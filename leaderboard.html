@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리더보드 - FuturX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="leaderboard.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="header__logo">
+            <div class="header__logo-icon">F</div>
+            <span>FuturX</span>
+        </div>
+        <nav class="header__nav">
+            <a href="index.html" class="header__nav-link">마켓</a>
+            <a href="trade.html" class="header__nav-link">선물거래</a>
+            <a href="competition.html" class="header__nav-link">대회</a>
+            <a href="leaderboard.html" class="header__nav-link active">리더보드</a>
+            <a href="wallet.html" class="header__nav-link">지갑</a>
+        </nav>
+        <div class="header__actions">
+            <button class="btn btn--outline btn--sm">로그인</button>
+            <button class="btn btn--primary btn--sm">회원가입</button>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- 히어로 배너 -->
+        <section class="leaderboard-hero">
+            <div class="hero-bg">
+                <div class="hero-glow hero-glow--1"></div>
+                <div class="hero-glow hero-glow--2"></div>
+                <div class="hero-particles"></div>
+            </div>
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="badge-icon">🏆</span>
+                        <span>실시간 순위</span>
+                    </div>
+                    <h1 class="hero-title">트레이더 리더보드</h1>
+                    <p class="hero-subtitle">최고의 트레이더들과 경쟁하고 보상을 획득하세요</p>
+                </div>
+
+                <!-- 탑 3 포디움 -->
+                <div class="top3-podium">
+                    <!-- 2등 -->
+                    <div class="podium-item podium-item--2">
+                        <div class="podium-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader2" alt="">
+                            <div class="podium-rank">2</div>
+                        </div>
+                        <div class="podium-info">
+                            <div class="podium-name">CryptoKing</div>
+                            <div class="podium-pnl num-positive">+892.45%</div>
+                            <div class="podium-profit">$1,245,890</div>
+                        </div>
+                        <div class="podium-bar"></div>
+                    </div>
+
+                    <!-- 1등 -->
+                    <div class="podium-item podium-item--1">
+                        <div class="podium-crown">👑</div>
+                        <div class="podium-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader1" alt="">
+                            <div class="podium-rank">1</div>
+                        </div>
+                        <div class="podium-info">
+                            <div class="podium-name">TraderPro</div>
+                            <div class="podium-pnl num-positive">+1,245.67%</div>
+                            <div class="podium-profit">$2,456,780</div>
+                        </div>
+                        <div class="podium-bar"></div>
+                    </div>
+
+                    <!-- 3등 -->
+                    <div class="podium-item podium-item--3">
+                        <div class="podium-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader3" alt="">
+                            <div class="podium-rank">3</div>
+                        </div>
+                        <div class="podium-info">
+                            <div class="podium-name">WhaleHunter</div>
+                            <div class="podium-pnl num-positive">+756.23%</div>
+                            <div class="podium-profit">$987,650</div>
+                        </div>
+                        <div class="podium-bar"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 필터 및 통계 -->
+        <section class="leaderboard-stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <div class="stat-value">12,456</div>
+                            <div class="stat-label">참여 트레이더</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-content">
+                            <div class="stat-value">$45.8M</div>
+                            <div class="stat-label">총 거래량</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-content">
+                            <div class="stat-value">+234.5%</div>
+                            <div class="stat-label">평균 수익률</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎁</div>
+                        <div class="stat-content">
+                            <div class="stat-value">$500K</div>
+                            <div class="stat-label">총 보상금</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 리더보드 테이블 -->
+        <section class="leaderboard-section">
+            <div class="container">
+                <!-- 필터 탭 -->
+                <div class="leaderboard-filters">
+                    <div class="filter-tabs">
+                        <button class="filter-tab active">일간</button>
+                        <button class="filter-tab">주간</button>
+                        <button class="filter-tab">월간</button>
+                        <button class="filter-tab">전체</button>
+                    </div>
+                    <div class="filter-options">
+                        <div class="filter-select">
+                            <select>
+                                <option>수익률 순</option>
+                                <option>수익금 순</option>
+                                <option>거래량 순</option>
+                                <option>승률 순</option>
+                            </select>
+                        </div>
+                        <div class="filter-search">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                            <input type="text" placeholder="트레이더 검색...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 테이블 -->
+                <div class="leaderboard-table-wrapper">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th class="col-rank">순위</th>
+                                <th class="col-trader">트레이더</th>
+                                <th class="col-pnl">수익률 (ROI)</th>
+                                <th class="col-profit">총 수익</th>
+                                <th class="col-volume">거래량</th>
+                                <th class="col-trades">거래 횟수</th>
+                                <th class="col-winrate">승률</th>
+                                <th class="col-action"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="rank-row rank-1">
+                                <td class="col-rank">
+                                    <div class="rank-badge rank-gold">1</div>
+                                </td>
+                                <td class="col-trader">
+                                    <div class="trader-info">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader1" class="trader-avatar">
+                                        <div class="trader-details">
+                                            <div class="trader-name">TraderPro <span class="verified-badge">✓</span></div>
+                                            <div class="trader-id">@traderpro</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="col-pnl">
+                                    <span class="pnl-value num-positive">+1,245.67%</span>
+                                </td>
+                                <td class="col-profit">
+                                    <span class="profit-value num-positive">+$2,456,780</span>
+                                </td>
+                                <td class="col-volume">$15.8M</td>
+                                <td class="col-trades">1,245</td>
+                                <td class="col-winrate">
+                                    <div class="winrate-bar">
+                                        <div class="winrate-fill" style="width: 78%"></div>
+                                        <span class="winrate-value">78%</span>
+                                    </div>
+                                </td>
+                                <td class="col-action">
+                                    <button class="btn btn--outline btn--sm">팔로우</button>
+                                </td>
+                            </tr>
+                            <tr class="rank-row rank-2">
+                                <td class="col-rank">
+                                    <div class="rank-badge rank-silver">2</div>
+                                </td>
+                                <td class="col-trader">
+                                    <div class="trader-info">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader2" class="trader-avatar">
+                                        <div class="trader-details">
+                                            <div class="trader-name">CryptoKing</div>
+                                            <div class="trader-id">@cryptoking</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="col-pnl">
+                                    <span class="pnl-value num-positive">+892.45%</span>
+                                </td>
+                                <td class="col-profit">
+                                    <span class="profit-value num-positive">+$1,245,890</span>
+                                </td>
+                                <td class="col-volume">$12.3M</td>
+                                <td class="col-trades">987</td>
+                                <td class="col-winrate">
+                                    <div class="winrate-bar">
+                                        <div class="winrate-fill" style="width: 72%"></div>
+                                        <span class="winrate-value">72%</span>
+                                    </div>
+                                </td>
+                                <td class="col-action">
+                                    <button class="btn btn--outline btn--sm">팔로우</button>
+                                </td>
+                            </tr>
+                            <tr class="rank-row rank-3">
+                                <td class="col-rank">
+                                    <div class="rank-badge rank-bronze">3</div>
+                                </td>
+                                <td class="col-trader">
+                                    <div class="trader-info">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader3" class="trader-avatar">
+                                        <div class="trader-details">
+                                            <div class="trader-name">WhaleHunter <span class="verified-badge">✓</span></div>
+                                            <div class="trader-id">@whalehunter</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="col-pnl">
+                                    <span class="pnl-value num-positive">+756.23%</span>
+                                </td>
+                                <td class="col-profit">
+                                    <span class="profit-value num-positive">+$987,650</span>
+                                </td>
+                                <td class="col-volume">$9.8M</td>
+                                <td class="col-trades">756</td>
+                                <td class="col-winrate">
+                                    <div class="winrate-bar">
+                                        <div class="winrate-fill" style="width: 69%"></div>
+                                        <span class="winrate-value">69%</span>
+                                    </div>
+                                </td>
+                                <td class="col-action">
+                                    <button class="btn btn--outline btn--sm">팔로우</button>
+                                </td>
+                            </tr>
+                            <tr class="rank-row">
+                                <td class="col-rank">
+                                    <div class="rank-number">4</div>
+                                </td>
+                                <td class="col-trader">
+                                    <div class="trader-info">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader4" class="trader-avatar">
+                                        <div class="trader-details">
+                                            <div class="trader-name">ScalpMaster</div>
+                                            <div class="trader-id">@scalpmaster</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="col-pnl">
+                                    <span class="pnl-value num-positive">+654.12%</span>
+                                </td>
+                                <td class="col-profit">
+                                    <span class="profit-value num-positive">+$876,540</span>
+                                </td>
+                                <td class="col-volume">$8.5M</td>
+                                <td class="col-trades">2,345</td>
+                                <td class="col-winrate">
+                                    <div class="winrate-bar">
+                                        <div class="winrate-fill" style="width: 82%"></div>
+                                        <span class="winrate-value">82%</span>
+                                    </div>
+                                </td>
+                                <td class="col-action">
+                                    <button class="btn btn--outline btn--sm">팔로우</button>
+                                </td>
+                            </tr>
+                            <tr class="rank-row">
+                                <td class="col-rank">
+                                    <div class="rank-number">5</div>
+                                </td>
+                                <td class="col-trader">
+                                    <div class="trader-info">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader5" class="trader-avatar">
+                                        <div class="trader-details">
+                                            <div class="trader-name">BTCMaxi</div>
+                                            <div class="trader-id">@btcmaxi</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="col-pnl">
+                                    <span class="pnl-value num-positive">+543.89%</span>
+                                </td>
+                                <td class="col-profit">
+                                    <span class="profit-value num-positive">+$765,430</span>
+                                </td>
+                                <td class="col-volume">$7.2M</td>
+                                <td class="col-trades">432</td>
+                                <td class="col-winrate">
+                                    <div class="winrate-bar">
+                                        <div class="winrate-fill" style="width: 65%"></div>
+                                        <span class="winrate-value">65%</span>
+                                    </div>
+                                </td>
+                                <td class="col-action">
+                                    <button class="btn btn--outline btn--sm">팔로우</button>
+                                </td>
+                            </tr>
+                            <tr class="rank-row">
+                                <td class="col-rank">
+                                    <div class="rank-number">6</div>
+                                </td>
+                                <td class="col-trader">
+                                    <div class="trader-info">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader6" class="trader-avatar">
+                                        <div class="trader-details">
+                                            <div class="trader-name">AltSeason</div>
+                                            <div class="trader-id">@altseason</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="col-pnl">
+                                    <span class="pnl-value num-positive">+489.34%</span>
+                                </td>
+                                <td class="col-profit">
+                                    <span class="profit-value num-positive">+$654,320</span>
+                                </td>
+                                <td class="col-volume">$6.1M</td>
+                                <td class="col-trades">567</td>
+                                <td class="col-winrate">
+                                    <div class="winrate-bar">
+                                        <div class="winrate-fill" style="width: 71%"></div>
+                                        <span class="winrate-value">71%</span>
+                                    </div>
+                                </td>
+                                <td class="col-action">
+                                    <button class="btn btn--outline btn--sm">팔로우</button>
+                                </td>
+                            </tr>
+                            <tr class="rank-row">
+                                <td class="col-rank">
+                                    <div class="rank-number">7</div>
+                                </td>
+                                <td class="col-trader">
+                                    <div class="trader-info">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader7" class="trader-avatar">
+                                        <div class="trader-details">
+                                            <div class="trader-name">FutureMaker</div>
+                                            <div class="trader-id">@futuremaker</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="col-pnl">
+                                    <span class="pnl-value num-positive">+423.56%</span>
+                                </td>
+                                <td class="col-profit">
+                                    <span class="profit-value num-positive">+$543,210</span>
+                                </td>
+                                <td class="col-volume">$5.4M</td>
+                                <td class="col-trades">678</td>
+                                <td class="col-winrate">
+                                    <div class="winrate-bar">
+                                        <div class="winrate-fill" style="width: 67%"></div>
+                                        <span class="winrate-value">67%</span>
+                                    </div>
+                                </td>
+                                <td class="col-action">
+                                    <button class="btn btn--outline btn--sm">팔로우</button>
+                                </td>
+                            </tr>
+                            <tr class="rank-row">
+                                <td class="col-rank">
+                                    <div class="rank-number">8</div>
+                                </td>
+                                <td class="col-trader">
+                                    <div class="trader-info">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader8" class="trader-avatar">
+                                        <div class="trader-details">
+                                            <div class="trader-name">LongKing</div>
+                                            <div class="trader-id">@longking</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="col-pnl">
+                                    <span class="pnl-value num-positive">+398.78%</span>
+                                </td>
+                                <td class="col-profit">
+                                    <span class="profit-value num-positive">+$432,100</span>
+                                </td>
+                                <td class="col-volume">$4.8M</td>
+                                <td class="col-trades">345</td>
+                                <td class="col-winrate">
+                                    <div class="winrate-bar">
+                                        <div class="winrate-fill" style="width: 74%"></div>
+                                        <span class="winrate-value">74%</span>
+                                    </div>
+                                </td>
+                                <td class="col-action">
+                                    <button class="btn btn--outline btn--sm">팔로우</button>
+                                </td>
+                            </tr>
+                            <tr class="rank-row">
+                                <td class="col-rank">
+                                    <div class="rank-number">9</div>
+                                </td>
+                                <td class="col-trader">
+                                    <div class="trader-info">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader9" class="trader-avatar">
+                                        <div class="trader-details">
+                                            <div class="trader-name">ShortSeller</div>
+                                            <div class="trader-id">@shortseller</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="col-pnl">
+                                    <span class="pnl-value num-positive">+356.45%</span>
+                                </td>
+                                <td class="col-profit">
+                                    <span class="profit-value num-positive">+$387,650</span>
+                                </td>
+                                <td class="col-volume">$4.2M</td>
+                                <td class="col-trades">512</td>
+                                <td class="col-winrate">
+                                    <div class="winrate-bar">
+                                        <div class="winrate-fill" style="width: 63%"></div>
+                                        <span class="winrate-value">63%</span>
+                                    </div>
+                                </td>
+                                <td class="col-action">
+                                    <button class="btn btn--outline btn--sm">팔로우</button>
+                                </td>
+                            </tr>
+                            <tr class="rank-row">
+                                <td class="col-rank">
+                                    <div class="rank-number">10</div>
+                                </td>
+                                <td class="col-trader">
+                                    <div class="trader-info">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=trader10" class="trader-avatar">
+                                        <div class="trader-details">
+                                            <div class="trader-name">SwingTrader</div>
+                                            <div class="trader-id">@swingtrader</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="col-pnl">
+                                    <span class="pnl-value num-positive">+312.89%</span>
+                                </td>
+                                <td class="col-profit">
+                                    <span class="profit-value num-positive">+$345,670</span>
+                                </td>
+                                <td class="col-volume">$3.9M</td>
+                                <td class="col-trades">234</td>
+                                <td class="col-winrate">
+                                    <div class="winrate-bar">
+                                        <div class="winrate-fill" style="width: 76%"></div>
+                                        <span class="winrate-value">76%</span>
+                                    </div>
+                                </td>
+                                <td class="col-action">
+                                    <button class="btn btn--outline btn--sm">팔로우</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 페이지네이션 -->
+                <div class="pagination">
+                    <button class="pagination-btn" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <button class="pagination-num active">1</button>
+                    <button class="pagination-num">2</button>
+                    <button class="pagination-num">3</button>
+                    <span class="pagination-dots">...</span>
+                    <button class="pagination-num">50</button>
+                    <button class="pagination-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 내 순위 (고정 바) -->
+        <div class="my-rank-bar">
+            <div class="container">
+                <div class="my-rank-content">
+                    <div class="my-rank-left">
+                        <span class="my-rank-label">내 순위</span>
+                        <span class="my-rank-number">#156</span>
+                    </div>
+                    <div class="my-rank-stats">
+                        <div class="my-stat">
+                            <span class="my-stat-label">수익률</span>
+                            <span class="my-stat-value num-positive">+45.67%</span>
+                        </div>
+                        <div class="my-stat">
+                            <span class="my-stat-label">수익금</span>
+                            <span class="my-stat-value num-positive">+$12,345</span>
+                        </div>
+                        <div class="my-stat">
+                            <span class="my-stat-label">승률</span>
+                            <span class="my-stat-value">62%</span>
+                        </div>
+                    </div>
+                    <button class="btn btn--primary">거래 시작하기</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__bottom">
+                <div class="footer__copy">© 2024 FuturX. All rights reserved.</div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

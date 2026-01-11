@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지갑 - FuturX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="wallet.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="header__logo">
+            <div class="header__logo-icon">F</div>
+            <span>FuturX</span>
+        </div>
+        <nav class="header__nav">
+            <a href="index.html" class="header__nav-link">마켓</a>
+            <a href="trade.html" class="header__nav-link">선물거래</a>
+            <a href="leaderboard.php" class="header__nav-link">리더보드</a>
+            <a href="competition.php" class="header__nav-link">대회</a>
+            <a href="wallet.html" class="header__nav-link active">지갑</a>
+            <a href="deposit.html" class="header__nav-link">입금</a>
+        </nav>
+        <div class="header__actions">
+            <button class="btn btn--outline btn--sm">알림</button>
+            <button class="btn btn--secondary btn--sm">설정</button>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main wallet-page">
+        <!-- 지갑 헤더 (전체 너비) -->
+        <div class="wallet-header">
+            <div class="container">
+                <div class="wallet-header__inner">
+                    <div class="wallet-header__info">
+                        <div class="wallet-header__avatar">U</div>
+                        <div class="wallet-header__details">
+                            <h1>user****@gmail.com</h1>
+                            <div class="wallet-header__uid">
+                                <span>UID: 12345678</span>
+                                <button class="wallet-header__uid-copy">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wallet-header__actions">
+                        <a href="deposit.html" class="btn btn--primary">입금</a>
+                        <button class="btn btn--secondary">출금</button>
+                        <button class="btn btn--outline">이체</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- 총 자산 개요 -->
+            <div class="total-balance">
+                <div class="total-balance__header">
+                    <div class="total-balance__title">
+                        <span>총 자산 (추정)</span>
+                        <button class="total-balance__eye">👁</button>
+                    </div>
+                    <div class="total-balance__convert">
+                        <select>
+                            <option value="btc">BTC</option>
+                            <option value="usdt" selected>USDT</option>
+                            <option value="krw">KRW</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="total-balance__amount">
+                    <span class="total-balance__value">24,567.89</span>
+                    <span class="total-balance__unit">USDT</span>
+                </div>
+                <div class="total-balance__fiat">≈ ₩32,456,780</div>
+
+                <div class="total-balance__pnl">
+                    <div class="total-balance__pnl-item">
+                        <span class="total-balance__pnl-label">오늘의 손익</span>
+                        <span class="total-balance__pnl-value num-positive">+$432.50 (+1.79%)</span>
+                    </div>
+                    <div class="total-balance__pnl-item">
+                        <span class="total-balance__pnl-label">이번 달 손익</span>
+                        <span class="total-balance__pnl-value num-positive">+$2,156.78 (+9.63%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 지갑 탭 -->
+            <div class="wallet-tabs">
+                <button class="wallet-tabs__item active">개요</button>
+                <button class="wallet-tabs__item">현물 지갑</button>
+                <button class="wallet-tabs__item">선물 지갑</button>
+                <button class="wallet-tabs__item">거래 내역</button>
+            </div>
+
+            <!-- 지갑 카드 그리드 -->
+            <div class="wallet-grid">
+                <!-- 현물 지갑 카드 -->
+                <div class="wallet-card">
+                    <div class="wallet-card__header">
+                        <div class="wallet-card__title">
+                            <div class="wallet-card__icon wallet-card__icon--spot">💰</div>
+                            <span>현물 지갑</span>
+                        </div>
+                        <div class="wallet-card__actions">
+                            <button class="btn btn--outline btn--sm">입금</button>
+                            <button class="btn btn--outline btn--sm">출금</button>
+                        </div>
+                    </div>
+                    <div class="wallet-card__balance">
+                        <div class="wallet-card__balance-label">총 잔고</div>
+                        <div class="wallet-card__balance-value">12,345.67 USDT</div>
+                        <div class="wallet-card__balance-fiat">≈ ₩16,300,000</div>
+                    </div>
+                    <div class="wallet-card__stats">
+                        <div class="wallet-card__stat">
+                            <span class="wallet-card__stat-label">사용 가능</span>
+                            <span class="wallet-card__stat-value">10,234.50 USDT</span>
+                        </div>
+                        <div class="wallet-card__stat">
+                            <span class="wallet-card__stat-label">주문 중</span>
+                            <span class="wallet-card__stat-value">2,111.17 USDT</span>
+                        </div>
+                        <div class="wallet-card__stat">
+                            <span class="wallet-card__stat-label">보유 코인</span>
+                            <span class="wallet-card__stat-value">8종</span>
+                        </div>
+                        <div class="wallet-card__stat">
+                            <span class="wallet-card__stat-label">BTC 환산</span>
+                            <span class="wallet-card__stat-value">0.1267 BTC</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 선물 지갑 카드 -->
+                <div class="wallet-card">
+                    <div class="wallet-card__header">
+                        <div class="wallet-card__title">
+                            <div class="wallet-card__icon wallet-card__icon--futures">📈</div>
+                            <span>USDT-M 선물</span>
+                        </div>
+                        <div class="wallet-card__actions">
+                            <button class="btn btn--outline btn--sm">이체</button>
+                            <button class="btn btn--primary btn--sm">거래</button>
+                        </div>
+                    </div>
+                    <div class="wallet-card__balance">
+                        <div class="wallet-card__balance-label">지갑 잔고</div>
+                        <div class="wallet-card__balance-value">12,222.22 USDT</div>
+                        <div class="wallet-card__balance-fiat">≈ ₩16,156,780</div>
+                    </div>
+                    <div class="wallet-card__stats">
+                        <div class="wallet-card__stat">
+                            <span class="wallet-card__stat-label">미실현 손익</span>
+                            <span class="wallet-card__stat-value num-positive">+$1,234.56</span>
+                        </div>
+                        <div class="wallet-card__stat">
+                            <span class="wallet-card__stat-label">마진 잔고</span>
+                            <span class="wallet-card__stat-value">8,456.78 USDT</span>
+                        </div>
+                        <div class="wallet-card__stat">
+                            <span class="wallet-card__stat-label">사용 가능</span>
+                            <span class="wallet-card__stat-value">3,765.44 USDT</span>
+                        </div>
+                        <div class="wallet-card__stat">
+                            <span class="wallet-card__stat-label">활성 포지션</span>
+                            <span class="wallet-card__stat-value">3개</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 선물 지갑 상세 -->
+            <div class="futures-wallet">
+                <div class="futures-wallet__header">
+                    <h2 class="futures-wallet__title">USDT-M 선물 상세</h2>
+                    <div class="futures-wallet__mode">
+                        <button class="futures-wallet__mode-btn active">크로스</button>
+                        <button class="futures-wallet__mode-btn">격리</button>
+                    </div>
+                </div>
+                <div class="futures-wallet__grid">
+                    <div class="futures-wallet__stat">
+                        <div class="futures-wallet__stat-label">
+                            <span>총 마진 잔고</span>
+                            <span class="tooltip-icon">ⓘ</span>
+                        </div>
+                        <div class="futures-wallet__stat-value">
+                            8,456.78
+                            <span class="futures-wallet__stat-unit">USDT</span>
+                        </div>
+                    </div>
+                    <div class="futures-wallet__stat">
+                        <div class="futures-wallet__stat-label">
+                            <span>미실현 손익</span>
+                            <span class="tooltip-icon">ⓘ</span>
+                        </div>
+                        <div class="futures-wallet__stat-value num-positive">
+                            +1,234.56
+                            <span class="futures-wallet__stat-unit">USDT</span>
+                        </div>
+                    </div>
+                    <div class="futures-wallet__stat">
+                        <div class="futures-wallet__stat-label">
+                            <span>사용 가능 잔고</span>
+                            <span class="tooltip-icon">ⓘ</span>
+                        </div>
+                        <div class="futures-wallet__stat-value">
+                            3,765.44
+                            <span class="futures-wallet__stat-unit">USDT</span>
+                        </div>
+                    </div>
+                    <div class="futures-wallet__stat">
+                        <div class="futures-wallet__stat-label">
+                            <span>포지션 마진</span>
+                            <span class="tooltip-icon">ⓘ</span>
+                        </div>
+                        <div class="futures-wallet__stat-value">
+                            4,691.34
+                            <span class="futures-wallet__stat-unit">USDT</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 포지션 리스트 -->
+            <div class="position-list">
+                <div class="position-list__header">
+                    <div class="position-list__tabs">
+                        <button class="position-list__tab active">
+                            포지션
+                            <span class="count">3</span>
+                        </button>
+                        <button class="position-list__tab">
+                            미체결 주문
+                            <span class="count">2</span>
+                        </button>
+                        <button class="position-list__tab">주문 내역</button>
+                        <button class="position-list__tab">거래 내역</button>
+                    </div>
+                    <button class="btn btn--outline btn--sm">모두 청산</button>
+                </div>
+                <table class="position-table">
+                    <thead>
+                        <tr>
+                            <th>심볼</th>
+                            <th>크기</th>
+                            <th>진입가</th>
+                            <th>마크가</th>
+                            <th>청산가</th>
+                            <th>마진</th>
+                            <th>손익 (ROE%)</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="position-table__symbol">
+                                    <span class="position-table__symbol-name">BTCUSDT</span>
+                                    <span class="position-table__side position-table__side--long">Long</span>
+                                    <span class="position-table__leverage">20x</span>
+                                </div>
+                            </td>
+                            <td class="position-table__size">0.125 BTC</td>
+                            <td class="position-table__entry">96,234.50</td>
+                            <td class="position-table__mark">97,432.50</td>
+                            <td class="position-table__liq">91,456.00</td>
+                            <td class="position-table__margin">2,405.86 USDT</td>
+                            <td class="position-table__pnl num-positive">
+                                +149.75
+                                <span class="position-table__pnl-percent">(+6.22%)</span>
+                            </td>
+                            <td class="position-table__actions">
+                                <button class="btn btn--outline btn--sm">마진</button>
+                                <button class="btn btn--short btn--sm">청산</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="position-table__symbol">
+                                    <span class="position-table__symbol-name">ETHUSDT</span>
+                                    <span class="position-table__side position-table__side--long">Long</span>
+                                    <span class="position-table__leverage">10x</span>
+                                </div>
+                            </td>
+                            <td class="position-table__size">2.5 ETH</td>
+                            <td class="position-table__entry">3,380.00</td>
+                            <td class="position-table__mark">3,456.78</td>
+                            <td class="position-table__liq">3,042.00</td>
+                            <td class="position-table__margin">1,690.00 USDT</td>
+                            <td class="position-table__pnl num-positive">
+                                +191.95
+                                <span class="position-table__pnl-percent">(+11.36%)</span>
+                            </td>
+                            <td class="position-table__actions">
+                                <button class="btn btn--outline btn--sm">마진</button>
+                                <button class="btn btn--short btn--sm">청산</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="position-table__symbol">
+                                    <span class="position-table__symbol-name">SOLUSDT</span>
+                                    <span class="position-table__side position-table__side--short">Short</span>
+                                    <span class="position-table__leverage">15x</span>
+                                </div>
+                            </td>
+                            <td class="position-table__size">50 SOL</td>
+                            <td class="position-table__entry">205.20</td>
+                            <td class="position-table__mark">198.45</td>
+                            <td class="position-table__liq">218.90</td>
+                            <td class="position-table__margin">684.00 USDT</td>
+                            <td class="position-table__pnl num-positive">
+                                +337.50
+                                <span class="position-table__pnl-percent">(+49.34%)</span>
+                            </td>
+                            <td class="position-table__actions">
+                                <button class="btn btn--outline btn--sm">마진</button>
+                                <button class="btn btn--short btn--sm">청산</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 현물 자산 리스트 -->
+            <div class="asset-list mt-xl">
+                <div class="asset-list__header">
+                    <h2 class="asset-list__title">현물 자산</h2>
+                    <div class="asset-list__filters">
+                        <div class="asset-list__search">
+                            <svg class="asset-list__search-icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                            <input type="text" placeholder="코인 검색...">
+                        </div>
+                        <label class="asset-list__toggle">
+                            <input type="checkbox">
+                            <span>0 잔고 숨기기</span>
+                        </label>
+                    </div>
+                </div>
+                <table class="asset-table">
+                    <thead>
+                        <tr>
+                            <th>코인</th>
+                            <th>총 잔고</th>
+                            <th>사용 가능</th>
+                            <th>주문 중</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="asset-table__coin">
+                                    <div class="asset-table__coin-icon" style="background: #26a17b; color: white;">₮</div>
+                                    <div class="asset-table__coin-info">
+                                        <span class="asset-table__coin-name">USDT</span>
+                                        <span class="asset-table__coin-full">Tether USD</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="asset-table__amount">
+                                <div class="asset-table__amount-value">8,234.50</div>
+                                <div class="asset-table__amount-fiat">≈ ₩10,882,366</div>
+                            </td>
+                            <td class="asset-table__available">6,234.50</td>
+                            <td class="asset-table__frozen">2,000.00</td>
+                            <td class="asset-table__actions">
+                                <button class="btn btn--outline btn--sm">입금</button>
+                                <button class="btn btn--outline btn--sm">출금</button>
+                                <button class="btn btn--outline btn--sm">이체</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="asset-table__coin">
+                                    <div class="asset-table__coin-icon" style="background: #f7931a; color: white;">₿</div>
+                                    <div class="asset-table__coin-info">
+                                        <span class="asset-table__coin-name">BTC</span>
+                                        <span class="asset-table__coin-full">Bitcoin</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="asset-table__amount">
+                                <div class="asset-table__amount-value">0.0423</div>
+                                <div class="asset-table__amount-fiat">≈ $4,121.39</div>
+                            </td>
+                            <td class="asset-table__available">0.0423</td>
+                            <td class="asset-table__frozen">0.0000</td>
+                            <td class="asset-table__actions">
+                                <button class="btn btn--outline btn--sm">입금</button>
+                                <button class="btn btn--outline btn--sm">출금</button>
+                                <button class="btn btn--outline btn--sm">이체</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="asset-table__coin">
+                                    <div class="asset-table__coin-icon" style="background: #627eea; color: white;">Ξ</div>
+                                    <div class="asset-table__coin-info">
+                                        <span class="asset-table__coin-name">ETH</span>
+                                        <span class="asset-table__coin-full">Ethereum</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="asset-table__amount">
+                                <div class="asset-table__amount-value">0.8567</div>
+                                <div class="asset-table__amount-fiat">≈ $2,961.43</div>
+                            </td>
+                            <td class="asset-table__available">0.7567</td>
+                            <td class="asset-table__frozen">0.1000</td>
+                            <td class="asset-table__actions">
+                                <button class="btn btn--outline btn--sm">입금</button>
+                                <button class="btn btn--outline btn--sm">출금</button>
+                                <button class="btn btn--outline btn--sm">이체</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="asset-table__coin">
+                                    <div class="asset-table__coin-icon" style="background: #14f195; color: #111;">◎</div>
+                                    <div class="asset-table__coin-info">
+                                        <span class="asset-table__coin-name">SOL</span>
+                                        <span class="asset-table__coin-full">Solana</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="asset-table__amount">
+                                <div class="asset-table__amount-value">12.45</div>
+                                <div class="asset-table__amount-fiat">≈ $2,470.70</div>
+                            </td>
+                            <td class="asset-table__available">12.45</td>
+                            <td class="asset-table__frozen">0.00</td>
+                            <td class="asset-table__actions">
+                                <button class="btn btn--outline btn--sm">입금</button>
+                                <button class="btn btn--outline btn--sm">출금</button>
+                                <button class="btn btn--outline btn--sm">이체</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

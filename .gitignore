@@ -1,0 +1,14 @@
+# Node modules
+ws-server/node_modules/
+
+# Cache
+*.cache
+*.log
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

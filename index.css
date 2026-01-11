@@ -1,0 +1,1417 @@
+/* ========================================
+   메인 페이지 전용 CSS
+   ======================================== */
+
+/* 히어로 섹션 */
+.hero {
+    background: linear-gradient(180deg, #0a0a0f 0%, var(--bg-primary) 100%);
+    padding: 120px 0 100px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+}
+
+/* 애니메이션 배경 그라디언트 */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(240, 185, 11, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 20% 100%, rgba(240, 185, 11, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(240, 185, 11, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+    animation: heroGlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes heroGlow {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* 움직이는 라인 그리드 */
+.hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        linear-gradient(90deg, rgba(240, 185, 11, 0.03) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(240, 185, 11, 0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 0%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 0%, transparent 70%);
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes gridMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 80px 80px; }
+}
+
+.hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+/* 캔버스 배경 */
+.hero__canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* 텍스트 Reveal 효과 */
+.text-reveal {
+    display: inline-block;
+    background: linear-gradient(90deg,
+        #f0b90b 0%,
+        #fcd535 25%,
+        #ffffff 50%,
+        rgba(255,255,255,0.3) 50.1%,
+        rgba(255,255,255,0.3) 100%);
+    background-size: 200% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textReveal 1.5s ease-out forwards;
+}
+
+.text-reveal--delay {
+    animation-delay: 0.3s;
+    background-position: 100% 0;
+}
+
+@keyframes textReveal {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: 0% 0;
+    }
+}
+
+/* 글로우 펄스 효과 */
+.hero__title-main .text-reveal {
+    text-shadow: 0 0 40px rgba(240, 185, 11, 0);
+    animation: textReveal 1.5s ease-out forwards, textGlowPulse 3s ease-in-out 1.5s infinite;
+}
+
+@keyframes textGlowPulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 20px rgba(240, 185, 11, 0.3));
+    }
+    50% {
+        filter: drop-shadow(0 0 40px rgba(240, 185, 11, 0.6));
+    }
+}
+
+.hero__title {
+    font-size: 56px;
+    font-weight: 800;
+    margin-bottom: var(--spacing-lg);
+    line-height: 1.1;
+    animation: titleFadeIn 1s ease-out;
+}
+
+.hero__title-main {
+    display: block;
+    background: linear-gradient(90deg, #ffffff 0%, #f0b90b 50%, #fcd535 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleShine 4s linear infinite;
+}
+
+.hero__title-sub {
+    display: block;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: var(--spacing-xs);
+}
+
+@keyframes titleFadeIn {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes titleShine {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+.hero__subtitle {
+    font-size: 18px;
+    color: var(--text-secondary);
+    max-width: 650px;
+    margin: 0 auto var(--spacing-xl);
+    line-height: 1.9;
+}
+
+/* 서브타이틀 라인 애니메이션 */
+.subtitle-line {
+    display: block;
+    opacity: 0;
+    transform: translateY(15px);
+    animation: subtitleLineIn 0.8s ease-out forwards;
+}
+
+.subtitle-line--1 {
+    animation-delay: 0.8s;
+}
+
+.subtitle-line--2 {
+    animation-delay: 1.1s;
+}
+
+@keyframes subtitleLineIn {
+    0% {
+        opacity: 0;
+        transform: translateY(15px);
+        filter: blur(4px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+/* 강조 숫자 스타일 */
+.highlight-num {
+    color: var(--color-primary);
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+}
+
+.highlight-num::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-primary), transparent);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: underlineGrow 0.6s ease-out forwards;
+}
+
+.subtitle-line--1 .highlight-num:nth-of-type(1)::after {
+    animation-delay: 1.3s;
+}
+
+.subtitle-line--1 .highlight-num:nth-of-type(2)::after {
+    animation-delay: 1.5s;
+}
+
+.subtitle-line--2 .highlight-num::after {
+    animation-delay: 1.7s;
+}
+
+@keyframes underlineGrow {
+    0% {
+        transform: scaleX(0);
+    }
+    100% {
+        transform: scaleX(1);
+    }
+}
+
+/* 숫자 글로우 펄스 */
+.highlight-num {
+    animation: numGlow 2s ease-in-out infinite;
+    animation-delay: 2s;
+}
+
+@keyframes numGlow {
+    0%, 100% {
+        text-shadow: 0 0 5px rgba(240, 185, 11, 0.3);
+    }
+    50% {
+        text-shadow: 0 0 15px rgba(240, 185, 11, 0.6), 0 0 30px rgba(240, 185, 11, 0.3);
+    }
+}
+
+.hero__cta {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    animation: ctaFadeIn 1s ease-out 0.4s both;
+}
+
+@keyframes ctaFadeIn {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* 히어로 버튼 스타일 업그레이드 */
+.hero__cta .btn--primary {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f0b90b 0%, #fcd535 100%);
+    border: none;
+    padding: 16px 40px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.hero__cta .btn--primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: btnShine 3s infinite;
+}
+
+@keyframes btnShine {
+    0% { left: -100%; }
+    50%, 100% { left: 100%; }
+}
+
+.hero__cta .btn--secondary {
+    padding: 16px 40px;
+    font-size: 16px;
+    font-weight: 600;
+    border: 1px solid rgba(240, 185, 11, 0.3);
+    background: rgba(240, 185, 11, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+.hero__cta .btn--secondary:hover {
+    border-color: var(--color-primary);
+    background: rgba(240, 185, 11, 0.1);
+}
+
+/* 히어로 하단 통계 바 */
+.hero__stats {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(240, 185, 11, 0.1);
+    animation: statsFadeIn 1s ease-out 0.6s both;
+}
+
+@keyframes statsFadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.hero__stat {
+    text-align: center;
+}
+
+.hero__stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--color-primary);
+    display: block;
+}
+
+.hero__stat-label {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+}
+
+/* 플로팅 코인 아이콘 */
+.hero__floating {
+    position: absolute;
+    pointer-events: none;
+}
+
+.hero__floating-coin {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, rgba(240, 185, 11, 0.2) 0%, rgba(240, 185, 11, 0.05) 100%);
+    border: 1px solid rgba(240, 185, 11, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--color-primary);
+    backdrop-filter: blur(5px);
+    animation: coinFloat 6s ease-in-out infinite;
+}
+
+.hero__floating-coin:nth-child(1) {
+    top: 15%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.hero__floating-coin:nth-child(2) {
+    top: 25%;
+    right: 12%;
+    animation-delay: -2s;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+}
+
+.hero__floating-coin:nth-child(3) {
+    bottom: 30%;
+    left: 8%;
+    animation-delay: -4s;
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+}
+
+.hero__floating-coin:nth-child(4) {
+    bottom: 25%;
+    right: 10%;
+    animation-delay: -1s;
+}
+
+@keyframes coinFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(10deg); }
+}
+
+/* 실시간 가격 플래시 애니메이션 */
+.flash-up {
+    animation: flashUp 0.3s ease-out;
+}
+
+.flash-down {
+    animation: flashDown 0.3s ease-out;
+}
+
+@keyframes flashUp {
+    0% { color: var(--color-long); background: rgba(22, 199, 132, 0.2); }
+    100% { color: inherit; background: transparent; }
+}
+
+@keyframes flashDown {
+    0% { color: var(--color-short); background: rgba(234, 57, 67, 0.2); }
+    100% { color: inherit; background: transparent; }
+}
+
+/* WebSocket 연결 상태 */
+.ws-connected {
+    position: relative;
+}
+
+.ws-connected::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -12px;
+    width: 6px;
+    height: 6px;
+    background: var(--color-long);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+    50% { opacity: 0.5; transform: translateY(-50%) scale(1.2); }
+}
+
+/* 마켓 개요 */
+.market-overview {
+    padding: var(--spacing-xl) 0;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.market-ticker {
+    display: flex;
+    gap: var(--spacing-xxl);
+    overflow-x: auto;
+    padding: var(--spacing-sm) 0;
+    scrollbar-width: none;
+}
+
+.market-ticker::-webkit-scrollbar {
+    display: none;
+}
+
+.ticker-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    min-width: 220px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.ticker-item:hover {
+    background: var(--bg-tertiary);
+    transform: translateY(-2px);
+}
+
+.ticker-item__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-bold);
+    color: var(--bg-primary);
+}
+
+.ticker-item__info {
+    flex: 1;
+}
+
+.ticker-item__symbol {
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-md);
+}
+
+.ticker-item__pair {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.ticker-item__price {
+    text-align: right;
+}
+
+.ticker-item__value {
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-md);
+}
+
+.ticker-item__change {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+}
+
+/* 실시간 시세 테이블 */
+.price-table {
+    margin-top: var(--spacing-xl);
+}
+
+.price-table__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-lg);
+}
+
+.price-table__tabs {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.price-table__tab {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    background: transparent;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.price-table__tab:hover {
+    color: var(--text-primary);
+}
+
+.price-table__tab.active {
+    background: var(--color-primary);
+    color: var(--bg-primary);
+}
+
+.price-table__search {
+    position: relative;
+}
+
+.price-table__search input {
+    width: 280px;
+    padding-left: 36px;
+}
+
+.price-table__search-icon {
+    position: absolute;
+    left: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+}
+
+/* 시세 테이블 */
+.market-table {
+    width: 100%;
+}
+
+.market-table th {
+    padding: var(--spacing-md) var(--spacing-lg);
+    text-align: left;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+    background: var(--bg-tertiary);
+}
+
+.market-table th:first-child {
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.market-table th:last-child {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    text-align: right;
+}
+
+.market-table td {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.market-table tr {
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.market-table tbody tr:hover {
+    background: var(--bg-tertiary);
+}
+
+.market-table__pair {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.market-table__coin-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+}
+
+.market-table__coin-name {
+    font-weight: var(--font-weight-semibold);
+}
+
+.market-table__coin-base {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.market-table__price {
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-medium);
+}
+
+.market-table__change {
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-medium);
+}
+
+.market-table__volume {
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+}
+
+.market-table__action {
+    text-align: right;
+}
+
+/* 미니 차트 */
+.mini-chart {
+    width: 80px;
+    height: 32px;
+}
+
+.mini-chart svg {
+    width: 100%;
+    height: 100%;
+}
+
+.mini-chart--up path {
+    stroke: var(--color-long);
+    fill: none;
+    stroke-width: 1.5;
+}
+
+.mini-chart--down path {
+    stroke: var(--color-short);
+    fill: none;
+    stroke-width: 1.5;
+}
+
+/* 기능 섹션 */
+.features {
+    padding: 80px 0;
+}
+
+.features__title {
+    text-align: center;
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-xxl);
+}
+
+.features__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+}
+
+.feature-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    text-align: center;
+    transition: all var(--transition-normal);
+}
+
+.feature-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.feature-card__icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--spacing-lg);
+    background: var(--color-primary-light);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.feature-card__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-sm);
+}
+
+.feature-card__desc {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
+
+/* 통계 섹션 */
+.stats {
+    padding: 60px 0;
+    background: var(--bg-secondary);
+}
+
+.stats__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-xl);
+    text-align: center;
+}
+
+.stat-item__value {
+    font-size: 36px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-item__label {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* 푸터 */
+.footer {
+    padding: var(--spacing-xxl) 0;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+}
+
+.footer__grid {
+    display: grid;
+    grid-template-columns: 2fr repeat(3, 1fr);
+    gap: var(--spacing-xxl);
+}
+
+.footer__brand {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-md);
+}
+
+.footer__desc {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    max-width: 300px;
+}
+
+.footer__title {
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-lg);
+}
+
+.footer__links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.footer__link {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.footer__link:hover {
+    color: var(--text-primary);
+}
+
+.footer__bottom {
+    margin-top: var(--spacing-xxl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer__copy {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+}
+
+.footer__social {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.footer__social-link {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-tertiary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.footer__social-link:hover {
+    background: var(--color-primary);
+    color: var(--bg-primary);
+}
+
+/* ========================================
+   3D 글로벌 트레이딩 섹션
+   ======================================== */
+.global-trading {
+    position: relative;
+    min-height: 600px;
+    background: linear-gradient(180deg, var(--bg-primary) 0%, #0a0a0f 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.global-trading__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* 그리드 바닥 */
+.grid-floor {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) perspective(500px) rotateX(60deg);
+    width: 200%;
+    height: 400px;
+    background:
+        linear-gradient(90deg, rgba(240, 185, 11, 0.03) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(240, 185, 11, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%);
+}
+
+/* 파티클 */
+.particles {
+    position: absolute;
+    inset: 0;
+}
+
+.global-trading__content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px var(--spacing-xl);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 60px;
+}
+
+.global-trading__text {
+    max-width: 500px;
+}
+
+.global-trading__title {
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: var(--spacing-lg);
+}
+
+.gradient-text {
+    background: linear-gradient(90deg, #f0b90b 0%, #fcd535 50%, #f0b90b 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+.global-trading__desc {
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: var(--spacing-xl);
+}
+
+.global-trading__stats {
+    display: flex;
+    gap: var(--spacing-xl);
+}
+
+.gstat {
+    display: flex;
+    flex-direction: column;
+}
+
+.gstat__value {
+    font-size: 36px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--color-primary);
+    display: inline;
+}
+
+.gstat__unit {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.gstat__label {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    margin-top: var(--spacing-xs);
+}
+
+/* 자이로스코프 비주얼 */
+.global-trading__visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+}
+
+.gyroscope {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    transform-style: preserve-3d;
+    animation: gyroFloat 6s ease-in-out infinite;
+}
+
+@keyframes gyroFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+/* 자이로스코프 링 */
+.gyroscope__ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    transform-style: preserve-3d;
+}
+
+.gyroscope__ring--outer {
+    width: 380px;
+    height: 380px;
+    margin: -190px 0 0 -190px;
+    border-color: rgba(240, 185, 11, 0.6);
+    animation: ringRotateOuter 12s linear infinite;
+    box-shadow:
+        0 0 30px rgba(240, 185, 11, 0.3),
+        inset 0 0 30px rgba(240, 185, 11, 0.1);
+}
+
+.gyroscope__ring--middle {
+    width: 300px;
+    height: 300px;
+    margin: -150px 0 0 -150px;
+    border-color: rgba(240, 185, 11, 0.5);
+    animation: ringRotateMiddle 10s linear infinite;
+    box-shadow:
+        0 0 25px rgba(240, 185, 11, 0.25),
+        inset 0 0 25px rgba(240, 185, 11, 0.1);
+}
+
+.gyroscope__ring--inner {
+    width: 220px;
+    height: 220px;
+    margin: -110px 0 0 -110px;
+    border-color: rgba(240, 185, 11, 0.4);
+    animation: ringRotateInner 8s linear infinite;
+    box-shadow:
+        0 0 20px rgba(240, 185, 11, 0.2),
+        inset 0 0 20px rgba(240, 185, 11, 0.1);
+}
+
+/* 링 글로우 효과 */
+.ring-glow {
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 50%;
+    background: linear-gradient(45deg,
+        transparent 40%,
+        rgba(240, 185, 11, 0.8) 50%,
+        transparent 60%);
+    animation: ringGlow 3s linear infinite;
+}
+
+@keyframes ringGlow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes ringRotateOuter {
+    0% { transform: rotateX(70deg) rotateY(0deg); }
+    100% { transform: rotateX(70deg) rotateY(360deg); }
+}
+
+@keyframes ringRotateMiddle {
+    0% { transform: rotateX(60deg) rotateZ(30deg) rotateY(0deg); }
+    100% { transform: rotateX(60deg) rotateZ(30deg) rotateY(-360deg); }
+}
+
+@keyframes ringRotateInner {
+    0% { transform: rotateX(50deg) rotateZ(-30deg) rotateY(0deg); }
+    100% { transform: rotateX(50deg) rotateZ(-30deg) rotateY(360deg); }
+}
+
+/* 코어 */
+.gyroscope__core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    margin: -50px 0 0 -50px;
+    background: radial-gradient(circle at 30% 30%,
+        #fcd535 0%,
+        #f0b90b 40%,
+        #c99a09 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+        0 0 60px rgba(240, 185, 11, 0.6),
+        0 0 100px rgba(240, 185, 11, 0.3),
+        inset 0 -10px 30px rgba(0,0,0,0.3);
+    animation: corePulse 2s ease-in-out infinite;
+}
+
+.core-icon {
+    font-size: 48px;
+    font-weight: 700;
+    color: #0a0a0f;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.core-glow {
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(circle, rgba(240, 185, 11, 0.4) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: coreGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes corePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes coreGlow {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.2); }
+}
+
+/* 오비탈 파티클 */
+.orbital {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+}
+
+.orbital span {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #f0b90b;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(240, 185, 11, 0.8);
+}
+
+.orbital--1 {
+    animation: orbit1 8s linear infinite;
+}
+.orbital--1 span {
+    top: 0;
+    left: 50%;
+    margin-left: -4px;
+    margin-top: -4px;
+}
+
+.orbital--2 {
+    animation: orbit2 10s linear infinite;
+}
+.orbital--2 span {
+    top: 50%;
+    right: 0;
+    margin-right: -4px;
+    margin-top: -4px;
+}
+
+.orbital--3 {
+    animation: orbit3 12s linear infinite;
+}
+.orbital--3 span {
+    bottom: 0;
+    left: 50%;
+    margin-left: -4px;
+    margin-bottom: -4px;
+}
+
+.orbital--4 {
+    animation: orbit4 9s linear infinite;
+}
+.orbital--4 span {
+    top: 50%;
+    left: 0;
+    margin-left: -4px;
+    margin-top: -4px;
+}
+
+.orbital--5 {
+    animation: orbit5 11s linear infinite;
+}
+.orbital--5 span {
+    top: 25%;
+    right: 25%;
+}
+
+.orbital--6 {
+    animation: orbit6 7s linear infinite;
+}
+.orbital--6 span {
+    bottom: 25%;
+    left: 25%;
+}
+
+@keyframes orbit1 {
+    0% { transform: rotateX(70deg) rotateZ(0deg); }
+    100% { transform: rotateX(70deg) rotateZ(360deg); }
+}
+
+@keyframes orbit2 {
+    0% { transform: rotateX(60deg) rotateY(45deg) rotateZ(0deg); }
+    100% { transform: rotateX(60deg) rotateY(45deg) rotateZ(-360deg); }
+}
+
+@keyframes orbit3 {
+    0% { transform: rotateX(80deg) rotateY(-30deg) rotateZ(0deg); }
+    100% { transform: rotateX(80deg) rotateY(-30deg) rotateZ(360deg); }
+}
+
+@keyframes orbit4 {
+    0% { transform: rotateX(50deg) rotateY(60deg) rotateZ(0deg); }
+    100% { transform: rotateX(50deg) rotateY(60deg) rotateZ(-360deg); }
+}
+
+@keyframes orbit5 {
+    0% { transform: rotateX(65deg) rotateY(-45deg) rotateZ(0deg); }
+    100% { transform: rotateX(65deg) rotateY(-45deg) rotateZ(360deg); }
+}
+
+@keyframes orbit6 {
+    0% { transform: rotateX(55deg) rotateY(30deg) rotateZ(0deg); }
+    100% { transform: rotateX(55deg) rotateY(30deg) rotateZ(-360deg); }
+}
+
+/* 미니 푸터 */
+.mini-footer {
+    background: #0a0a0f;
+    border-top: 1px solid rgba(240, 185, 11, 0.1);
+    padding: var(--spacing-lg) 0;
+}
+
+.mini-footer__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+}
+
+.mini-footer__links {
+    display: flex;
+    gap: var(--spacing-lg);
+}
+
+.mini-footer__links a {
+    color: var(--text-tertiary);
+    transition: color var(--transition-fast);
+}
+
+.mini-footer__links a:hover {
+    color: var(--color-primary);
+}
+
+/* ========================================
+   반응형
+   ======================================== */
+
+/* 반응형 */
+@media (max-width: 1200px) {
+    .features__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stats__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .global-trading__content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 60px var(--spacing-lg);
+    }
+
+    .global-trading__text {
+        max-width: 100%;
+    }
+
+    .global-trading__stats {
+        justify-content: center;
+    }
+
+    .gyroscope {
+        width: 350px;
+        height: 350px;
+    }
+
+    .gyroscope__ring--outer {
+        width: 330px;
+        height: 330px;
+        margin: -165px 0 0 -165px;
+    }
+
+    .gyroscope__ring--middle {
+        width: 260px;
+        height: 260px;
+        margin: -130px 0 0 -130px;
+    }
+
+    .gyroscope__ring--inner {
+        width: 190px;
+        height: 190px;
+        margin: -95px 0 0 -95px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero {
+        padding: 80px 0 60px;
+        min-height: auto;
+    }
+
+    .hero__title {
+        font-size: 36px;
+    }
+
+    .hero__title-main {
+        font-size: 32px;
+    }
+
+    .hero__title-sub {
+        font-size: 28px;
+    }
+
+    .hero__subtitle {
+        font-size: 15px;
+    }
+
+    .hero__cta {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero__cta .btn--primary,
+    .hero__cta .btn--secondary {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .hero__stats {
+        flex-wrap: wrap;
+        gap: 24px;
+        margin-top: 40px;
+        padding-top: 30px;
+    }
+
+    .hero__stat {
+        flex: 0 0 45%;
+    }
+
+    .hero__stat-value {
+        font-size: 22px;
+    }
+
+    .hero__floating-coin {
+        display: none;
+    }
+
+    .features__grid,
+    .stats__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer__grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    .footer__bottom {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        text-align: center;
+    }
+
+    .market-ticker {
+        flex-wrap: nowrap;
+    }
+
+    .price-table__search input {
+        width: 200px;
+    }
+
+    /* 3D 글로벌 섹션 모바일 */
+    .global-trading {
+        min-height: auto;
+        padding: 40px 0;
+    }
+
+    .global-trading__title {
+        font-size: 36px;
+    }
+
+    .global-trading__stats {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .gyroscope {
+        width: 280px;
+        height: 280px;
+    }
+
+    .gyroscope__ring--outer {
+        width: 260px;
+        height: 260px;
+        margin: -130px 0 0 -130px;
+    }
+
+    .gyroscope__ring--middle {
+        width: 200px;
+        height: 200px;
+        margin: -100px 0 0 -100px;
+    }
+
+    .gyroscope__ring--inner {
+        width: 140px;
+        height: 140px;
+        margin: -70px 0 0 -70px;
+    }
+
+    .gyroscope__core {
+        width: 70px;
+        height: 70px;
+        margin: -35px 0 0 -35px;
+    }
+
+    .core-icon {
+        font-size: 32px;
+    }
+
+    .mini-footer__inner {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        text-align: center;
+    }
+}

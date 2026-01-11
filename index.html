@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuturX - 선물거래 플랫폼</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="header__logo">
+            <div class="header__logo-icon">F</div>
+            <span>FuturX</span>
+        </div>
+        <nav class="header__nav">
+            <a href="index.html" class="header__nav-link active">마켓</a>
+            <a href="trade.html" class="header__nav-link">선물거래</a>
+            <a href="leaderboard.php" class="header__nav-link">리더보드</a>
+            <a href="competition.php" class="header__nav-link">대회</a>
+            <a href="wallet.html" class="header__nav-link">지갑</a>
+            <a href="deposit.html" class="header__nav-link">입금</a>
+        </nav>
+        <div class="header__actions">
+            <button class="btn btn--outline btn--sm">로그인</button>
+            <button class="btn btn--primary btn--sm">회원가입</button>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main">
+        <!-- 히어로 섹션 -->
+        <section class="hero">
+            <div class="container">
+                <h1 class="hero__title">암호화폐 선물거래의 새로운 기준</h1>
+                <p class="hero__subtitle">
+                    최대 125배 레버리지, 업계 최저 수수료로 BTC, ETH 및 200개 이상의 암호화폐를 거래하세요
+                </p>
+                <div class="hero__cta">
+                    <a href="trade.html" class="btn btn--primary btn--lg">거래 시작하기</a>
+                    <a href="#markets" class="btn btn--secondary btn--lg">시세 확인</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 마켓 개요 티커 -->
+        <section class="market-overview">
+            <div class="container">
+                <div class="market-ticker">
+                    <div class="ticker-item">
+                        <div class="ticker-item__icon">₿</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">BTC</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value">$97,432.50</div>
+                            <div class="ticker-item__change num-positive">+2.34%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item">
+                        <div class="ticker-item__icon" style="background: #627eea;">Ξ</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">ETH</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value">$3,456.78</div>
+                            <div class="ticker-item__change num-positive">+1.85%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item">
+                        <div class="ticker-item__icon" style="background: #26a17b;">₮</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">SOL</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value">$198.45</div>
+                            <div class="ticker-item__change num-negative">-0.52%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item">
+                        <div class="ticker-item__icon" style="background: #f3ba2f;">B</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">BNB</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value">$712.30</div>
+                            <div class="ticker-item__change num-positive">+3.21%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item">
+                        <div class="ticker-item__icon" style="background: #e84142;">A</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">AVAX</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value">$42.18</div>
+                            <div class="ticker-item__change num-negative">-1.23%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 시세 테이블 -->
+        <section class="price-table" id="markets">
+            <div class="container">
+                <div class="price-table__header">
+                    <div class="price-table__tabs">
+                        <button class="price-table__tab active">USDT 무기한</button>
+                        <button class="price-table__tab">USDC 무기한</button>
+                        <button class="price-table__tab">코인-M 선물</button>
+                        <button class="price-table__tab">인기</button>
+                        <button class="price-table__tab">신규</button>
+                    </div>
+                    <div class="price-table__search">
+                        <svg class="price-table__search-icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        <input type="text" placeholder="코인 검색...">
+                    </div>
+                </div>
+
+                <table class="market-table">
+                    <thead>
+                        <tr>
+                            <th>거래쌍</th>
+                            <th>최근가</th>
+                            <th>24h 변동</th>
+                            <th>24h 최고</th>
+                            <th>24h 최저</th>
+                            <th>24h 거래량</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="market-table__pair">
+                                    <div class="market-table__coin-icon" style="background: #f7931a; color: white;">₿</div>
+                                    <div>
+                                        <div class="market-table__coin-name">BTCUSDT</div>
+                                        <div class="market-table__coin-base">무기한</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="market-table__price">97,432.50</td>
+                            <td class="market-table__change num-positive">+2.34%</td>
+                            <td class="market-table__price">98,100.00</td>
+                            <td class="market-table__price">94,850.20</td>
+                            <td class="market-table__volume">2.85B USDT</td>
+                            <td class="market-table__action">
+                                <a href="trade.html?symbol=BTCUSDT" class="btn btn--primary btn--sm">거래</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="market-table__pair">
+                                    <div class="market-table__coin-icon" style="background: #627eea; color: white;">Ξ</div>
+                                    <div>
+                                        <div class="market-table__coin-name">ETHUSDT</div>
+                                        <div class="market-table__coin-base">무기한</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="market-table__price">3,456.78</td>
+                            <td class="market-table__change num-positive">+1.85%</td>
+                            <td class="market-table__price">3,520.00</td>
+                            <td class="market-table__price">3,380.50</td>
+                            <td class="market-table__volume">1.42B USDT</td>
+                            <td class="market-table__action">
+                                <a href="trade.html?symbol=ETHUSDT" class="btn btn--primary btn--sm">거래</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="market-table__pair">
+                                    <div class="market-table__coin-icon" style="background: #14f195; color: #111;">◎</div>
+                                    <div>
+                                        <div class="market-table__coin-name">SOLUSDT</div>
+                                        <div class="market-table__coin-base">무기한</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="market-table__price">198.45</td>
+                            <td class="market-table__change num-negative">-0.52%</td>
+                            <td class="market-table__price">203.80</td>
+                            <td class="market-table__price">195.20</td>
+                            <td class="market-table__volume">892M USDT</td>
+                            <td class="market-table__action">
+                                <a href="trade.html?symbol=SOLUSDT" class="btn btn--primary btn--sm">거래</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="market-table__pair">
+                                    <div class="market-table__coin-icon" style="background: #f3ba2f; color: #111;">B</div>
+                                    <div>
+                                        <div class="market-table__coin-name">BNBUSDT</div>
+                                        <div class="market-table__coin-base">무기한</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="market-table__price">712.30</td>
+                            <td class="market-table__change num-positive">+3.21%</td>
+                            <td class="market-table__price">725.00</td>
+                            <td class="market-table__price">685.50</td>
+                            <td class="market-table__volume">654M USDT</td>
+                            <td class="market-table__action">
+                                <a href="trade.html?symbol=BNBUSDT" class="btn btn--primary btn--sm">거래</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="market-table__pair">
+                                    <div class="market-table__coin-icon" style="background: #2775ca; color: white;">X</div>
+                                    <div>
+                                        <div class="market-table__coin-name">XRPUSDT</div>
+                                        <div class="market-table__coin-base">무기한</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="market-table__price">2.4532</td>
+                            <td class="market-table__change num-positive">+5.67%</td>
+                            <td class="market-table__price">2.5200</td>
+                            <td class="market-table__price">2.3100</td>
+                            <td class="market-table__volume">1.12B USDT</td>
+                            <td class="market-table__action">
+                                <a href="trade.html?symbol=XRPUSDT" class="btn btn--primary btn--sm">거래</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="market-table__pair">
+                                    <div class="market-table__coin-icon" style="background: #e84142; color: white;">A</div>
+                                    <div>
+                                        <div class="market-table__coin-name">AVAXUSDT</div>
+                                        <div class="market-table__coin-base">무기한</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="market-table__price">42.18</td>
+                            <td class="market-table__change num-negative">-1.23%</td>
+                            <td class="market-table__price">43.50</td>
+                            <td class="market-table__price">41.20</td>
+                            <td class="market-table__volume">312M USDT</td>
+                            <td class="market-table__action">
+                                <a href="trade.html?symbol=AVAXUSDT" class="btn btn--primary btn--sm">거래</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="market-table__pair">
+                                    <div class="market-table__coin-icon" style="background: #8247e5; color: white;">P</div>
+                                    <div>
+                                        <div class="market-table__coin-name">MATICUSDT</div>
+                                        <div class="market-table__coin-base">무기한</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="market-table__price">0.5234</td>
+                            <td class="market-table__change num-positive">+0.89%</td>
+                            <td class="market-table__price">0.5400</td>
+                            <td class="market-table__price">0.5120</td>
+                            <td class="market-table__volume">198M USDT</td>
+                            <td class="market-table__action">
+                                <a href="trade.html?symbol=MATICUSDT" class="btn btn--primary btn--sm">거래</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="market-table__pair">
+                                    <div class="market-table__coin-icon" style="background: #00d4aa; color: white;">D</div>
+                                    <div>
+                                        <div class="market-table__coin-name">DOGEUSDT</div>
+                                        <div class="market-table__coin-base">무기한</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="market-table__price">0.4123</td>
+                            <td class="market-table__change num-positive">+8.45%</td>
+                            <td class="market-table__price">0.4250</td>
+                            <td class="market-table__price">0.3780</td>
+                            <td class="market-table__volume">756M USDT</td>
+                            <td class="market-table__action">
+                                <a href="trade.html?symbol=DOGEUSDT" class="btn btn--primary btn--sm">거래</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 기능 섹션 -->
+        <section class="features">
+            <div class="container">
+                <h2 class="features__title">왜 FuturX인가?</h2>
+                <div class="features__grid">
+                    <div class="feature-card">
+                        <div class="feature-card__icon">⚡</div>
+                        <h3 class="feature-card__title">초저지연 체결</h3>
+                        <p class="feature-card__desc">
+                            매칭 엔진 응답속도 5ms 이하. 고빈도 트레이딩에 최적화된 인프라
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-card__icon">🔒</div>
+                        <h3 class="feature-card__title">보안 최우선</h3>
+                        <p class="feature-card__desc">
+                            콜드월렛 95% 보관, 다중 서명, 실시간 리스크 모니터링 시스템
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-card__icon">💰</div>
+                        <h3 class="feature-card__title">업계 최저 수수료</h3>
+                        <p class="feature-card__desc">
+                            메이커 0.02%, 테이커 0.05%. VIP 등급별 추가 할인 적용
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-card__icon">📈</div>
+                        <h3 class="feature-card__title">최대 125배 레버리지</h3>
+                        <p class="feature-card__desc">
+                            크로스/격리 마진 선택. 리스크 관리 도구 제공
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-card__icon">🌐</div>
+                        <h3 class="feature-card__title">200+ 거래쌍</h3>
+                        <p class="feature-card__desc">
+                            주요 코인부터 알트코인까지 다양한 선물 상품 지원
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-card__icon">📱</div>
+                        <h3 class="feature-card__title">어디서나 거래</h3>
+                        <p class="feature-card__desc">
+                            웹, iOS, Android, API 지원. 언제 어디서나 거래 가능
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 통계 섹션 -->
+        <section class="stats">
+            <div class="container">
+                <div class="stats__grid">
+                    <div class="stat-item">
+                        <div class="stat-item__value">$24.5B+</div>
+                        <div class="stat-item__label">24시간 거래량</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-item__value">12M+</div>
+                        <div class="stat-item__label">등록 사용자</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-item__value">200+</div>
+                        <div class="stat-item__label">거래 가능 코인</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-item__value">99.99%</div>
+                        <div class="stat-item__label">서비스 가동률</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 푸터 -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer__grid">
+                    <div class="footer__about">
+                        <div class="footer__brand">FuturX</div>
+                        <p class="footer__desc">
+                            전 세계 트레이더들이 신뢰하는 암호화폐 선물거래 플랫폼.
+                            안전하고 빠른 거래 환경을 제공합니다.
+                        </p>
+                    </div>
+                    <div class="footer__section">
+                        <div class="footer__title">서비스</div>
+                        <div class="footer__links">
+                            <a href="#" class="footer__link">USDT-M 선물</a>
+                            <a href="#" class="footer__link">COIN-M 선물</a>
+                            <a href="#" class="footer__link">현물 거래</a>
+                            <a href="#" class="footer__link">API 문서</a>
+                        </div>
+                    </div>
+                    <div class="footer__section">
+                        <div class="footer__title">지원</div>
+                        <div class="footer__links">
+                            <a href="#" class="footer__link">고객센터</a>
+                            <a href="#" class="footer__link">이용가이드</a>
+                            <a href="#" class="footer__link">수수료 안내</a>
+                            <a href="#" class="footer__link">공지사항</a>
+                        </div>
+                    </div>
+                    <div class="footer__section">
+                        <div class="footer__title">법적 고지</div>
+                        <div class="footer__links">
+                            <a href="#" class="footer__link">이용약관</a>
+                            <a href="#" class="footer__link">개인정보처리방침</a>
+                            <a href="#" class="footer__link">위험 고지</a>
+                            <a href="#" class="footer__link">AML 정책</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer__bottom">
+                    <div class="footer__copy">© 2024 FuturX. All rights reserved.</div>
+                    <div class="footer__social">
+                        <a href="#" class="footer__social-link">𝕏</a>
+                        <a href="#" class="footer__social-link">📱</a>
+                        <a href="#" class="footer__social-link">💬</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+</body>
+</html>

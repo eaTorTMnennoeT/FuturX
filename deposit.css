@@ -1,0 +1,652 @@
+/* ========================================
+   입금 페이지 전용 CSS
+   암호화폐 주소 생성
+   ======================================== */
+
+/* 입금 페이지 레이아웃 */
+.deposit-page {
+    padding-top: calc(var(--header-height) + var(--spacing-xl));
+    min-height: 100vh;
+}
+
+.deposit-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+/* 페이지 타이틀 */
+.page-title {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* 입금 레이아웃 */
+.deposit-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: var(--spacing-xl);
+}
+
+/* 메인 입금 카드 */
+.deposit-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+}
+
+.deposit-card__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* 스텝 인디케이터 */
+.deposit-steps {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xxl);
+    padding-bottom: var(--spacing-xl);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.deposit-step {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.deposit-step__number {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.deposit-step.active .deposit-step__number {
+    background: var(--color-primary);
+    color: var(--bg-primary);
+}
+
+.deposit-step.completed .deposit-step__number {
+    background: var(--color-long);
+    color: white;
+}
+
+.deposit-step__label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.deposit-step.active .deposit-step__label {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+.deposit-step__line {
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+/* 코인 선택 */
+.coin-select-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.coin-select__label {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.coin-select__dropdown {
+    position: relative;
+}
+
+.coin-select__trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color var(--transition-fast);
+}
+
+.coin-select__trigger:hover {
+    border-color: var(--border-color-light);
+}
+
+.coin-select__trigger:focus {
+    border-color: var(--color-primary);
+}
+
+.coin-select__selected {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.coin-select__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+}
+
+.coin-select__name {
+    font-weight: var(--font-weight-semibold);
+}
+
+.coin-select__fullname {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-left: var(--spacing-sm);
+}
+
+.coin-select__arrow {
+    color: var(--text-secondary);
+    transition: transform var(--transition-fast);
+}
+
+.coin-select__dropdown.open .coin-select__arrow {
+    transform: rotate(180deg);
+}
+
+/* 코인 드롭다운 메뉴 */
+.coin-select__menu {
+    position: absolute;
+    top: calc(100% + var(--spacing-xs));
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    max-height: 320px;
+    overflow: hidden;
+    display: none;
+}
+
+.coin-select__dropdown.open .coin-select__menu {
+    display: block;
+}
+
+.coin-select__search {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.coin-select__search input {
+    width: 100%;
+    background: var(--bg-tertiary);
+}
+
+.coin-select__list {
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.coin-select__item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.coin-select__item:hover {
+    background: var(--bg-tertiary);
+}
+
+.coin-select__item.selected {
+    background: var(--color-primary-light);
+}
+
+/* 네트워크 선택 */
+.network-select-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.network-select__label {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.network-select__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-sm);
+}
+
+.network-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-md);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.network-option:hover {
+    border-color: var(--border-color-light);
+}
+
+.network-option.selected {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+.network-option__name {
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+}
+
+.network-option__fee {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.network-option__time {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+/* 입금 주소 섹션 */
+.deposit-address-section {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+}
+
+.deposit-address__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-lg);
+}
+
+.deposit-address__title {
+    font-weight: var(--font-weight-semibold);
+}
+
+.deposit-address__generate {
+    font-size: var(--font-size-sm);
+}
+
+/* QR 코드 */
+.deposit-qr {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.deposit-qr__code {
+    width: 180px;
+    height: 180px;
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.deposit-qr__code svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* QR 코드 패턴 (CSS로 시뮬레이션) */
+.qr-pattern {
+    width: 100%;
+    height: 100%;
+    background-image:
+        linear-gradient(45deg, #111 25%, transparent 25%),
+        linear-gradient(-45deg, #111 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #111 75%),
+        linear-gradient(-45deg, transparent 75%, #111 75%);
+    background-size: 12px 12px;
+    background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+    border-radius: var(--radius-sm);
+}
+
+/* 주소 필드 */
+.deposit-address__field {
+    margin-bottom: var(--spacing-lg);
+}
+
+.deposit-address__field-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.deposit-address__field-value {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+}
+
+.deposit-address__address {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    word-break: break-all;
+    color: var(--text-primary);
+}
+
+.deposit-address__copy {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-primary);
+    color: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+}
+
+.deposit-address__copy:hover {
+    background: var(--color-primary-hover);
+}
+
+/* 메모/태그 필드 */
+.deposit-memo {
+    background: rgba(240, 185, 11, 0.1);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.deposit-memo__warning {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-warning);
+}
+
+.deposit-memo__icon {
+    font-size: var(--font-size-lg);
+}
+
+/* 최소 입금액 */
+.deposit-minimum {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+}
+
+.deposit-minimum__label {
+    color: var(--text-secondary);
+}
+
+.deposit-minimum__value {
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-medium);
+}
+
+/* 사이드바 - 입금 내역 */
+.deposit-sidebar {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    height: fit-content;
+}
+
+.deposit-sidebar__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-lg);
+}
+
+.deposit-history {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.deposit-history__item {
+    display: flex;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+}
+
+.deposit-history__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-lg);
+    flex-shrink: 0;
+}
+
+.deposit-history__icon--pending {
+    background: rgba(240, 185, 11, 0.15);
+    color: var(--color-warning);
+}
+
+.deposit-history__icon--completed {
+    background: var(--color-long-bg);
+    color: var(--color-long);
+}
+
+.deposit-history__info {
+    flex: 1;
+    min-width: 0;
+}
+
+.deposit-history__coin {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xs);
+}
+
+.deposit-history__coin-name {
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+}
+
+.deposit-history__amount {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-long);
+}
+
+.deposit-history__details {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.deposit-history__status {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.deposit-history__status--pending {
+    color: var(--color-warning);
+}
+
+.deposit-history__status--completed {
+    color: var(--color-long);
+}
+
+/* 빈 상태 */
+.deposit-history__empty {
+    text-align: center;
+    padding: var(--spacing-xxl) var(--spacing-lg);
+    color: var(--text-secondary);
+}
+
+.deposit-history__empty-icon {
+    font-size: 48px;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.5;
+}
+
+/* FAQ 섹션 */
+.deposit-faq {
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--border-color);
+}
+
+.deposit-faq__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-md);
+}
+
+.deposit-faq__item {
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.deposit-faq__question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    text-align: left;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.deposit-faq__toggle {
+    color: var(--text-secondary);
+    transition: transform var(--transition-fast);
+}
+
+.deposit-faq__item.open .deposit-faq__toggle {
+    transform: rotate(180deg);
+}
+
+.deposit-faq__answer {
+    display: none;
+    padding-top: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.deposit-faq__item.open .deposit-faq__answer {
+    display: block;
+}
+
+/* 주의사항 */
+.deposit-notice {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border-left: 3px solid var(--color-warning);
+}
+
+.deposit-notice__title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-warning);
+    margin-bottom: var(--spacing-md);
+}
+
+.deposit-notice__list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.deposit-notice__list li {
+    position: relative;
+    padding-left: var(--spacing-lg);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.deposit-notice__list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--text-tertiary);
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+    .deposit-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .deposit-sidebar {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .deposit-steps {
+        flex-wrap: wrap;
+    }
+
+    .deposit-step__line {
+        display: none;
+    }
+
+    .network-select__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .deposit-qr__code {
+        width: 150px;
+        height: 150px;
+    }
+
+    .deposit-address__address {
+        font-size: var(--font-size-xs);
+    }
+}

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>입금 - FuturX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="deposit.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="header__logo">
+            <div class="header__logo-icon">F</div>
+            <span>FuturX</span>
+        </div>
+        <nav class="header__nav">
+            <a href="index.html" class="header__nav-link">마켓</a>
+            <a href="trade.html" class="header__nav-link">선물거래</a>
+            <a href="leaderboard.php" class="header__nav-link">리더보드</a>
+            <a href="competition.php" class="header__nav-link">대회</a>
+            <a href="wallet.html" class="header__nav-link">지갑</a>
+            <a href="deposit.html" class="header__nav-link active">입금</a>
+        </nav>
+        <div class="header__actions">
+            <button class="btn btn--outline btn--sm">알림</button>
+            <button class="btn btn--secondary btn--sm">설정</button>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main deposit-page">
+        <div class="deposit-container">
+            <h1 class="page-title">암호화폐 입금</h1>
+
+            <div class="deposit-layout">
+                <!-- 메인 입금 카드 -->
+                <div class="deposit-card">
+                    <!-- 스텝 인디케이터 -->
+                    <div class="deposit-steps">
+                        <div class="deposit-step completed">
+                            <span class="deposit-step__number">✓</span>
+                            <span class="deposit-step__label">코인 선택</span>
+                        </div>
+                        <div class="deposit-step__line"></div>
+                        <div class="deposit-step completed">
+                            <span class="deposit-step__number">✓</span>
+                            <span class="deposit-step__label">네트워크 선택</span>
+                        </div>
+                        <div class="deposit-step__line"></div>
+                        <div class="deposit-step active">
+                            <span class="deposit-step__number">3</span>
+                            <span class="deposit-step__label">입금 주소 확인</span>
+                        </div>
+                    </div>
+
+                    <!-- 코인 선택 -->
+                    <div class="coin-select-section">
+                        <label class="coin-select__label">입금할 코인</label>
+                        <div class="coin-select__dropdown">
+                            <button class="coin-select__trigger">
+                                <div class="coin-select__selected">
+                                    <div class="coin-select__icon" style="background: #26a17b; color: white;">₮</div>
+                                    <span class="coin-select__name">USDT</span>
+                                    <span class="coin-select__fullname">Tether USD</span>
+                                </div>
+                                <span class="coin-select__arrow">▼</span>
+                            </button>
+                            <div class="coin-select__menu">
+                                <div class="coin-select__search">
+                                    <input type="text" placeholder="코인 검색...">
+                                </div>
+                                <div class="coin-select__list">
+                                    <div class="coin-select__item selected">
+                                        <div class="coin-select__icon" style="background: #26a17b; color: white;">₮</div>
+                                        <span class="coin-select__name">USDT</span>
+                                        <span class="coin-select__fullname">Tether USD</span>
+                                    </div>
+                                    <div class="coin-select__item">
+                                        <div class="coin-select__icon" style="background: #f7931a; color: white;">₿</div>
+                                        <span class="coin-select__name">BTC</span>
+                                        <span class="coin-select__fullname">Bitcoin</span>
+                                    </div>
+                                    <div class="coin-select__item">
+                                        <div class="coin-select__icon" style="background: #627eea; color: white;">Ξ</div>
+                                        <span class="coin-select__name">ETH</span>
+                                        <span class="coin-select__fullname">Ethereum</span>
+                                    </div>
+                                    <div class="coin-select__item">
+                                        <div class="coin-select__icon" style="background: #14f195; color: #111;">◎</div>
+                                        <span class="coin-select__name">SOL</span>
+                                        <span class="coin-select__fullname">Solana</span>
+                                    </div>
+                                    <div class="coin-select__item">
+                                        <div class="coin-select__icon" style="background: #2775ca; color: white;">$</div>
+                                        <span class="coin-select__name">USDC</span>
+                                        <span class="coin-select__fullname">USD Coin</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 네트워크 선택 -->
+                    <div class="network-select-section">
+                        <label class="network-select__label">네트워크 선택</label>
+                        <div class="network-select__grid">
+                            <button class="network-option">
+                                <span class="network-option__name">ERC20</span>
+                                <span class="network-option__fee">수수료: ~$5</span>
+                                <span class="network-option__time">~5분</span>
+                            </button>
+                            <button class="network-option selected">
+                                <span class="network-option__name">TRC20</span>
+                                <span class="network-option__fee">수수료: ~$1</span>
+                                <span class="network-option__time">~3분</span>
+                            </button>
+                            <button class="network-option">
+                                <span class="network-option__name">BEP20</span>
+                                <span class="network-option__fee">수수료: ~$0.5</span>
+                                <span class="network-option__time">~3분</span>
+                            </button>
+                            <button class="network-option">
+                                <span class="network-option__name">SOL</span>
+                                <span class="network-option__fee">수수료: ~$0.01</span>
+                                <span class="network-option__time">~1분</span>
+                            </button>
+                            <button class="network-option">
+                                <span class="network-option__name">Polygon</span>
+                                <span class="network-option__fee">수수료: ~$0.1</span>
+                                <span class="network-option__time">~2분</span>
+                            </button>
+                            <button class="network-option">
+                                <span class="network-option__name">Arbitrum</span>
+                                <span class="network-option__fee">수수료: ~$0.5</span>
+                                <span class="network-option__time">~2분</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 입금 주소 -->
+                    <div class="deposit-address-section">
+                        <div class="deposit-address__header">
+                            <span class="deposit-address__title">USDT 입금 주소 (TRC20)</span>
+                            <button class="btn btn--outline btn--sm deposit-address__generate">새 주소 생성</button>
+                        </div>
+
+                        <!-- QR 코드 -->
+                        <div class="deposit-qr">
+                            <div class="deposit-qr__code">
+                                <!-- QR 코드 자리 -->
+                                <svg viewBox="0 0 100 100" fill="none">
+                                    <!-- Position Detection Patterns -->
+                                    <rect x="4" y="4" width="21" height="21" fill="#111"/>
+                                    <rect x="7" y="7" width="15" height="15" fill="white"/>
+                                    <rect x="10" y="10" width="9" height="9" fill="#111"/>
+
+                                    <rect x="75" y="4" width="21" height="21" fill="#111"/>
+                                    <rect x="78" y="7" width="15" height="15" fill="white"/>
+                                    <rect x="81" y="10" width="9" height="9" fill="#111"/>
+
+                                    <rect x="4" y="75" width="21" height="21" fill="#111"/>
+                                    <rect x="7" y="78" width="15" height="15" fill="white"/>
+                                    <rect x="10" y="81" width="9" height="9" fill="#111"/>
+
+                                    <!-- Data modules (simplified) -->
+                                    <rect x="30" y="4" width="3" height="3" fill="#111"/>
+                                    <rect x="36" y="4" width="3" height="3" fill="#111"/>
+                                    <rect x="42" y="4" width="3" height="3" fill="#111"/>
+                                    <rect x="54" y="4" width="3" height="3" fill="#111"/>
+                                    <rect x="66" y="4" width="3" height="3" fill="#111"/>
+
+                                    <rect x="30" y="10" width="3" height="3" fill="#111"/>
+                                    <rect x="42" y="10" width="3" height="3" fill="#111"/>
+                                    <rect x="48" y="10" width="3" height="3" fill="#111"/>
+                                    <rect x="60" y="10" width="3" height="3" fill="#111"/>
+
+                                    <rect x="4" y="30" width="3" height="3" fill="#111"/>
+                                    <rect x="10" y="30" width="3" height="3" fill="#111"/>
+                                    <rect x="16" y="30" width="3" height="3" fill="#111"/>
+                                    <rect x="30" y="30" width="3" height="3" fill="#111"/>
+                                    <rect x="36" y="30" width="3" height="3" fill="#111"/>
+                                    <rect x="48" y="30" width="3" height="3" fill="#111"/>
+                                    <rect x="60" y="30" width="3" height="3" fill="#111"/>
+                                    <rect x="72" y="30" width="3" height="3" fill="#111"/>
+                                    <rect x="84" y="30" width="3" height="3" fill="#111"/>
+                                    <rect x="90" y="30" width="3" height="3" fill="#111"/>
+
+                                    <rect x="30" y="36" width="3" height="3" fill="#111"/>
+                                    <rect x="42" y="36" width="3" height="3" fill="#111"/>
+                                    <rect x="54" y="36" width="3" height="3" fill="#111"/>
+                                    <rect x="66" y="36" width="3" height="3" fill="#111"/>
+                                    <rect x="78" y="36" width="3" height="3" fill="#111"/>
+
+                                    <rect x="4" y="42" width="3" height="3" fill="#111"/>
+                                    <rect x="16" y="42" width="3" height="3" fill="#111"/>
+                                    <rect x="30" y="42" width="3" height="3" fill="#111"/>
+                                    <rect x="36" y="42" width="3" height="3" fill="#111"/>
+                                    <rect x="42" y="42" width="3" height="3" fill="#111"/>
+                                    <rect x="48" y="42" width="3" height="3" fill="#111"/>
+                                    <rect x="60" y="42" width="3" height="3" fill="#111"/>
+                                    <rect x="72" y="42" width="3" height="3" fill="#111"/>
+
+                                    <rect x="30" y="48" width="3" height="3" fill="#111"/>
+                                    <rect x="48" y="48" width="3" height="3" fill="#111"/>
+                                    <rect x="54" y="48" width="3" height="3" fill="#111"/>
+                                    <rect x="66" y="48" width="3" height="3" fill="#111"/>
+                                    <rect x="84" y="48" width="3" height="3" fill="#111"/>
+
+                                    <rect x="4" y="54" width="3" height="3" fill="#111"/>
+                                    <rect x="10" y="54" width="3" height="3" fill="#111"/>
+                                    <rect x="22" y="54" width="3" height="3" fill="#111"/>
+                                    <rect x="36" y="54" width="3" height="3" fill="#111"/>
+                                    <rect x="42" y="54" width="3" height="3" fill="#111"/>
+                                    <rect x="60" y="54" width="3" height="3" fill="#111"/>
+                                    <rect x="78" y="54" width="3" height="3" fill="#111"/>
+                                    <rect x="90" y="54" width="3" height="3" fill="#111"/>
+
+                                    <rect x="30" y="60" width="3" height="3" fill="#111"/>
+                                    <rect x="42" y="60" width="3" height="3" fill="#111"/>
+                                    <rect x="48" y="60" width="3" height="3" fill="#111"/>
+                                    <rect x="54" y="60" width="3" height="3" fill="#111"/>
+                                    <rect x="72" y="60" width="3" height="3" fill="#111"/>
+                                    <rect x="84" y="60" width="3" height="3" fill="#111"/>
+
+                                    <rect x="30" y="66" width="3" height="3" fill="#111"/>
+                                    <rect x="36" y="66" width="3" height="3" fill="#111"/>
+                                    <rect x="60" y="66" width="3" height="3" fill="#111"/>
+                                    <rect x="66" y="66" width="3" height="3" fill="#111"/>
+                                    <rect x="78" y="66" width="3" height="3" fill="#111"/>
+                                    <rect x="90" y="66" width="3" height="3" fill="#111"/>
+
+                                    <rect x="30" y="78" width="3" height="3" fill="#111"/>
+                                    <rect x="48" y="78" width="3" height="3" fill="#111"/>
+                                    <rect x="54" y="78" width="3" height="3" fill="#111"/>
+                                    <rect x="66" y="78" width="3" height="3" fill="#111"/>
+                                    <rect x="72" y="78" width="3" height="3" fill="#111"/>
+                                    <rect x="84" y="78" width="3" height="3" fill="#111"/>
+
+                                    <rect x="30" y="84" width="3" height="3" fill="#111"/>
+                                    <rect x="36" y="84" width="3" height="3" fill="#111"/>
+                                    <rect x="42" y="84" width="3" height="3" fill="#111"/>
+                                    <rect x="60" y="84" width="3" height="3" fill="#111"/>
+                                    <rect x="78" y="84" width="3" height="3" fill="#111"/>
+                                    <rect x="90" y="84" width="3" height="3" fill="#111"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- 주소 필드 -->
+                        <div class="deposit-address__field">
+                            <div class="deposit-address__field-label">입금 주소</div>
+                            <div class="deposit-address__field-value">
+                                <span class="deposit-address__address">TQYsKbXr4AvfNwEQN5Q8mXcBanZmh2U8PE</span>
+                                <button class="deposit-address__copy">복사</button>
+                            </div>
+                        </div>
+
+                        <!-- 최소 입금액 -->
+                        <div class="deposit-minimum">
+                            <span class="deposit-minimum__label">최소 입금액</span>
+                            <span class="deposit-minimum__value">1 USDT</span>
+                        </div>
+                    </div>
+
+                    <!-- 주의사항 -->
+                    <div class="deposit-notice">
+                        <div class="deposit-notice__title">
+                            <span>⚠️</span>
+                            <span>입금 시 주의사항</span>
+                        </div>
+                        <ul class="deposit-notice__list">
+                            <li>위 주소는 USDT-TRC20 전용입니다. 다른 네트워크로 전송 시 자산을 잃을 수 있습니다.</li>
+                            <li>최소 입금액 이하의 금액은 입금되지 않으며, 반환되지 않습니다.</li>
+                            <li>입금 주소로 USDT 외의 다른 토큰을 보내지 마세요.</li>
+                            <li>네트워크 확인 수: 1회 확인 후 입금 반영됩니다.</li>
+                            <li>입금 반영까지 평균 1~5분 소요됩니다. (네트워크 상황에 따라 지연 가능)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 사이드바 - 최근 입금 내역 -->
+                <div class="deposit-sidebar">
+                    <h2 class="deposit-sidebar__title">최근 입금 내역</h2>
+
+                    <div class="deposit-history">
+                        <div class="deposit-history__item">
+                            <div class="deposit-history__icon deposit-history__icon--completed">✓</div>
+                            <div class="deposit-history__info">
+                                <div class="deposit-history__coin">
+                                    <span class="deposit-history__coin-name">USDT (TRC20)</span>
+                                    <span class="deposit-history__amount">+500.00</span>
+                                </div>
+                                <div class="deposit-history__details">
+                                    <span class="deposit-history__status deposit-history__status--completed">완료</span>
+                                    <span class="deposit-history__time">2024-01-10 14:32</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="deposit-history__item">
+                            <div class="deposit-history__icon deposit-history__icon--completed">✓</div>
+                            <div class="deposit-history__info">
+                                <div class="deposit-history__coin">
+                                    <span class="deposit-history__coin-name">ETH (ERC20)</span>
+                                    <span class="deposit-history__amount">+0.5</span>
+                                </div>
+                                <div class="deposit-history__details">
+                                    <span class="deposit-history__status deposit-history__status--completed">완료</span>
+                                    <span class="deposit-history__time">2024-01-09 09:15</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="deposit-history__item">
+                            <div class="deposit-history__icon deposit-history__icon--pending">⏳</div>
+                            <div class="deposit-history__info">
+                                <div class="deposit-history__coin">
+                                    <span class="deposit-history__coin-name">BTC</span>
+                                    <span class="deposit-history__amount">+0.01</span>
+                                </div>
+                                <div class="deposit-history__details">
+                                    <span class="deposit-history__status deposit-history__status--pending">확인 중 (2/3)</span>
+                                    <span class="deposit-history__time">2024-01-10 15:45</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="deposit-history__item">
+                            <div class="deposit-history__icon deposit-history__icon--completed">✓</div>
+                            <div class="deposit-history__info">
+                                <div class="deposit-history__coin">
+                                    <span class="deposit-history__coin-name">USDT (BEP20)</span>
+                                    <span class="deposit-history__amount">+1,000.00</span>
+                                </div>
+                                <div class="deposit-history__details">
+                                    <span class="deposit-history__status deposit-history__status--completed">완료</span>
+                                    <span class="deposit-history__time">2024-01-08 18:22</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ -->
+                    <div class="deposit-faq">
+                        <h3 class="deposit-faq__title">자주 묻는 질문</h3>
+
+                        <div class="deposit-faq__item">
+                            <button class="deposit-faq__question">
+                                <span>입금이 반영되지 않아요</span>
+                                <span class="deposit-faq__toggle">▼</span>
+                            </button>
+                            <div class="deposit-faq__answer">
+                                네트워크 혼잡 시 입금 반영이 지연될 수 있습니다.
+                                트랜잭션 해시(TXID)를 확인하시고, 30분 이상 지연 시 고객센터로 문의해주세요.
+                            </div>
+                        </div>
+
+                        <div class="deposit-faq__item">
+                            <button class="deposit-faq__question">
+                                <span>잘못된 네트워크로 입금했어요</span>
+                                <span class="deposit-faq__toggle">▼</span>
+                            </button>
+                            <div class="deposit-faq__answer">
+                                잘못된 네트워크로 입금된 자산은 복구가 불가능할 수 있습니다.
+                                반드시 입금 전 네트워크를 확인해주세요.
+                            </div>
+                        </div>
+
+                        <div class="deposit-faq__item">
+                            <button class="deposit-faq__question">
+                                <span>입금 주소가 바뀌었어요</span>
+                                <span class="deposit-faq__toggle">▼</span>
+                            </button>
+                            <div class="deposit-faq__answer">
+                                이전 입금 주소도 계속 유효합니다.
+                                보안을 위해 주기적으로 새 주소가 생성되지만,
+                                기존 주소로 입금하셔도 정상 반영됩니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 코인 드롭다운 토글
+        document.querySelector('.coin-select__trigger').addEventListener('click', function() {
+            this.parentElement.classList.toggle('open');
+        });
+
+        // FAQ 토글
+        document.querySelectorAll('.deposit-faq__question').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                this.parentElement.classList.toggle('open');
+            });
+        });
+
+        // 네트워크 선택
+        document.querySelectorAll('.network-option').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.network-option').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // 주소 복사
+        document.querySelector('.deposit-address__copy').addEventListener('click', function() {
+            const address = document.querySelector('.deposit-address__address').textContent;
+            navigator.clipboard.writeText(address);
+            this.textContent = '복사됨!';
+            setTimeout(() => this.textContent = '복사', 2000);
+        });
+    </script>
+</body>
+</html>

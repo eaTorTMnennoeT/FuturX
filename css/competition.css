@@ -1,0 +1,988 @@
+/* ========================================
+   FuturX - Competition Page Styles
+   대회 페이지 전용 스타일
+   ======================================== */
+
+/* 히어로 섹션 */
+.competition-hero {
+    position: relative;
+    padding: calc(var(--header-height) + 60px) 0 60px;
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    overflow: hidden;
+}
+
+.competition-hero__bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(240, 185, 11, 0.2), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 30%, rgba(14, 203, 129, 0.15), transparent),
+        radial-gradient(ellipse 60% 40% at 20% 30%, rgba(246, 70, 93, 0.15), transparent);
+    pointer-events: none;
+}
+
+.competition-hero__content {
+    position: relative;
+    text-align: center;
+}
+
+.competition-hero__title {
+    font-size: 42px;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.competition-hero__title i {
+    color: var(--color-primary);
+    font-size: 36px;
+}
+
+.competition-hero__subtitle {
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* 섹션 */
+.competition-section {
+    margin-bottom: var(--spacing-xxl);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xl);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.section-title i {
+    color: var(--color-primary);
+}
+
+.section-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.section-link:hover {
+    color: var(--color-primary);
+}
+
+.live-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--color-long);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* 대회 그리드 */
+.competition-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+}
+
+.competition-grid--featured {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* 대회 카드 */
+.competition-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+}
+
+.competition-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-primary);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.competition-card--active {
+    border-color: var(--color-long);
+}
+
+.competition-card--active:hover {
+    border-color: var(--color-long);
+    box-shadow: 0 12px 40px rgba(14, 203, 129, 0.2);
+}
+
+.competition-card--ended {
+    opacity: 0.8;
+}
+
+.competition-card--ended:hover {
+    opacity: 1;
+}
+
+.competition-card__banner {
+    position: relative;
+    height: 140px;
+    overflow: hidden;
+}
+
+.competition-card__banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.competition-card__banner-gradient {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg,
+        rgba(240, 185, 11, 0.3) 0%,
+        rgba(14, 203, 129, 0.2) 50%,
+        rgba(246, 70, 93, 0.2) 100%);
+}
+
+.competition-card__banner-gradient--upcoming {
+    background: linear-gradient(135deg,
+        rgba(30, 136, 229, 0.3) 0%,
+        rgba(240, 185, 11, 0.2) 100%);
+}
+
+.competition-card__banner-gradient--ended {
+    background: linear-gradient(135deg,
+        rgba(94, 102, 115, 0.3) 0%,
+        rgba(43, 49, 57, 0.3) 100%);
+}
+
+.competition-card__badge {
+    position: absolute;
+    top: var(--spacing-md);
+    left: var(--spacing-md);
+    padding: 4px 12px;
+    background: var(--color-long);
+    color: #fff;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-sm);
+}
+
+.competition-card__badge--upcoming {
+    background: var(--color-info);
+}
+
+.competition-card__badge--ended {
+    background: var(--text-tertiary);
+}
+
+.competition-card__content {
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.competition-card__type {
+    font-size: var(--font-size-xs);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-xs);
+}
+
+.competition-card__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    line-height: 1.4;
+}
+
+.competition-card__prize {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.competition-card__prize i {
+    color: var(--color-primary);
+}
+
+.competition-card__prize .prize-amount {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+}
+
+.competition-card__prize .prize-currency {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.competition-card__timer,
+.competition-card__date {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.competition-card__timer i,
+.competition-card__date i {
+    color: var(--color-short);
+}
+
+.competition-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+}
+
+.competition-card__participants {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.view-results {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* 대회 상세 배너 */
+.competition-banner {
+    position: relative;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    padding-top: var(--header-height);
+    overflow: hidden;
+}
+
+.competition-banner > img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.competition-banner__gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg,
+        rgba(240, 185, 11, 0.3) 0%,
+        rgba(14, 203, 129, 0.2) 30%,
+        rgba(11, 14, 17, 0.9) 100%);
+}
+
+.competition-banner__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg,
+        rgba(11, 14, 17, 0.3) 0%,
+        rgba(11, 14, 17, 0.9) 100%);
+}
+
+.competition-banner__content {
+    position: relative;
+    text-align: center;
+    padding: var(--spacing-xxl) 0;
+}
+
+.competition-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-lg);
+}
+
+.competition-badge--active {
+    background: var(--color-long-bg);
+    color: var(--color-long);
+    border: 1px solid var(--color-long);
+}
+
+.competition-badge--upcoming {
+    background: rgba(30, 136, 229, 0.1);
+    color: var(--color-info);
+    border: 1px solid var(--color-info);
+}
+
+.competition-badge--ended {
+    background: rgba(94, 102, 115, 0.1);
+    color: var(--text-secondary);
+    border: 1px solid var(--text-tertiary);
+}
+
+.competition-banner__title {
+    font-size: 48px;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.competition-banner__type {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* 카운트다운 */
+.countdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+}
+
+.countdown__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    min-width: 80px;
+}
+
+.countdown__value {
+    font-size: 32px;
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-mono);
+    color: var(--color-primary);
+}
+
+.countdown__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.countdown__separator {
+    font-size: 28px;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-tertiary);
+}
+
+/* 대회 레이아웃 */
+.competition-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-xxl) 0;
+}
+
+.competition-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+/* 정보 카드 */
+.info-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+}
+
+.info-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.info-card__icon {
+    width: 48px;
+    height: 48px;
+    background: var(--color-primary-light);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    font-size: 20px;
+}
+
+.info-card__content {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-card__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
+.info-card__value {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.info-card__value small {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-normal);
+}
+
+/* 카드 타이틀 아이콘 */
+.card__title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.card__title i {
+    color: var(--color-primary);
+}
+
+.update-time {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    color: var(--color-long);
+}
+
+.update-time i {
+    animation: spin 2s linear infinite;
+}
+
+/* 순위 테이블 */
+.rank-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.rank-table th {
+    text-align: left;
+    padding: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.rank-table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.rank-table tbody tr:hover {
+    background: var(--bg-tertiary);
+}
+
+.rank-medal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+}
+
+.rank-medal--gold {
+    background: linear-gradient(135deg, #ffd700, #ffb800);
+    color: #1a1a1a;
+}
+
+.rank-medal--silver {
+    background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
+    color: #1a1a1a;
+}
+
+.rank-medal--bronze {
+    background: linear-gradient(135deg, #cd7f32, #b87333);
+    color: #1a1a1a;
+}
+
+.rank-num {
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+.trader-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.trader-cell__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+    overflow: hidden;
+}
+
+.trader-cell__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.trader-cell__name {
+    font-weight: var(--font-weight-medium);
+}
+
+.vip-badge {
+    padding: 2px 6px;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #1a1a1a;
+    font-size: 9px;
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--radius-sm);
+}
+
+/* 규칙 콘텐츠 */
+.rules-content {
+    font-size: var(--font-size-md);
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+/* 사이드바 카드 */
+.competition-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.prize-card,
+.schedule-card,
+.share-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.prize-card__header,
+.schedule-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background: var(--bg-tertiary);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.prize-card__header i,
+.schedule-card__header i {
+    color: var(--color-primary);
+}
+
+.prize-card__total {
+    padding: var(--spacing-xl);
+    text-align: center;
+    background: linear-gradient(135deg, rgba(240, 185, 11, 0.1), transparent);
+}
+
+.prize-card__total-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.prize-card__total-value {
+    font-size: 36px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+}
+
+.prize-tiers {
+    padding: var(--spacing-lg);
+}
+
+.prize-tier {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-sm);
+    background: var(--bg-tertiary);
+}
+
+.prize-tier:last-child {
+    margin-bottom: 0;
+}
+
+.prize-tier--1 {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent);
+    border-left: 3px solid #ffd700;
+}
+
+.prize-tier--2 {
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.1), transparent);
+    border-left: 3px solid #c0c0c0;
+}
+
+.prize-tier--3 {
+    background: linear-gradient(90deg, rgba(205, 127, 50, 0.1), transparent);
+    border-left: 3px solid #cd7f32;
+}
+
+.prize-tier__rank {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+}
+
+.prize-tier__rank i {
+    color: var(--color-primary);
+}
+
+.prize-tier__amount {
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+}
+
+/* 일정 */
+.schedule-items {
+    padding: var(--spacing-lg);
+}
+
+.schedule-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.schedule-item:last-child {
+    border-bottom: none;
+}
+
+.schedule-item__icon {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-tertiary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+.schedule-item__icon--start {
+    color: var(--color-long);
+}
+
+.schedule-item__icon--end {
+    color: var(--color-short);
+}
+
+.schedule-item__content {
+    display: flex;
+    flex-direction: column;
+}
+
+.schedule-item__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.schedule-item__date {
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+}
+
+/* 공유 */
+.share-card {
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.share-card__label {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+.share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.share-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.share-btn:hover {
+    transform: translateY(-2px);
+}
+
+.share-btn--twitter:hover {
+    background: #1da1f2;
+    color: #fff;
+}
+
+.share-btn--telegram:hover {
+    background: #0088cc;
+    color: #fff;
+}
+
+.share-btn--copy:hover {
+    background: var(--color-primary);
+    color: var(--bg-primary);
+}
+
+/* 빈 상태 */
+.empty-state {
+    text-align: center;
+    padding: 60px var(--spacing-xl);
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.3;
+}
+
+.empty-competitions {
+    text-align: center;
+    padding: 80px var(--spacing-xl);
+}
+
+.empty-competitions i {
+    font-size: 64px;
+    color: var(--color-primary);
+    opacity: 0.5;
+    margin-bottom: var(--spacing-xl);
+}
+
+.empty-competitions h3 {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-md);
+}
+
+.empty-competitions p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* 푸터 */
+.footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-xxl) 0;
+    margin-top: var(--spacing-xxl);
+}
+
+.footer__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+}
+
+.footer__logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+}
+
+.footer__links {
+    display: flex;
+    gap: var(--spacing-xl);
+}
+
+.footer__links a {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.footer__links a:hover {
+    color: var(--text-primary);
+}
+
+.footer__copyright {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+    .competition-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .competition-sidebar {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .competition-sidebar > * {
+        flex: 1;
+        min-width: 280px;
+    }
+
+    .info-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .competition-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .competition-grid--featured {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .competition-hero {
+        padding: calc(var(--header-height) + 30px) 0 40px;
+    }
+
+    .competition-hero__title {
+        font-size: 28px;
+    }
+
+    .competition-banner__title {
+        font-size: 28px;
+    }
+
+    .countdown__item {
+        min-width: 60px;
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .countdown__value {
+        font-size: 24px;
+    }
+
+    .competition-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .competition-sidebar {
+        flex-direction: column;
+    }
+
+    .competition-sidebar > * {
+        min-width: auto;
+    }
+
+    .rank-table th:nth-child(4),
+    .rank-table td:nth-child(4),
+    .rank-table th:nth-child(5),
+    .rank-table td:nth-child(5) {
+        display: none;
+    }
+
+    .footer__content {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .countdown {
+        flex-wrap: wrap;
+    }
+
+    .countdown__separator {
+        display: none;
+    }
+
+    .prize-card__total-value {
+        font-size: 28px;
+    }
+}

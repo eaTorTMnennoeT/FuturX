@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTCUSDT 무기한 - FuturX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="trade.css">
+    <!-- Socket.IO Client -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <!-- 연결 상태 오버레이 -->
+    <div id="connectionOverlay" class="connection-overlay">
+        <div class="connection-content">
+            <div class="connection-spinner"></div>
+            <div class="connection-text">서버에 연결중...</div>
+            <div class="connection-subtext">실시간 데이터를 불러오는 중입니다</div>
+        </div>
+    </div>
+
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-icon">F</span>
+                <span class="logo-text">FuturX</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">마켓</a>
+                <a href="trade.html" class="nav-link active">선물거래</a>
+                <a href="leaderboard.php" class="nav-link">리더보드</a>
+                <a href="competition.php" class="nav-link">대회</a>
+                <a href="wallet.html" class="nav-link">지갑</a>
+                <a href="deposit.html" class="nav-link">입금</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <button class="header-btn">API</button>
+            <button class="header-btn">설정</button>
+            <button class="header-btn primary">로그인</button>
+        </div>
+    </header>
+
+    <!-- 메인 레이아웃 -->
+    <div class="trade-layout">
+        <!-- 왼쪽: 차트 영역 -->
+        <div class="chart-area">
+            <!-- 심볼 정보 바 -->
+            <div class="symbol-info">
+                <div class="symbol-selector">
+                    <div class="symbol-main" id="symbolDropdownTrigger">
+                        <span class="symbol-icon" id="currentSymbolIcon">₿</span>
+                        <span class="symbol-name" id="currentSymbolName">BTCUSDT</span>
+                        <span class="symbol-badge">USDT Perpetual</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <!-- 코인 드롭다운 -->
+                    <div class="symbol-dropdown" id="symbolDropdown">
+                        <div class="dropdown-header">
+                            <input type="text" class="dropdown-search" placeholder="심볼 검색..." id="symbolSearch">
+                        </div>
+                        <div class="dropdown-tabs">
+                            <button class="dropdown-tab active">USDT</button>
+                            <button class="dropdown-tab">USDC</button>
+                            <button class="dropdown-tab">즐겨찾기</button>
+                        </div>
+                        <div class="dropdown-list-header">
+                            <span>Name</span>
+                            <span>Price</span>
+                            <span>24H %</span>
+                            <span>Volume</span>
+                        </div>
+                        <div class="dropdown-list" id="symbolList">
+                            <div class="dropdown-item active" data-symbol="BTCUSDT" data-icon="₿" data-color="#f7931a">
+                                <span class="item-star">☆</span>
+                                <span class="item-icon btc">₿</span>
+                                <span class="item-name">BTCUSDT</span>
+                                <span class="item-price" id="dropdown-btc-price">90,673.90</span>
+                                <span class="item-change up" id="dropdown-btc-change">+0.01%</span>
+                                <span class="item-volume">878.48M</span>
+                            </div>
+                            <div class="dropdown-item" data-symbol="ETHUSDT" data-icon="Ξ" data-color="#627eea">
+                                <span class="item-star">☆</span>
+                                <span class="item-icon eth">Ξ</span>
+                                <span class="item-name">ETHUSDT</span>
+                                <span class="item-price" id="dropdown-eth-price">3,104.00</span>
+                                <span class="item-change up" id="dropdown-eth-change">+0.32%</span>
+                                <span class="item-volume">628.38M</span>
+                            </div>
+                            <div class="dropdown-item" data-symbol="SOLUSDT" data-icon="◎" data-color="#00d18c">
+                                <span class="item-star">☆</span>
+                                <span class="item-icon sol">◎</span>
+                                <span class="item-name">SOLUSDT</span>
+                                <span class="item-price" id="dropdown-sol-price">185.50</span>
+                                <span class="item-change up" id="dropdown-sol-change">+0.08%</span>
+                                <span class="item-volume">332.70M</span>
+                            </div>
+                            <div class="dropdown-item" data-symbol="XRPUSDT" data-icon="✕" data-color="#23292f">
+                                <span class="item-star">☆</span>
+                                <span class="item-icon xrp">✕</span>
+                                <span class="item-name">XRPUSDT</span>
+                                <span class="item-price" id="dropdown-xrp-price">2.35</span>
+                                <span class="item-change down" id="dropdown-xrp-change">-0.15%</span>
+                                <span class="item-volume">245.80M</span>
+                            </div>
+                            <div class="dropdown-item" data-symbol="DOGEUSDT" data-icon="Ð" data-color="#c2a633">
+                                <span class="item-star">☆</span>
+                                <span class="item-icon doge">Ð</span>
+                                <span class="item-name">DOGEUSDT</span>
+                                <span class="item-price" id="dropdown-doge-price">0.3285</span>
+                                <span class="item-change up" id="dropdown-doge-change">+1.22%</span>
+                                <span class="item-volume">198.50M</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="symbol-price">
+                    <span class="price-value up" id="mainPrice">90,670.80</span>
+                    <span class="price-usd">90,670.80</span>
+                </div>
+                <div class="symbol-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Index Price</span>
+                        <span class="stat-value">90,700.57</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Change %</span>
+                        <span class="stat-value up">+94.30 (+0.10%)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">24H High</span>
+                        <span class="stat-value">90,812.10</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">24H Low</span>
+                        <span class="stat-value">90,332.80</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">24H Turnover(USDT)</span>
+                        <span class="stat-value">979,443,444.72</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Funding Rate</span>
+                        <span class="stat-value up">0.0072% / 04:23:26</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 차트 탭 -->
+            <div class="chart-tabs">
+                <button class="chart-tab active">Chart</button>
+                <button class="chart-tab">Overview</button>
+                <button class="chart-tab">Data</button>
+                <button class="chart-tab">Feed</button>
+                <div class="chart-tabs-right">
+                    <span>Standard</span>
+                    <span class="active">TradingView</span>
+                    <span>Depth</span>
+                </div>
+            </div>
+
+            <!-- 차트 컨테이너 -->
+            <div class="chart-container">
+                <!-- 차트 도구바 -->
+                <div class="chart-toolbar">
+                    <div class="time-intervals">
+                        <button class="interval-btn">1s</button>
+                        <button class="interval-btn active">1m</button>
+                        <button class="interval-btn">5m</button>
+                        <button class="interval-btn">15m</button>
+                        <button class="interval-btn">30m</button>
+                        <button class="interval-btn">1h</button>
+                        <button class="interval-btn">4h</button>
+                        <button class="interval-btn">1d</button>
+                        <button class="interval-btn">1w</button>
+                        <button class="interval-btn">1M</button>
+                    </div>
+                </div>
+                <!-- TradingView 차트 -->
+                <div class="chart-wrapper">
+                    <div id="tradingview-chart"></div>
+                </div>
+            </div>
+
+            <!-- 하단 패널 -->
+            <div class="bottom-panel">
+                <div class="panel-tabs">
+                    <button class="panel-tab active">Open Orders <span class="tab-count">0</span></button>
+                    <button class="panel-tab">Positions <span class="tab-count">0</span></button>
+                    <button class="panel-tab">Order History</button>
+                    <button class="panel-tab">Trade History</button>
+                    <button class="panel-tab">Assets</button>
+                    <button class="panel-tab">Borrowings <span class="tab-count">1</span></button>
+                    <button class="panel-tab">Tools <span class="tab-count">0</span></button>
+                    <button class="panel-tab">P&L</button>
+                </div>
+                <div class="panel-filters">
+                    <button class="filter-btn active">Limit & Market Orders</button>
+                    <button class="filter-btn">Conditional</button>
+                    <button class="filter-btn">TP/SL</button>
+                    <button class="filter-btn">Trailing Stop</button>
+                    <button class="filter-btn">OCO</button>
+                    <button class="filter-btn">MMR Close</button>
+                    <button class="filter-btn">Spread Trading</button>
+                </div>
+                <div class="panel-content" id="panelContent">
+                    <!-- Open Orders -->
+                    <div class="panel-section active" id="openOrdersPanel">
+                        <div class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <div class="empty-text">No Open Orders</div>
+                        </div>
+                    </div>
+                    <!-- Positions -->
+                    <div class="panel-section" id="positionsPanel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Size</th>
+                                    <th>Entry Price</th>
+                                    <th>Mark Price</th>
+                                    <th>Liq. Price</th>
+                                    <th>Margin</th>
+                                    <th>PNL (ROE%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="positionsBody"></tbody>
+                        </table>
+                    </div>
+                    <!-- Order History -->
+                    <div class="panel-section" id="orderHistoryPanel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Symbol</th>
+                                    <th>Type</th>
+                                    <th>Side</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderHistoryBody"></tbody>
+                        </table>
+                    </div>
+                    <!-- Trade History -->
+                    <div class="panel-section" id="tradeHistoryPanel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Symbol</th>
+                                    <th>Side</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Fee</th>
+                                    <th>Realized PNL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tradeHistoryBody"></tbody>
+                        </table>
+                    </div>
+                    <!-- Assets -->
+                    <div class="panel-section" id="assetsPanel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Coin</th>
+                                    <th>Wallet Balance</th>
+                                    <th>Available</th>
+                                    <th>In Order</th>
+                                    <th>USD Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assetsBody"></tbody>
+                        </table>
+                    </div>
+                    <!-- Borrowings -->
+                    <div class="panel-section" id="borrowingsPanel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Coin</th>
+                                    <th>Borrowed</th>
+                                    <th>Interest</th>
+                                    <th>Hourly Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="borrowingsBody"></tbody>
+                        </table>
+                    </div>
+                    <!-- Tools -->
+                    <div class="panel-section" id="toolsPanel">
+                        <div class="empty-state">
+                            <div class="empty-icon">🔧</div>
+                            <div class="empty-text">No Active Tools</div>
+                        </div>
+                    </div>
+                    <!-- P&L -->
+                    <div class="panel-section" id="pnlPanel">
+                        <div class="pnl-summary">
+                            <div class="pnl-card">
+                                <span class="pnl-label">Today's PNL</span>
+                                <span class="pnl-value up" id="todayPnl">+0.00 USDT</span>
+                            </div>
+                            <div class="pnl-card">
+                                <span class="pnl-label">7D PNL</span>
+                                <span class="pnl-value up" id="weekPnl">+0.00 USDT</span>
+                            </div>
+                            <div class="pnl-card">
+                                <span class="pnl-label">30D PNL</span>
+                                <span class="pnl-value" id="monthPnl">+0.00 USDT</span>
+                            </div>
+                            <div class="pnl-card">
+                                <span class="pnl-label">Total PNL</span>
+                                <span class="pnl-value up" id="totalPnl">+0.00 USDT</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 중간: 오더북 -->
+        <div class="orderbook-area">
+            <div class="orderbook-tabs">
+                <button class="ob-tab active">Order Book</button>
+                <button class="ob-tab">Recent Trades</button>
+            </div>
+            <div class="orderbook-options">
+                <div class="ob-view-btns">
+                    <button class="ob-view active" data-view="both" title="전체">
+                        <span class="bar red"></span>
+                        <span class="bar green"></span>
+                    </button>
+                    <button class="ob-view" data-view="bids" title="매수만">
+                        <span class="bar green"></span>
+                        <span class="bar green"></span>
+                    </button>
+                    <button class="ob-view" data-view="asks" title="매도만">
+                        <span class="bar red"></span>
+                        <span class="bar red"></span>
+                    </button>
+                </div>
+                <div class="ob-precision-wrapper">
+                    <select class="precision-select" id="precisionSelect">
+                        <option value="0.01">0.01</option>
+                        <option value="0.1" selected>0.1</option>
+                        <option value="1">1</option>
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span class="precision-arrow">▼</span>
+                </div>
+            </div>
+            <div class="orderbook-header">
+                <span>Price(BTC)</span>
+                <span>Qty(BTC)</span>
+                <span>Total(BTC)</span>
+            </div>
+            <div class="orderbook-content">
+                <div class="asks-list" id="asksList"></div>
+                <div class="orderbook-spread">
+                    <span class="spread-price up" id="spreadPrice">90,670.80</span>
+                    <span class="spread-mark">▼ 90,670.80</span>
+                </div>
+                <div class="bids-list" id="bidsList"></div>
+            </div>
+            <div class="orderbook-footer">
+                <div class="depth-bar">
+                    <div class="depth-bid" style="width: 60%">B 60%</div>
+                    <div class="depth-ask" style="width: 40%">40% S</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 주문 패널 -->
+        <div class="order-area">
+            <!-- 주문 타입 선택 -->
+            <div class="limit-tabs">
+                <button class="limit-tab active">Limit</button>
+                <button class="limit-tab">Market</button>
+                <button class="limit-tab">Conditional</button>
+            </div>
+
+            <!-- 마진 모드 -->
+            <div class="margin-row">
+                <button class="margin-btn">
+                    Cross <span class="arrow">▼</span>
+                </button>
+                <button class="leverage-btn">
+                    40.00x <span class="arrow">▼</span>
+                </button>
+            </div>
+
+            <!-- 가격 입력 -->
+            <div class="input-group">
+                <label>Price</label>
+                <div class="input-wrapper">
+                    <input type="text" value="90,670.80" id="priceInput">
+                    <span class="input-suffix">
+                        <span class="last-btn">Last</span>
+                        <span class="swap-btn">⇄</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- USDT 선택 -->
+            <div class="currency-select">
+                <button class="currency-btn">USDT <span class="arrow">▼</span></button>
+            </div>
+
+            <!-- 슬라이더 -->
+            <div class="slider-container">
+                <div class="slider-track">
+                    <div class="slider-fill" style="width: 0%"></div>
+                    <div class="slider-thumb" style="left: 0%"></div>
+                </div>
+                <div class="slider-labels">
+                    <span>0</span>
+                    <span>100%</span>
+                </div>
+            </div>
+
+            <!-- 주문 정보 -->
+            <div class="order-info">
+                <div class="info-row">
+                    <span>Quantity</span>
+                    <span>-- / -- BTC</span>
+                </div>
+                <div class="info-row">
+                    <span>Cost</span>
+                    <span>-- / -- USDT</span>
+                </div>
+                <div class="info-row">
+                    <span>Liq. Price</span>
+                    <span class="link">Calculate</span>
+                </div>
+            </div>
+
+            <!-- 옵션 -->
+            <div class="order-options">
+                <label class="checkbox-label">
+                    <input type="checkbox"> TP/SL
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox"> Reduce-Only
+                </label>
+            </div>
+
+            <!-- 롱/숏 버튼 -->
+            <div class="action-buttons">
+                <button class="action-btn long">Long</button>
+                <button class="action-btn short">Short</button>
+            </div>
+
+            <!-- 추가 정보 -->
+            <div class="extra-info">
+                <span>◎ Fee Rate</span>
+                <span>📊 Calculator</span>
+            </div>
+
+            <!-- 계좌 정보 -->
+            <div class="account-section">
+                <div class="account-header">
+                    <span>Unified Trading Account</span>
+                    <span class="account-icons">⚙ 📊 P&L</span>
+                </div>
+                <div class="account-row">
+                    <span>Margin Mode</span>
+                    <span class="link">Cross Margin ></span>
+                </div>
+                <div class="margin-bars">
+                    <div class="margin-bar-row">
+                        <span>Initial Margin</span>
+                        <div class="bar-container">
+                            <div class="bar-fill green" style="width: 89%"></div>
+                        </div>
+                        <span>89.13%</span>
+                    </div>
+                    <div class="margin-bar-row">
+                        <span>Maintenance Margin</span>
+                        <div class="bar-container">
+                            <div class="bar-fill green" style="width: 35%"></div>
+                        </div>
+                        <span>35.65%</span>
+                    </div>
+                </div>
+                <div class="balance-rows">
+                    <div class="balance-row">
+                        <span>Margin Balance</span>
+                        <span>0.3044 USDT</span>
+                    </div>
+                    <div class="balance-row">
+                        <span>Available Balance</span>
+                        <span>0.0330 USDT</span>
+                    </div>
+                </div>
+                <div class="account-actions">
+                    <button class="acc-btn">Deposit</button>
+                    <button class="acc-btn">Convert</button>
+                    <button class="acc-btn">Transfer</button>
+                </div>
+            </div>
+
+            <!-- 계약 상세 -->
+            <div class="contract-details">
+                <div class="contract-header">
+                    <span>Contract Details BTCUSDT</span>
+                </div>
+                <div class="contract-rows">
+                    <div class="contract-row">
+                        <span>Expiration Date</span>
+                        <span>Perpetual</span>
+                    </div>
+                    <div class="contract-row">
+                        <span>Index Price</span>
+                        <span>90,700.55</span>
+                    </div>
+                    <div class="contract-row">
+                        <span>Mark Price</span>
+                        <span>90,670.80</span>
+                    </div>
+                </div>
+                <button class="show-more">Show ▼</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Binance Chart Widget -->
+    <script>
+        // 바이낸스 차트 위젯 초기화
+        function initBinanceChart() {
+            const chartContainer = document.getElementById('tradingview-chart');
+            if (!chartContainer) return;
+
+            // 바이낸스 차트 iframe 삽입
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://www.binance.com/en/futures/BTCUSDT?theme=dark';
+            iframe.style.cssText = 'width:100%;height:100%;border:none;';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+
+            // 바이낸스 TradingView 차트 위젯 (더 깔끔한 버전)
+            chartContainer.innerHTML = `
+                <iframe
+                    src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_chart&symbol=BINANCE%3ABTCUSDT&interval=1&hidesidetoolbar=0&symboledit=0&saveimage=0&toolbarbg=161a1e&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FSeoul&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=kr&utm_source=&utm_medium=widget&utm_campaign=chart&utm_term=BINANCE%3ABTCUSDT"
+                    style="width:100%;height:100%;border:none;"
+                    allowtransparency="true"
+                    scrolling="no"
+                    allowfullscreen>
+                </iframe>
+            `;
+        }
+
+        // DOM 로드 후 차트 초기화
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initBinanceChart);
+        } else {
+            initBinanceChart();
+        }
+
+        // ========================================
+        // Socket.IO 실시간 데이터
+        // ========================================
+        const SOCKET_SERVER = 'http://localhost:3002';
+        let socket = null;
+
+        let currentPrice = 0;
+        let previousPrice = 0;
+        let indexPrice = 0;
+        let high24h = 0;
+        let low24h = 0;
+        let turnover = 0;
+        let fundingRate = 0.0072;
+        let fundingCountdown = 4 * 3600 + 23 * 60 + 26;
+        let initialMargin = 89.13;
+        let maintenanceMargin = 35.65;
+        let marginBalance = 0.3044;
+        let availableBalance = 0.0330;
+
+        // 오더북 데이터
+        let asksData = [];
+        let bidsData = [];
+        let rawAsksData = [];  // 원본 데이터 (정밀도 적용 전)
+        let rawBidsData = [];
+
+        // 오더북 설정
+        let obPrecision = 0.1;  // 가격 정밀도
+        let obViewMode = 'both'; // 'both', 'bids', 'asks'
+
+        // Recent Trades 데이터
+        let recentTrades = [];
+
+        // 사용자 주문 (내부 처리용)
+        let userOrders = {
+            asks: [], // 사용자 매도 주문
+            bids: []  // 사용자 매수 주문
+        };
+
+        // ========================================
+        // Socket.IO 연결
+        // ========================================
+        function connectSocketIO() {
+            socket = io(SOCKET_SERVER, {
+                transports: ['websocket', 'polling'],
+                reconnection: true,
+                reconnectionAttempts: Infinity,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000
+            });
+
+            socket.on('connect', () => {
+                console.log('Socket.IO Connected:', socket.id);
+                updateConnectionStatus(true);
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Socket.IO Disconnected');
+                updateConnectionStatus(false);
+            });
+
+            socket.on('connect_error', (error) => {
+                console.error('Socket.IO Connection Error:', error);
+                updateConnectionStatus(false);
+            });
+
+            // 오더북 데이터 수신
+            socket.on('depth', (data) => {
+                processOrderbookData(data);
+            });
+
+            // 티커 데이터 수신 (24h 통계)
+            socket.on('ticker', (data) => {
+                processTickerData(data);
+            });
+
+            // 체결 데이터 수신
+            socket.on('trade', (data) => {
+                processTradeData(data);
+            });
+
+            // 가격 데이터 수신
+            socket.on('price', (data) => {
+                // 가격 업데이트만 처리 (티커와 별도)
+                const price = parseFloat(data.price);
+                if (price > 0 && Math.abs(price - currentPrice) > 0.01) {
+                    previousPrice = currentPrice;
+                    currentPrice = price;
+                    updatePriceDisplay();
+                }
+            });
+        }
+
+        // 연결 상태 표시
+        function updateConnectionStatus(connected) {
+            const statusEl = document.querySelector('.symbol-badge');
+            const overlay = document.getElementById('connectionOverlay');
+
+            if (overlay) {
+                if (connected) {
+                    // 연결 성공 - 오버레이 숨김 (페이드 아웃)
+                    overlay.classList.add('hidden');
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 300);
+                } else {
+                    // 연결 끊김 - 오버레이 표시
+                    overlay.style.display = 'flex';
+                    overlay.querySelector('.connection-text').textContent = '연결이 끊어졌습니다';
+                    overlay.querySelector('.connection-subtext').textContent = '재연결 시도중...';
+                    setTimeout(() => {
+                        overlay.classList.remove('hidden');
+                    }, 10);
+                }
+            }
+
+            if (statusEl) {
+                if (connected) {
+                    statusEl.style.background = 'rgba(14, 203, 129, 0.2)';
+                    statusEl.style.color = '#0ecb81';
+                    statusEl.textContent = 'USDT Perpetual';
+                } else {
+                    statusEl.style.background = 'rgba(246, 70, 93, 0.2)';
+                    statusEl.style.color = '#f6465d';
+                    statusEl.textContent = '연결 끊김';
+                }
+            }
+        }
+
+        // 가격 표시 업데이트
+        function updatePriceDisplay() {
+            const isUp = currentPrice >= previousPrice;
+            const priceEl = document.getElementById('mainPrice');
+            const spreadPriceEl = document.getElementById('spreadPrice');
+
+            if (priceEl) {
+                priceEl.textContent = formatPrice(currentPrice);
+                priceEl.className = `price-value ${isUp ? 'up flash-green' : 'down flash-red'}`;
+
+                setTimeout(() => {
+                    priceEl.className = `price-value ${isUp ? 'up' : 'down'}`;
+                }, 300);
+            }
+
+            if (spreadPriceEl) {
+                spreadPriceEl.textContent = formatPrice(currentPrice);
+                spreadPriceEl.className = `spread-price ${isUp ? 'up' : 'down'}`;
+            }
+
+            // 주문 입력창 업데이트
+            const priceInput = document.getElementById('priceInput');
+            if (priceInput) {
+                priceInput.value = formatPrice(currentPrice);
+            }
+        }
+
+        // ========================================
+        // 오더북 데이터 처리
+        // ========================================
+        // 확장 데이터 저장 (정밀도별 가짜 데이터 포함)
+        let extendedData = {};
+
+        function processOrderbookData(data) {
+            // 확장 데이터 저장 (정밀도별)
+            extendedData = {
+                1: data.extended || { asks: data.asks, bids: data.bids },
+                10: data.extended10 || { asks: data.asks, bids: data.bids },
+                50: data.extended50 || { asks: data.asks, bids: data.bids },
+                100: data.extended100 || { asks: data.asks, bids: data.bids }
+            };
+
+            // 원본 데이터 저장 (정밀도 0.01, 0.1용)
+            rawAsksData = data.asks || [];
+            rawBidsData = data.bids || [];
+
+            // 정밀도 적용하여 데이터 가공
+            applyPrecisionAndRender();
+        }
+
+        // 정밀도 적용 및 렌더링
+        function applyPrecisionAndRender() {
+            let sourceAsks, sourceBids;
+
+            // 정밀도가 1 이상이면 서버에서 미리 계산된 확장 데이터 사용
+            if (obPrecision >= 1 && extendedData[obPrecision]) {
+                sourceAsks = extendedData[obPrecision].asks;
+                sourceBids = extendedData[obPrecision].bids;
+                // 이미 정밀도별로 그룹화되어 있으므로 직접 변환
+                asksData = sourceAsks.map(([price, qty]) => ({
+                    price: parseFloat(price),
+                    qty: parseFloat(qty),
+                    total: 0,
+                    isUser: false
+                })).slice(0, obViewMode === 'asks' ? 30 : 15);
+
+                bidsData = sourceBids.map(([price, qty]) => ({
+                    price: parseFloat(price),
+                    qty: parseFloat(qty),
+                    total: 0,
+                    isUser: false
+                })).slice(0, obViewMode === 'bids' ? 30 : 15);
+            } else {
+                // 정밀도가 1 미만이면 원본 데이터에서 그룹화
+                asksData = groupByPrecision(rawAsksData, obPrecision, 'asks');
+                bidsData = groupByPrecision(rawBidsData, obPrecision, 'bids');
+            }
+
+            // 사용자 주문 합산 (B-Book 방식)
+            mergeUserOrders();
+
+            // 누적 합계 계산
+            calculateTotals();
+
+            renderOrderbook();
+            updateDepthBar();
+        }
+
+        // 가격 정밀도에 따라 그룹화
+        function groupByPrecision(data, precision, side) {
+            if (!data || data.length === 0) return [];
+
+            const grouped = new Map();
+
+            data.forEach(item => {
+                const price = parseFloat(item[0]);
+                const qty = parseFloat(item[1]);
+
+                if (isNaN(price) || isNaN(qty)) return;
+
+                // 정밀도에 맞게 가격 반올림
+                const groupedPrice = side === 'asks'
+                    ? Math.ceil(price / precision) * precision
+                    : Math.floor(price / precision) * precision;
+
+                if (grouped.has(groupedPrice)) {
+                    grouped.get(groupedPrice).qty += qty;
+                } else {
+                    grouped.set(groupedPrice, {
+                        price: groupedPrice,
+                        qty: qty,
+                        total: 0,
+                        isUser: false
+                    });
+                }
+            });
+
+            // 배열로 변환 후 정렬
+            let result = Array.from(grouped.values());
+
+            // 뷰 모드에 따라 최대 표시 행 수 결정
+            let maxRows = 15;
+            if (obViewMode === 'bids' && side === 'bids') maxRows = 30;
+            if (obViewMode === 'asks' && side === 'asks') maxRows = 30;
+
+            if (side === 'asks') {
+                result.sort((a, b) => a.price - b.price); // 오름차순 후 역순 표시
+                result = result.slice(0, maxRows).reverse();
+            } else {
+                result.sort((a, b) => b.price - a.price); // 내림차순
+                result = result.slice(0, maxRows);
+            }
+
+            // 그룹화된 데이터 개수 반환 (있는 만큼만)
+            return result;
+        }
+
+        // ========================================
+        // 사용자 주문 오더북에 합산
+        // ========================================
+        function mergeUserOrders() {
+            // 사용자 매도 주문 합산
+            userOrders.asks.forEach(userOrder => {
+                const existingIdx = asksData.findIndex(a => Math.abs(a.price - userOrder.price) < 0.01);
+                if (existingIdx !== -1) {
+                    asksData[existingIdx].qty += userOrder.qty;
+                    asksData[existingIdx].isUser = true;
+                } else {
+                    // 적절한 위치에 삽입
+                    const insertIdx = asksData.findIndex(a => a.price > userOrder.price);
+                    if (insertIdx !== -1) {
+                        asksData.splice(insertIdx, 0, { ...userOrder, isUser: true });
+                    }
+                }
+            });
+
+            // 사용자 매수 주문 합산
+            userOrders.bids.forEach(userOrder => {
+                const existingIdx = bidsData.findIndex(b => Math.abs(b.price - userOrder.price) < 0.01);
+                if (existingIdx !== -1) {
+                    bidsData[existingIdx].qty += userOrder.qty;
+                    bidsData[existingIdx].isUser = true;
+                } else {
+                    const insertIdx = bidsData.findIndex(b => b.price < userOrder.price);
+                    if (insertIdx !== -1) {
+                        bidsData.splice(insertIdx, 0, { ...userOrder, isUser: true });
+                    }
+                }
+            });
+        }
+
+        // ========================================
+        // 누적 합계 계산
+        // ========================================
+        function calculateTotals() {
+            let askTotal = 0;
+            for (let i = asksData.length - 1; i >= 0; i--) {
+                askTotal += asksData[i].qty;
+                asksData[i].total = askTotal;
+            }
+
+            let bidTotal = 0;
+            for (let i = 0; i < bidsData.length; i++) {
+                bidTotal += bidsData[i].qty;
+                bidsData[i].total = bidTotal;
+            }
+        }
+
+        // ========================================
+        // 티커 데이터 처리 (가격, 24h 정보)
+        // ========================================
+        function processTickerData(data) {
+            // Socket.IO 서버에서 오는 형식에 맞게 처리
+            previousPrice = currentPrice;
+            currentPrice = parseFloat(data.lastPrice || data.c || 0);
+            high24h = parseFloat(data.highPrice || data.h || 0);
+            low24h = parseFloat(data.lowPrice || data.l || 0);
+            turnover = parseFloat(data.quoteVolume || data.q || 0);
+            indexPrice = currentPrice;
+
+            const priceChange = parseFloat(data.priceChange || data.p || 0);
+            const isUp = currentPrice >= previousPrice;
+
+            updatePriceDisplay();
+            updateStats(isUp, priceChange);
+        }
+
+        // ========================================
+        // 체결 데이터 처리
+        // ========================================
+        function processTradeData(data) {
+            // Socket.IO 서버 형식에 맞게 처리
+            const trade = {
+                price: parseFloat(data.price || data.p || 0),
+                qty: parseFloat(data.qty || data.q || 0),
+                side: data.isBuy ? 'buy' : 'sell',
+                time: data.time || formatCurrentTime()
+            };
+
+            recentTrades.unshift(trade);
+
+            // 최대 50개 유지
+            if (recentTrades.length > 50) {
+                recentTrades.pop();
+            }
+
+            renderRecentTrades();
+        }
+
+        function formatCurrentTime() {
+            const now = new Date();
+            return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        }
+
+        // ========================================
+        // 사용자 주문 추가 (B-Book) - Socket.IO 서버로 전송
+        // ========================================
+        let orderIdCounter = 1;
+
+        function addUserOrder(side, price, qty, mb_id = 'guest') {
+            const orderId = `order_${Date.now()}_${orderIdCounter++}`;
+            const order = {
+                orderId: orderId,
+                price: parseFloat(price),
+                qty: parseFloat(qty),
+                total: parseFloat(qty),
+                timestamp: Date.now()
+            };
+
+            if (side === 'sell') {
+                userOrders.asks.push(order);
+            } else {
+                userOrders.bids.push(order);
+            }
+
+            // Socket.IO 서버로 주문 전송
+            if (socket && socket.connected) {
+                socket.emit('order:add', {
+                    orderId: orderId,
+                    side: side,
+                    price: price,
+                    qty: qty,
+                    mb_id: mb_id
+                });
+            }
+
+            console.log(`User ${side} order added: ${qty} BTC @ ${price} (ID: ${orderId})`);
+            return orderId;
+        }
+
+        // ========================================
+        // 사용자 주문 제거
+        // ========================================
+        function removeUserOrder(side, price, orderId = null) {
+            if (orderId) {
+                // orderId로 제거
+                if (side === 'sell') {
+                    userOrders.asks = userOrders.asks.filter(o => o.orderId !== orderId);
+                } else {
+                    userOrders.bids = userOrders.bids.filter(o => o.orderId !== orderId);
+                }
+            } else {
+                // 가격으로 제거
+                if (side === 'sell') {
+                    userOrders.asks = userOrders.asks.filter(o => Math.abs(o.price - price) > 0.01);
+                } else {
+                    userOrders.bids = userOrders.bids.filter(o => Math.abs(o.price - price) > 0.01);
+                }
+            }
+
+            // Socket.IO 서버로 주문 제거 전송
+            if (socket && socket.connected) {
+                socket.emit('order:remove', {
+                    orderId: orderId,
+                    side: side
+                });
+            }
+        }
+
+        // 초기화 (Socket.IO 연결)
+        function initOrderbook() {
+            // Socket.IO 연결
+            connectSocketIO();
+        }
+
+        // 가격 포맷팅
+        function formatPrice(price) {
+            return price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000000) return (num / 1000000000).toFixed(2) + 'B';
+            if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+            return num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // ========================================
+        // 오더북 렌더링 (애니메이션 포함)
+        // ========================================
+        function renderOrderbook() {
+            const asksList = document.getElementById('asksList');
+            const bidsList = document.getElementById('bidsList');
+            const spreadEl = document.querySelector('.orderbook-spread');
+
+            // 뷰 모드에 따른 표시/숨김
+            if (obViewMode === 'bids') {
+                asksList.style.display = 'none';
+                bidsList.style.display = 'flex';
+                bidsList.style.flex = '1';
+                if (spreadEl) spreadEl.style.display = 'flex';
+            } else if (obViewMode === 'asks') {
+                asksList.style.display = 'flex';
+                asksList.style.flex = '1';
+                bidsList.style.display = 'none';
+                if (spreadEl) spreadEl.style.display = 'flex';
+            } else {
+                // both
+                asksList.style.display = 'flex';
+                bidsList.style.display = 'flex';
+                asksList.style.flex = '1';
+                bidsList.style.flex = '1';
+                if (spreadEl) spreadEl.style.display = 'flex';
+            }
+
+            // 최대 수량 계산 (깊이 바 스케일링용)
+            const maxAskQty = asksData.length > 0 ? Math.max(...asksData.map(a => a.qty)) : 0.1;
+            const maxBidQty = bidsData.length > 0 ? Math.max(...bidsData.map(b => b.qty)) : 0.1;
+            const maxQty = Math.max(maxAskQty, maxBidQty, 0.1);
+
+            // 정밀도에 따른 소수점 자릿수 계산
+            const priceDecimals = obPrecision < 1 ? Math.abs(Math.log10(obPrecision)) : 0;
+
+            // Asks (매도) 렌더링
+            if (obViewMode !== 'bids' && asksData.length > 0) {
+                asksList.innerHTML = asksData.map((a, idx) => `
+                    <div class="ob-row ask ${a.isUser ? 'user-order' : ''}" data-price="${a.price.toFixed(priceDecimals)}">
+                        <span class="ob-price">${a.price.toLocaleString(undefined, {minimumFractionDigits: priceDecimals, maximumFractionDigits: priceDecimals})}</span>
+                        <span class="ob-qty">${a.qty.toFixed(4)}</span>
+                        <span class="ob-total">${a.total.toFixed(4)}</span>
+                        <div class="ob-depth" style="width: ${(a.qty / maxQty) * 100}%"></div>
+                    </div>
+                `).join('');
+            }
+
+            // Bids (매수) 렌더링
+            if (obViewMode !== 'asks' && bidsData.length > 0) {
+                bidsList.innerHTML = bidsData.map((b, idx) => `
+                    <div class="ob-row bid ${b.isUser ? 'user-order' : ''}" data-price="${b.price.toFixed(priceDecimals)}">
+                        <span class="ob-price">${b.price.toLocaleString(undefined, {minimumFractionDigits: priceDecimals, maximumFractionDigits: priceDecimals})}</span>
+                        <span class="ob-qty">${b.qty.toFixed(4)}</span>
+                        <span class="ob-total">${b.total.toFixed(4)}</span>
+                        <div class="ob-depth" style="width: ${(b.qty / maxQty) * 100}%"></div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // ========================================
+        // Recent Trades 렌더링
+        // ========================================
+        function renderRecentTrades() {
+            const container = document.getElementById('recentTradesContent');
+            if (!container) return;
+
+            container.innerHTML = recentTrades.slice(0, 20).map(t => `
+                <div class="trade-row ${t.side}">
+                    <span class="trade-price">${formatPrice(t.price)}</span>
+                    <span class="trade-qty">${t.qty.toFixed(3)}</span>
+                    <span class="trade-time">${t.time}</span>
+                </div>
+            `).join('');
+        }
+
+        // ========================================
+        // 실시간 가격 업데이트 (바이낸스 WebSocket으로 대체됨)
+        // ========================================
+        // 가격 업데이트는 processTickerData()에서 처리됨
+
+        // ========================================
+        // 통계 정보 업데이트
+        // ========================================
+        function updateStats(isUp, priceChange) {
+            const stats = document.querySelectorAll('.stat-item');
+
+            // Index Price
+            if (stats[0]) {
+                stats[0].querySelector('.stat-value').textContent = formatPrice(indexPrice);
+            }
+
+            // Change % (바이낸스에서 받은 24h 변화량 사용)
+            if (stats[1]) {
+                const changePercent = priceChange && currentPrice ? (priceChange / (currentPrice - priceChange) * 100) : 0;
+                const statVal = stats[1].querySelector('.stat-value');
+                statVal.textContent = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
+                statVal.className = `stat-value ${priceChange >= 0 ? 'up' : 'down'}`;
+            }
+
+            // 24H High
+            if (stats[2]) {
+                stats[2].querySelector('.stat-value').textContent = formatPrice(high24h);
+            }
+
+            // 24H Low
+            if (stats[3]) {
+                stats[3].querySelector('.stat-value').textContent = formatPrice(low24h);
+            }
+
+            // Turnover
+            if (stats[4]) {
+                stats[4].querySelector('.stat-value').textContent = formatNumber(turnover);
+            }
+
+            // Funding Rate
+            if (stats[5]) {
+                stats[5].querySelector('.stat-value').textContent = `${fundingRate.toFixed(4)}% / ${formatTime(fundingCountdown)}`;
+            }
+
+            // Contract Details 업데이트
+            const contractRows = document.querySelectorAll('.contract-row');
+            if (contractRows[1]) {
+                contractRows[1].querySelector('span:last-child').textContent = formatPrice(indexPrice);
+            }
+            if (contractRows[2]) {
+                contractRows[2].querySelector('span:last-child').textContent = formatPrice(currentPrice);
+            }
+        }
+
+        // ========================================
+        // 오더북 데이터 실시간 변경 (바이낸스 WebSocket으로 대체됨)
+        // ========================================
+        // 오더북 업데이트는 processOrderbookData()에서 처리됨
+
+        // ========================================
+        // Depth Bar 업데이트
+        // ========================================
+        function updateDepthBar() {
+            const totalBids = bidsData.reduce((sum, b) => sum + b.qty, 0);
+            const totalAsks = asksData.reduce((sum, a) => sum + a.qty, 0);
+            const total = totalBids + totalAsks;
+
+            const bidPercent = Math.round((totalBids / total) * 100);
+            const askPercent = 100 - bidPercent;
+
+            const bidBar = document.querySelector('.depth-bid');
+            const askBar = document.querySelector('.depth-ask');
+
+            if (bidBar && askBar) {
+                bidBar.style.width = bidPercent + '%';
+                bidBar.textContent = `B ${bidPercent}%`;
+                askBar.style.width = askPercent + '%';
+                askBar.textContent = `${askPercent}% S`;
+            }
+        }
+
+        // ========================================
+        // Recent Trade 추가 (바이낸스 WebSocket으로 대체됨)
+        // ========================================
+        // 체결 데이터는 processTradeData()에서 처리됨
+
+        // ========================================
+        // 펀딩 카운트다운
+        // ========================================
+        function updateFundingCountdown() {
+            fundingCountdown--;
+            if (fundingCountdown <= 0) {
+                fundingCountdown = 8 * 3600; // 8시간 리셋
+                fundingRate = Math.random() * 0.01;
+            }
+        }
+
+        // ========================================
+        // 마진 정보 업데이트
+        // ========================================
+        function updateMarginInfo() {
+            // 마진 약간 변동
+            initialMargin += (Math.random() - 0.5) * 0.5;
+            initialMargin = Math.max(50, Math.min(99, initialMargin));
+
+            maintenanceMargin += (Math.random() - 0.5) * 0.3;
+            maintenanceMargin = Math.max(20, Math.min(60, maintenanceMargin));
+
+            // 마진 바 업데이트
+            const marginBars = document.querySelectorAll('.margin-bar-row');
+            if (marginBars[0]) {
+                marginBars[0].querySelector('.bar-fill').style.width = initialMargin + '%';
+                marginBars[0].querySelector('span:last-child').textContent = initialMargin.toFixed(2) + '%';
+            }
+            if (marginBars[1]) {
+                marginBars[1].querySelector('.bar-fill').style.width = maintenanceMargin + '%';
+                marginBars[1].querySelector('span:last-child').textContent = maintenanceMargin.toFixed(2) + '%';
+            }
+
+            // 잔고 변동
+            marginBalance += (Math.random() - 0.5) * 0.01;
+            availableBalance += (Math.random() - 0.5) * 0.005;
+            marginBalance = Math.max(0.1, marginBalance);
+            availableBalance = Math.max(0.01, availableBalance);
+
+            const balanceRows = document.querySelectorAll('.balance-row');
+            if (balanceRows[0]) {
+                balanceRows[0].querySelector('span:last-child').textContent = marginBalance.toFixed(4) + ' USDT';
+            }
+            if (balanceRows[1]) {
+                balanceRows[1].querySelector('span:last-child').textContent = availableBalance.toFixed(4) + ' USDT';
+            }
+        }
+
+        // ========================================
+        // 오더북/최근거래 탭 전환
+        // ========================================
+        let currentObTab = 'orderbook';
+
+        function setupOrderbookTabs() {
+            const obContent = document.querySelector('.orderbook-content');
+            const obTabs = document.querySelectorAll('.ob-tab');
+
+            // Recent Trades HTML 생성
+            const recentTradesHTML = `
+                <div class="recent-trades-content" id="recentTradesContent" style="display: none;">
+                </div>
+            `;
+
+            // Recent Trades 헤더
+            const obHeader = document.querySelector('.orderbook-header');
+
+            obTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    obTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const isOrderbook = this.textContent.includes('Order Book');
+                    currentObTab = isOrderbook ? 'orderbook' : 'trades';
+
+                    if (isOrderbook) {
+                        document.getElementById('asksList').style.display = '';
+                        document.getElementById('bidsList').style.display = '';
+                        document.querySelector('.orderbook-spread').style.display = '';
+                        if (document.getElementById('recentTradesContent')) {
+                            document.getElementById('recentTradesContent').style.display = 'none';
+                        }
+                        obHeader.innerHTML = '<span>Price(BTC)</span><span>Qty(BTC)</span><span>Total(BTC)</span>';
+                    } else {
+                        document.getElementById('asksList').style.display = 'none';
+                        document.getElementById('bidsList').style.display = 'none';
+                        document.querySelector('.orderbook-spread').style.display = 'none';
+
+                        if (!document.getElementById('recentTradesContent')) {
+                            obContent.insertAdjacentHTML('afterbegin', '<div class="recent-trades-content" id="recentTradesContent"></div>');
+                        }
+                        document.getElementById('recentTradesContent').style.display = '';
+                        obHeader.innerHTML = '<span>Price(BTC)</span><span>Qty(BTC)</span><span>Time</span>';
+                        renderRecentTrades();
+                    }
+                });
+            });
+
+            // 정밀도 변경
+            const precisionSelect = document.getElementById('precisionSelect');
+            if (precisionSelect) {
+                precisionSelect.addEventListener('change', function() {
+                    obPrecision = parseFloat(this.value);
+                    console.log('Precision changed to:', obPrecision);
+                    if (rawAsksData.length > 0 || rawBidsData.length > 0) {
+                        applyPrecisionAndRender();
+                    }
+                });
+            }
+
+            // 뷰 모드 변경
+            document.querySelectorAll('.ob-view').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.ob-view').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    obViewMode = this.dataset.view;
+                    console.log('View mode changed to:', obViewMode);
+
+                    // 뷰 모드에 따라 행 수가 달라지므로 다시 처리
+                    if (rawAsksData.length > 0 || rawBidsData.length > 0) {
+                        applyPrecisionAndRender();
+                    } else {
+                        renderOrderbook();
+                    }
+                });
+            });
+        }
+
+        // ========================================
+        // 탭 이벤트 설정
+        // ========================================
+        const panelIds = ['openOrdersPanel', 'positionsPanel', 'orderHistoryPanel', 'tradeHistoryPanel', 'assetsPanel', 'borrowingsPanel', 'toolsPanel', 'pnlPanel'];
+
+        function setupTabs() {
+            // Panel Tabs - 각 탭별 콘텐츠 전환
+            document.querySelectorAll('.panel-tab').forEach((tab, index) => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // 모든 패널 숨기고 선택된 패널만 표시
+                    document.querySelectorAll('.panel-section').forEach(p => p.classList.remove('active'));
+                    const targetPanel = document.getElementById(panelIds[index]);
+                    if (targetPanel) {
+                        targetPanel.classList.add('active');
+                    }
+                });
+            });
+
+            // Limit Tabs
+            document.querySelectorAll('.limit-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.limit-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Chart Tabs
+            document.querySelectorAll('.chart-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Interval Buttons
+            document.querySelectorAll('.interval-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.interval-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Filter Buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // OB View Buttons
+            document.querySelectorAll('.ob-view').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.ob-view').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        // ========================================
+        // 심볼 드롭다운 설정
+        // ========================================
+        let currentSymbol = 'btcusdt';
+        const symbolConfigs = {
+            'BTCUSDT': { icon: '₿', color: '#f7931a', name: 'Bitcoin' },
+            'ETHUSDT': { icon: 'Ξ', color: '#627eea', name: 'Ethereum' },
+            'SOLUSDT': { icon: '◎', color: '#00d18c', name: 'Solana' },
+            'XRPUSDT': { icon: '✕', color: '#23292f', name: 'Ripple' },
+            'DOGEUSDT': { icon: 'Ð', color: '#c2a633', name: 'Dogecoin' }
+        };
+
+        function setupSymbolDropdown() {
+            const selector = document.querySelector('.symbol-selector');
+            const trigger = document.getElementById('symbolDropdownTrigger');
+            const dropdown = document.getElementById('symbolDropdown');
+            const searchInput = document.getElementById('symbolSearch');
+            const symbolList = document.getElementById('symbolList');
+
+            if (!trigger || !dropdown) return;
+
+            // 드롭다운 토글
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selector.classList.toggle('open');
+                if (selector.classList.contains('open')) {
+                    searchInput.focus();
+                }
+            });
+
+            // 외부 클릭시 닫기
+            document.addEventListener('click', (e) => {
+                if (!selector.contains(e.target)) {
+                    selector.classList.remove('open');
+                }
+            });
+
+            // 검색 기능
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                document.querySelectorAll('.dropdown-item').forEach(item => {
+                    const symbol = item.dataset.symbol.toLowerCase();
+                    item.style.display = symbol.includes(query) ? '' : 'none';
+                });
+            });
+
+            // 심볼 선택
+            symbolList.addEventListener('click', (e) => {
+                const item = e.target.closest('.dropdown-item');
+                if (!item) return;
+
+                // 별표 클릭시 즐겨찾기
+                if (e.target.classList.contains('item-star')) {
+                    e.target.classList.toggle('active');
+                    e.target.textContent = e.target.classList.contains('active') ? '★' : '☆';
+                    return;
+                }
+
+                const symbol = item.dataset.symbol;
+                selectSymbol(symbol);
+                selector.classList.remove('open');
+            });
+
+            // 드롭다운 탭
+            document.querySelectorAll('.dropdown-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.dropdown-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        function selectSymbol(symbol) {
+            const config = symbolConfigs[symbol];
+            if (!config) return;
+
+            currentSymbol = symbol.toLowerCase();
+
+            // UI 업데이트
+            document.getElementById('currentSymbolName').textContent = symbol;
+            const iconEl = document.getElementById('currentSymbolIcon');
+            iconEl.textContent = config.icon;
+            iconEl.style.background = config.color;
+
+            // 활성 항목 표시
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.symbol === symbol);
+            });
+
+            // 차트 업데이트
+            updateChartSymbol(symbol);
+
+            // WebSocket 심볼 변경 (서버에 알림)
+            if (socket && socket.connected) {
+                socket.emit('symbol:change', { symbol: currentSymbol });
+            }
+
+            console.log('Symbol changed to:', symbol);
+        }
+
+        function updateChartSymbol(symbol) {
+            const chartContainer = document.getElementById('tradingview-chart');
+            if (!chartContainer) return;
+
+            chartContainer.innerHTML = `
+                <iframe
+                    src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_chart&symbol=BINANCE%3A${symbol}&interval=1&hidesidetoolbar=0&symboledit=0&saveimage=0&toolbarbg=161a1e&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FSeoul&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=kr&utm_source=&utm_medium=widget&utm_campaign=chart&utm_term=BINANCE%3A${symbol}"
+                    style="width:100%;height:100%;border:none;"
+                    allowtransparency="true"
+                    scrolling="no"
+                    allowfullscreen>
+                </iframe>
+            `;
+        }
+
+        // ========================================
+        // 버튼 호버/클릭 효과
+        // ========================================
+        function setupButtonEffects() {
+            // Long/Short 버튼 효과
+            const longBtn = document.querySelector('.action-btn.long');
+            const shortBtn = document.querySelector('.action-btn.short');
+
+            if (longBtn) {
+                longBtn.addEventListener('click', function() {
+                    this.classList.add('clicked');
+                    setTimeout(() => this.classList.remove('clicked'), 200);
+                });
+            }
+
+            if (shortBtn) {
+                shortBtn.addEventListener('click', function() {
+                    this.classList.add('clicked');
+                    setTimeout(() => this.classList.remove('clicked'), 200);
+                });
+            }
+        }
+
+        // ========================================
+        // 슬라이더 기능
+        // ========================================
+        function setupSlider() {
+            const track = document.querySelector('.slider-track');
+            const fill = document.querySelector('.slider-fill');
+            const thumb = document.querySelector('.slider-thumb');
+
+            if (!track) return;
+
+            let isDragging = false;
+
+            function updateSlider(percent) {
+                percent = Math.max(0, Math.min(100, percent));
+                fill.style.width = percent + '%';
+                thumb.style.left = percent + '%';
+            }
+
+            track.addEventListener('click', function(e) {
+                const rect = track.getBoundingClientRect();
+                const percent = ((e.clientX - rect.left) / rect.width) * 100;
+                updateSlider(percent);
+            });
+
+            thumb.addEventListener('mousedown', function() {
+                isDragging = true;
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                const rect = track.getBoundingClientRect();
+                const percent = ((e.clientX - rect.left) / rect.width) * 100;
+                updateSlider(percent);
+            });
+
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+        }
+
+        // ========================================
+        // 하단 패널 데이터 초기화
+        // ========================================
+        function initPanelData() {
+            // Positions 더미 데이터
+            const positionsBody = document.getElementById('positionsBody');
+            const positions = [
+                { symbol: 'BTCUSDT', size: '+0.015', entry: '89,450.20', mark: currentPrice, liq: '75,230.00', margin: '33.58 USDT', pnl: '+18.32', roe: '+5.45%', side: 'long' },
+                { symbol: 'ETHUSDT', size: '-0.25', entry: '3,120.50', mark: '3,089.30', liq: '3,450.00', margin: '77.89 USDT', pnl: '+7.80', roe: '+2.50%', side: 'short' }
+            ];
+            positionsBody.innerHTML = positions.map(p => `
+                <tr>
+                    <td><div class="coin-cell"><span class="coin-icon btc">₿</span>${p.symbol}</div></td>
+                    <td class="${p.side}">${p.size} BTC</td>
+                    <td>${p.entry}</td>
+                    <td>${formatPrice(typeof p.mark === 'number' ? p.mark : parseFloat(p.mark.replace(',','')))}</td>
+                    <td>${p.liq}</td>
+                    <td>${p.margin}</td>
+                    <td class="up">${p.pnl} USDT (${p.roe})</td>
+                </tr>
+            `).join('');
+
+            // Order History 더미 데이터
+            const orderHistoryBody = document.getElementById('orderHistoryBody');
+            const orders = [
+                { time: '14:32:15', symbol: 'BTCUSDT', type: 'Limit', side: 'Buy', price: '89,200.00', qty: '0.015', status: 'Filled' },
+                { time: '14:28:42', symbol: 'BTCUSDT', type: 'Market', side: 'Sell', price: '89,450.20', qty: '0.010', status: 'Filled' },
+                { time: '13:55:08', symbol: 'ETHUSDT', type: 'Limit', side: 'Sell', price: '3,120.50', qty: '0.25', status: 'Filled' },
+                { time: '12:41:33', symbol: 'BTCUSDT', type: 'Limit', side: 'Buy', price: '88,900.00', qty: '0.020', status: 'Cancelled' }
+            ];
+            orderHistoryBody.innerHTML = orders.map(o => `
+                <tr>
+                    <td>${o.time}</td>
+                    <td>${o.symbol}</td>
+                    <td>${o.type}</td>
+                    <td class="${o.side === 'Buy' ? 'long' : 'short'}">${o.side}</td>
+                    <td>${o.price}</td>
+                    <td>${o.qty}</td>
+                    <td>${o.status}</td>
+                </tr>
+            `).join('');
+
+            // Trade History 더미 데이터
+            const tradeHistoryBody = document.getElementById('tradeHistoryBody');
+            const trades = [
+                { time: '14:32:15', symbol: 'BTCUSDT', side: 'Buy', price: '89,200.00', qty: '0.015', fee: '0.80 USDT', pnl: '+12.45' },
+                { time: '14:28:42', symbol: 'BTCUSDT', side: 'Sell', price: '89,450.20', qty: '0.010', fee: '0.54 USDT', pnl: '+5.87' },
+                { time: '13:55:08', symbol: 'ETHUSDT', side: 'Sell', price: '3,120.50', qty: '0.25', fee: '0.47 USDT', pnl: '+7.80' }
+            ];
+            tradeHistoryBody.innerHTML = trades.map(t => `
+                <tr>
+                    <td>${t.time}</td>
+                    <td>${t.symbol}</td>
+                    <td class="${t.side === 'Buy' ? 'long' : 'short'}">${t.side}</td>
+                    <td>${t.price}</td>
+                    <td>${t.qty}</td>
+                    <td>${t.fee}</td>
+                    <td class="up">${t.pnl} USDT</td>
+                </tr>
+            `).join('');
+
+            // Assets 더미 데이터
+            const assetsBody = document.getElementById('assetsBody');
+            const assets = [
+                { coin: 'USDT', icon: 'usdt', balance: '1,245.67', available: '892.34', inOrder: '353.33', usd: '1,245.67' },
+                { coin: 'BTC', icon: 'btc', balance: '0.0234', available: '0.0084', inOrder: '0.0150', usd: '2,123.45' },
+                { coin: 'ETH', icon: 'eth', balance: '0.5200', available: '0.2700', inOrder: '0.2500', usd: '1,606.36' }
+            ];
+            assetsBody.innerHTML = assets.map(a => `
+                <tr>
+                    <td><div class="coin-cell"><span class="coin-icon ${a.icon}">${a.coin[0]}</span>${a.coin}</div></td>
+                    <td>${a.balance}</td>
+                    <td>${a.available}</td>
+                    <td>${a.inOrder}</td>
+                    <td>$${a.usd}</td>
+                </tr>
+            `).join('');
+
+            // Borrowings 더미 데이터
+            const borrowingsBody = document.getElementById('borrowingsBody');
+            const borrowings = [
+                { coin: 'USDT', icon: 'usdt', borrowed: '500.00', interest: '0.0234', rate: '0.00125%' }
+            ];
+            borrowingsBody.innerHTML = borrowings.map(b => `
+                <tr>
+                    <td><div class="coin-cell"><span class="coin-icon ${b.icon}">${b.coin[0]}</span>${b.coin}</div></td>
+                    <td>${b.borrowed}</td>
+                    <td>${b.interest}</td>
+                    <td>${b.rate}</td>
+                </tr>
+            `).join('');
+        }
+
+        // PNL 데이터 실시간 업데이트
+        function updatePnlData() {
+            const todayPnl = (Math.random() * 50 - 10).toFixed(2);
+            const weekPnl = (Math.random() * 200 + 50).toFixed(2);
+            const monthPnl = (Math.random() * 500 - 100).toFixed(2);
+            const totalPnl = (Math.random() * 1000 + 200).toFixed(2);
+
+            const updatePnlEl = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const numVal = parseFloat(value);
+                    el.textContent = `${numVal >= 0 ? '+' : ''}${value} USDT`;
+                    el.className = `pnl-value ${numVal >= 0 ? 'up' : 'down'}`;
+                }
+            };
+
+            updatePnlEl('todayPnl', todayPnl);
+            updatePnlEl('weekPnl', weekPnl);
+            updatePnlEl('monthPnl', monthPnl);
+            updatePnlEl('totalPnl', totalPnl);
+        }
+
+        // ========================================
+        // 초기화 및 인터벌 설정
+        // ========================================
+        initOrderbook();        // Socket.IO 연결
+        setupTabs();
+        setupOrderbookTabs();
+        setupButtonEffects();
+        setupSlider();
+        setupSymbolDropdown();  // 심볼 드롭다운
+        initPanelData();
+
+        // 실시간 업데이트 인터벌 (Socket.IO로 대체되지 않는 항목만)
+        setInterval(updateFundingCountdown, 1000); // 펀딩 카운트다운: 1초
+        setInterval(updateMarginInfo, 3000);     // 마진 정보: 3초
+        setInterval(updatePnlData, 5000);        // PNL: 5초
+    </script>
+</body>
+</html>
