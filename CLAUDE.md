@@ -38,6 +38,12 @@ User: root
 Pass: 123123
 DB: trade
 
+[MySQL 경로 - Laragon]
+C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\
+
+덤프 명령어:
+powershell -Command "& 'C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysqldump.exe' -u root -p123123 trade" > sql/dump_날짜.sql
+
 - PDO만 사용
 - prepared statement 필수
 - float 사용 금지
