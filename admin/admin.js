@@ -3,9 +3,30 @@
  */
 
 // 사이드바 토글
-document.getElementById('sidebarToggle')?.addEventListener('click', function() {
-    document.querySelector('.sidebar').classList.toggle('open');
-});
+let sidebar, sidebarOverlay;
+
+function toggleSidebar() {
+    sidebar?.classList.toggle('open');
+    sidebarOverlay?.classList.toggle('active');
+}
+
+function closeSidebar() {
+    sidebar?.classList.remove('open');
+    sidebarOverlay?.classList.remove('active');
+}
+
+// DOM 로드 후 초기화
+function initSidebar() {
+    sidebar = document.querySelector('.sidebar');
+    sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    document.getElementById('sidebarToggle')?.addEventListener('click', toggleSidebar);
+    document.getElementById('sidebarClose')?.addEventListener('click', closeSidebar);
+    sidebarOverlay?.addEventListener('click', closeSidebar);
+}
+
+// DOMContentLoaded에서 초기화
+document.addEventListener('DOMContentLoaded', initSidebar);
 
 // CSRF 토큰
 const csrfToken = document.getElementById('csrf_token')?.value || '';
@@ -435,6 +456,9 @@ function toggleDarkMode() {
 
 // 초기화
 document.addEventListener('DOMContentLoaded', function() {
+    // 사이드바 초기화
+    initSidebar();
+    
     // 테마 로드
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') {
