@@ -101,6 +101,57 @@ renderPageHeader('시스템 설정', '플랫폼 설정을 관리합니다');
     </div>
 </form>
 
+<!-- WebSocket 서버 설정 -->
+<div class="card mb-xl">
+    <div class="card__header">
+        <h3 class="card__title">
+            <i class="fas fa-server"></i>
+            WebSocket 서버 설정
+            <span class="badge badge--info" id="wsStatus">연결중...</span>
+        </h3>
+    </div>
+    <div class="card__body">
+        <div class="settings-grid">
+            <!-- WebSocket URL -->
+            <div class="setting-item">
+                <div class="setting-item__info">
+                    <label class="setting-item__label">WebSocket 서버 주소</label>
+                    <span class="setting-item__key">ws_server_url (포트 포함)</span>
+                </div>
+                <div class="setting-item__input" style="display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
+                    <input type="text" id="wsServerUrl" class="form-input" value="<?= htmlspecialchars(WS_SERVER_URL) ?>" placeholder="http://localhost:3002" style="width: 220px; text-align: right;" autocomplete="off">
+                    <button type="button" class="btn btn--sm btn--primary" style="width: 52px;" onclick="updateWSServerUrl()">저장</button>
+                </div>
+            </div>
+            <!-- 포지션 가격 업데이트 간격 (실시간) -->
+            <div class="setting-item">
+                <div class="setting-item__info">
+                    <label class="setting-item__label">포지션 가격 업데이트 간격</label>
+                    <span class="setting-item__key">실시간 적용 <span class="fee-hint">(현재: <span id="currentInterval">-</span>ms)</span></span>
+                </div>
+                <div class="setting-item__input" style="display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
+                    <input type="number" id="positionPriceInterval" class="form-input" min="50" max="5000" step="50" style="width: 100px; text-align: right;">
+                    <span style="color: var(--text-secondary); width: 30px;">ms</span>
+                    <button type="button" class="btn btn--sm btn--primary" style="width: 52px;" onclick="updateWSSettings()">적용</button>
+                </div>
+            </div>
+            <!-- 프리셋 -->
+            <div class="setting-item">
+                <div class="setting-item__info">
+                    <label class="setting-item__label">권장값 프리셋</label>
+                    <span class="setting-item__key">빠른 설정</span>
+                </div>
+                <div class="setting-item__input" style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+                    <button type="button" class="btn btn--sm btn--outline" onclick="setInterval(100)">100ms</button>
+                    <button type="button" class="btn btn--sm btn--outline" onclick="setInterval(200)">200ms</button>
+                    <button type="button" class="btn btn--sm btn--outline" onclick="setInterval(500)">500ms</button>
+                    <button type="button" class="btn btn--sm btn--outline" onclick="setInterval(1000)">1초</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- 위험 영역 -->
 <div class="card mt-xl danger-zone">
     <div class="card__header">
@@ -332,6 +383,107 @@ async function toggleMaintenance() {
     if (!await confirmAction('점검 모드를 전환하시겠습니까?')) return;
     showToast('success', '완료', '점검 모드가 전환되었습니다.');
     setTimeout(() => location.reload(), 1000);
+}
+
+// WebSocket 서버 설정
+let wsSocket = null;
+
+function initWSSettings() {
+    wsSocket = io(window.FuturXConfig?.wsServerUrl || 'http://localhost:3002', {
+        transports: ['websocket'],
+        reconnection: true
+    });
+
+    wsSocket.on('connect', () => {
+        document.getElementById('wsStatus').textContent = '연결됨';
+        document.getElementById('wsStatus').className = 'badge badge--success';
+        wsSocket.emit('admin:identify', { isAdmin: true });
+        wsSocket.emit('admin:get_settings');
+    });
+
+    wsSocket.on('disconnect', () => {
+        document.getElementById('wsStatus').textContent = '연결 끊김';
+        document.getElementById('wsStatus').className = 'badge badge--danger';
+    });
+
+    wsSocket.on('admin:settings', (data) => {
+        document.getElementById('positionPriceInterval').value = data.positionPriceInterval;
+        document.getElementById('currentInterval').textContent = data.positionPriceInterval;
+    });
+
+    wsSocket.on('admin:settings_updated', (data) => {
+        document.getElementById('currentInterval').textContent = data.positionPriceInterval;
+        document.getElementById('positionPriceInterval').value = data.positionPriceInterval;
+        showToast('success', '적용됨', `포지션 업데이트 간격: ${data.positionPriceInterval}ms`);
+    });
+}
+
+function setInterval(ms) {
+    document.getElementById('positionPriceInterval').value = ms;
+    updateWSSettings();
+}
+
+function updateWSSettings() {
+    const interval = parseInt(document.getElementById('positionPriceInterval').value);
+    if (interval < 50 || interval > 5000) {
+        showToast('error', '오류', '50ms ~ 5000ms 사이 값을 입력하세요.');
+        return;
+    }
+
+    // DB에 저장
+    updateSettingDB('position_price_interval', interval);
+
+    // WebSocket 서버에도 실시간 반영
+    if (wsSocket && wsSocket.connected) {
+        wsSocket.emit('admin:update_settings', { positionPriceInterval: interval });
+    }
+}
+
+// DB에 설정 저장 공통 함수
+async function updateSettingDB(key, value) {
+    try {
+        const response = await fetch('api/settings.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.getElementById('csrf_token').value
+            },
+            body: JSON.stringify({ key, value: String(value) })
+        });
+        const result = await response.json();
+        if (result.success) {
+            showToast('success', '저장됨', `${key} 설정이 저장되었습니다.`);
+            return true;
+        } else {
+            showToast('error', '오류', result.error || '저장 실패');
+            return false;
+        }
+    } catch (e) {
+        showToast('error', '오류', '서버 통신 오류');
+        return false;
+    }
+}
+
+// WebSocket 서버 URL 저장
+async function updateWSServerUrl() {
+    const url = document.getElementById('wsServerUrl').value.trim();
+    if (!url) {
+        showToast('error', '오류', 'URL을 입력하세요.');
+        return;
+    }
+    if (await updateSettingDB('ws_server_url', url)) {
+        showToast('info', '안내', '변경된 URL은 페이지 새로고침 후 적용됩니다.');
+    }
+}
+
+// Socket.IO 로드 후 초기화
+if (typeof io === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.socket.io/4.7.2/socket.io.min.js';
+    script.onload = initWSSettings;
+    document.head.appendChild(script);
+} else {
+    initWSSettings();
 }
 </script>
 

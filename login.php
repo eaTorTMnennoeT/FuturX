@@ -424,7 +424,12 @@ require_once 'includes/header.php';
                     if (result.data.requires_2fa) {
                         showTwoFAStep();
                     } else {
-                        // 로그인 성공 - Toast 표시 후 리다이렉트
+                        // 로그인 성공 - auth_token을 localStorage에 저장
+                        if (result.data.token) {
+                            localStorage.setItem('auth_token', result.data.token);
+                        }
+
+                        // Toast 표시 후 리다이렉트
                         if (typeof Toast !== 'undefined') {
                             Toast.success('로그인 성공', '환영합니다!');
                         }

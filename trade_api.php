@@ -11,8 +11,8 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-// WebSocket 서버 URL
-define('WS_SERVER_URL', 'http://localhost:3002/api/broadcast');
+// WebSocket Broadcast URL (config.php의 WS_SERVER_URL 사용)
+define('WS_BROADCAST_URL', WS_SERVER_URL . '/api/broadcast');
 
 /**
  * WebSocket 서버에 이벤트 브로드캐스트
@@ -24,18 +24,79 @@ function broadcastToWS($type, $payload) {
         'payload' => $payload
     ]);
 
+    error_log("[DEBUG] broadcastToWS - type: $type, url: " . WS_BROADCAST_URL);
+
     // cURL로 비동기 전송
-    $ch = curl_init(WS_SERVER_URL);
+    $ch = curl_init(WS_BROADCAST_URL);
     curl_setopt_array($ch, [
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $data,
         CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT_MS => 100, // 100ms 타임아웃 (비동기처럼)
+        CURLOPT_TIMEOUT_MS => 500, // 500ms 타임아웃 (응답 대기)
         CURLOPT_NOSIGNAL => 1
     ]);
-    curl_exec($ch);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
     curl_close($ch);
+
+    error_log("[DEBUG] broadcastToWS - httpCode: $httpCode, error: $error, response: $response");
+
+    return $httpCode === 200;
+}
+
+/**
+ * 사용자 계정 정보를 WebSocket으로 푸시 (안전하게)
+ * 에러가 나도 무시하고 진행
+ */
+function broadcastAccountUpdateSafe($db, $userId) {
+    try {
+        error_log("[DEBUG] broadcastAccountUpdateSafe START - userId: $userId");
+
+        // 잔고 조회
+        $stmt = $db->prepare("SELECT balance, available_balance FROM wallets WHERE user_id = ? AND currency = 'USDT'");
+        $stmt->execute([$userId]);
+        $wallet = $stmt->fetch();
+        $balance = $wallet ? floatval($wallet['balance']) : 0;
+        $availableBalance = $wallet ? floatval($wallet['available_balance']) : 0;
+
+        error_log("[DEBUG] broadcastAccountUpdateSafe - balance: $balance, available: $availableBalance");
+
+        // 포지션 조회
+        $stmt = $db->prepare("
+            SELECT id, symbol, side, size, entry_price, leverage, margin,
+                   liquidation_price, tp_price, sl_price, created_at
+            FROM positions
+            WHERE user_id = ? AND status = 'open'
+        ");
+        $stmt->execute([$userId]);
+        $positions = $stmt->fetchAll();
+
+        // 마진 합계
+        $totalMargin = 0;
+        foreach ($positions as $pos) {
+            $totalMargin += floatval($pos['margin']);
+        }
+
+        $marginBalance = $balance;
+
+        error_log("[DEBUG] broadcastAccountUpdateSafe - calling broadcastToWS");
+
+        $result = broadcastToWS('account:update', [
+            'user_id' => $userId,
+            'balance' => $balance,
+            'positions' => $positions,
+            'margin_balance' => $marginBalance,
+            'available_balance' => $availableBalance,
+            'unrealized_pnl' => 0
+        ]);
+
+        error_log("[DEBUG] broadcastAccountUpdateSafe - broadcastToWS result: " . ($result ? 'success' : 'failed'));
+    } catch (Exception $e) {
+        // 에러 무시 - 로그만 남김
+        error_log("[DEBUG] broadcastAccountUpdate error: " . $e->getMessage());
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -394,6 +455,9 @@ function handlePlaceOrder($db) {
             ]);
         }
 
+        // WebSocket으로 계정 정보 푸시
+        broadcastAccountUpdateSafe($db, $user['id']);
+
         successResponse([
             'order' => $order,
             'executed_price' => $price,
@@ -562,6 +626,9 @@ function handleCancelOrder($db) {
             'price' => $order['price'],
             'quantity' => $order['quantity']
         ]);
+
+        // WebSocket으로 계정 정보 푸시
+        broadcastAccountUpdateSafe($db, $user['id']);
 
         successResponse(['order_id' => $orderId, 'refunded' => $totalRefund], '주문이 취소되었습니다.');
 
@@ -784,6 +851,9 @@ function handleClosePosition($db) {
             'remaining_size' => $remainingSize
         ]);
 
+        // WebSocket으로 계정 정보 푸시
+        broadcastAccountUpdateSafe($db, $user['id']);
+
         successResponse([
             'position_id' => $position['id'],
             'closed_quantity' => $closeQty,
@@ -960,35 +1030,147 @@ function handleGetTradeHistory($db) {
 }
 
 // ========================================
-// 잔고 조회
+// 잔고 조회 (바이낸스 스타일)
 // ========================================
 function handleGetBalance($db) {
     $user = requireAuth($db);
 
+    // 1. 지갑 잔고 조회
     $stmt = $db->prepare("SELECT * FROM wallets WHERE user_id = ?");
     $stmt->execute([$user['id']]);
     $wallets = $stmt->fetchAll();
 
-    // 포지션 마진 합계
-    $stmt = $db->prepare("SELECT SUM(margin) as total_margin, SUM(unrealized_pnl) as total_pnl FROM positions WHERE user_id = ? AND status = 'open'");
-    $stmt->execute([$user['id']]);
-    $positionSummary = $stmt->fetch();
-
-    $result = [
-        'wallets' => $wallets,
-        'position_margin' => floatval($positionSummary['total_margin'] ?? 0),
-        'unrealized_pnl' => floatval($positionSummary['total_pnl'] ?? 0)
-    ];
-
-    // USDT 총 자산 계산
+    $walletBalance = 0;
     foreach ($wallets as $wallet) {
         if ($wallet['currency'] === 'USDT') {
-            $result['total_equity'] = floatval($wallet['balance']) + floatval($positionSummary['total_pnl'] ?? 0);
+            $walletBalance = floatval($wallet['balance']);
             break;
         }
     }
 
+    // 2. 오픈 포지션 조회 (개별 포지션별로 MMR 계산 필요)
+    $stmt = $db->prepare("
+        SELECT id, symbol, side, size, entry_price, margin, leverage, unrealized_pnl
+        FROM positions
+        WHERE user_id = ? AND status = 'open'
+    ");
+    $stmt->execute([$user['id']]);
+    $positions = $stmt->fetchAll();
+
+    $positionIM = 0;  // Position Initial Margin
+    $positionMM = 0;  // Position Maintenance Margin
+    $totalPnl = 0;
+
+    foreach ($positions as $pos) {
+        $positionIM += floatval($pos['margin']);
+        $totalPnl += floatval($pos['unrealized_pnl']);
+
+        // Notional Value = Size × Entry Price
+        $notional = floatval($pos['size']) * floatval($pos['entry_price']);
+
+        // MMR 티어에서 해당 심볼/노셔널에 맞는 MMR 가져오기
+        $mmr = getMMRForPosition($db, $pos['symbol'], $notional);
+        $positionMM += $notional * $mmr;
+    }
+
+    // 3. 미체결 주문의 Initial Margin 계산 (Order IM)
+    $stmt = $db->prepare("
+        SELECT symbol, side, order_type, price, quantity, leverage
+        FROM orders
+        WHERE user_id = ? AND status IN ('pending', 'open', 'partially_filled')
+    ");
+    $stmt->execute([$user['id']]);
+    $openOrders = $stmt->fetchAll();
+
+    $orderIM = 0;
+    foreach ($openOrders as $order) {
+        $orderPrice = floatval($order['price']);
+        $orderQty = floatval($order['quantity']);
+        $leverage = intval($order['leverage']) ?: 10;
+
+        // Market order는 price가 0일 수 있음 - 현재가 기준으로 계산해야 하지만
+        // 여기서는 간단히 limit order만 계산 (market은 즉시 체결되므로)
+        if ($orderPrice > 0) {
+            $orderNotional = $orderPrice * $orderQty;
+            $orderIM += $orderNotional / $leverage;
+        }
+    }
+
+    // 4. 바이낸스 스타일 계산
+    // Total IM = Position IM + Order IM
+    $totalIM = $positionIM + $orderIM;
+
+    // Equity (Margin Balance) = Wallet Balance + Unrealized PNL
+    $marginBalance = $walletBalance + $totalPnl;
+
+    // Available Balance = Equity - Total IM
+    $availableBalance = $marginBalance - $totalIM;
+
+    // IMR% = Total IM / Equity × 100
+    $imRatio = ($marginBalance > 0) ? ($totalIM / $marginBalance) * 100 : 0;
+
+    // MMR% = MM / Equity × 100
+    $mmRatio = ($marginBalance > 0) ? ($positionMM / $marginBalance) * 100 : 0;
+
+    $result = [
+        'wallets' => $wallets,
+        'wallet_balance' => $walletBalance,
+        'unrealized_pnl' => $totalPnl,
+        'margin_balance' => $marginBalance,
+        'available_balance' => $availableBalance,
+        'total_equity' => $marginBalance,
+
+        // Initial Margin (상세)
+        'position_margin' => $positionIM,   // 포지션 IM
+        'order_margin' => $orderIM,         // 미체결 주문 IM
+        'total_im' => $totalIM,             // 총 IM
+
+        // Maintenance Margin
+        'maintenance_margin' => $positionMM,  // MMR 티어 기반 계산
+
+        // 비율 (%)
+        'im_ratio' => round($imRatio, 2),
+        'mm_ratio' => round($mmRatio, 2),
+
+        // 오픈 주문 수
+        'open_orders_count' => count($openOrders)
+    ];
+
     successResponse($result);
+}
+
+/**
+ * MMR 티어에서 해당 심볼/노셔널에 맞는 MMR 가져오기
+ */
+function getMMRForPosition($db, $symbol, $notional) {
+    // 해당 심볼의 티어 조회
+    $stmt = $db->prepare("
+        SELECT mmr FROM mmr_tiers
+        WHERE symbol = ? AND ? >= notional_min AND ? < notional_max
+        LIMIT 1
+    ");
+    $stmt->execute([$symbol, $notional, $notional]);
+    $tier = $stmt->fetch();
+
+    if ($tier) {
+        return floatval($tier['mmr']);
+    }
+
+    // 심볼별 티어가 없으면 DEFAULT 티어 사용
+    $stmt = $db->prepare("
+        SELECT mmr FROM mmr_tiers
+        WHERE symbol = 'DEFAULT' AND ? >= notional_min AND ? < notional_max
+        LIMIT 1
+    ");
+    $stmt->execute([$notional, $notional]);
+    $tier = $stmt->fetch();
+
+    if ($tier) {
+        return floatval($tier['mmr']);
+    }
+
+    // 그래도 없으면 기본값 0.5% 반환
+    return 0.005;
 }
 
 // ========================================

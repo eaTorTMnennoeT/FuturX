@@ -20,8 +20,8 @@ http://localhost/design/futures/
 ====================================
 
 [테스트 계정]
-Email: test@test.com
-Password: password
+Email: 123
+Password: 123
 초기 잔고: 1000 USDT
 
 [관리자 계정]

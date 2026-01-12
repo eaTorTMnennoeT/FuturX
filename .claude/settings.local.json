@@ -1,0 +1,79 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__mysql__mysql_list_tables",
+      "mcp__mysql__mysql_connect",
+      "Read(//c/Users/admin/**)",
+      "Bash(claude mcp list:*)",
+      "Bash(claude config list:*)",
+      "Bash(cmd /c \"dir %USERPROFILE%\\\\.claude* 2>&1\")",
+      "Bash(claude mcp:*)",
+      "Bash(npx -y @playwright/mcp@latest --headless=false)",
+      "Bash(npx:*)",
+      "mcp__browser__browser_navigate",
+      "mcp__filesystem__list_directory",
+      "mcp__memory__read_graph",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(npm search:*)",
+      "Bash(if not exist \"C:\\\\Users\\\\admin\\\\.claude\" mkdir \"C:\\\\Users\\\\admin\\\\.claude\")",
+      "Bash(powershell -Command:*)",
+      "mcp__filesystem__write_file",
+      "mcp__mysql__mysql_query",
+      "Bash(findstr:*)",
+      "mcp__browser__browser_fill_form",
+      "mcp__browser__browser_click",
+      "mcp__browser__browser_take_screenshot",
+      "mcp__browser__browser_resize",
+      "mcp__browser__browser_snapshot",
+      "mcp__browser__browser_evaluate",
+      "mcp__browser__browser_run_code",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "mysql",
+    "browser",
+    "filesystem",
+    "fetch",
+    "redis",
+    "git"
+  ],
+  "mcpServers": {
+    "mysql": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@benborber/mcp-mysql"
+      ],
+      "env": {
+        "MYSQL_HOST": "localhost",
+        "MYSQL_USER": "root",
+        "MYSQL_PASSWORD": "123123",
+        "MYSQL_DATABASE": "trade"
+      }
+    },
+    "browser": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@playwright/mcp@latest",
+        "--headless=false"
+      ]
+    },
+    "fetch": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@anthropic-ai/mcp-server-fetch@latest"
+      ]
+    }
+  }
+}

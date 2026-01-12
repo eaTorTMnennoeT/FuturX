@@ -20,6 +20,7 @@ $menuItems = [
     'stats.php' => ['icon' => 'fa-chart-bar', 'label' => '통계관리'],
     'online.php' => ['icon' => 'fa-signal', 'label' => '실시간 접속자'],
     'users.php' => ['icon' => 'fa-users', 'label' => '회원관리'],
+    'symbols.php' => ['icon' => 'fa-coins', 'label' => '코인 관리'],
     'trades.php' => ['icon' => 'fa-exchange-alt', 'label' => '거래관리'],
     'orders.php' => ['icon' => 'fa-list-alt', 'label' => '주문관리'],
     'positions.php' => ['icon' => 'fa-chart-line', 'label' => '포지션'],
@@ -40,7 +41,7 @@ function renderHeader($pageTitle = '관리자') {
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title><?= htmlspecialchars($pageTitle) ?> - FuturX Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,9 +49,32 @@ function renderHeader($pageTitle = '관리자') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="admin.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Common formatters (symbol decimals from DB) -->
+    <script src="../js/formatters.js"></script>
+    <!-- PHP Config to JS -->
+    <script>
+        <?php
+        // DB symbols -> decimals maps (single source of truth)
+        $symbols = function_exists('getSymbols') ? getSymbols(true) : [];
+        $priceDecimalsBySymbol = [];
+        $qtyDecimalsBySymbol = [];
+        foreach ($symbols as $sym => $row) {
+            $priceDecimalsBySymbol[$sym] = isset($row['price_decimals']) ? (int)$row['price_decimals'] : 2;
+            $qtyDecimalsBySymbol[$sym] = isset($row['qty_decimals']) ? (int)$row['qty_decimals'] : 3;
+        }
+        ?>
+
+        window.FuturXConfig = window.FuturXConfig || {};
+        window.FuturXConfig.wsServerUrl = '<?= WS_SERVER_URL ?>';
+        window.FuturXConfig.priceDecimalsBySymbol = <?= json_encode($priceDecimalsBySymbol, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        window.FuturXConfig.qtyDecimalsBySymbol = <?= json_encode($qtyDecimalsBySymbol, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    </script>
 </head>
 <body>
     <input type="hidden" id="csrf_token" value="<?= $csrfToken ?>">
+
+    <!-- 사이드바 오버레이 -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- 사이드바 -->
     <aside class="sidebar">
@@ -59,6 +83,9 @@ function renderHeader($pageTitle = '관리자') {
                 <div class="sidebar__logo-icon">F</div>
                 <span>FuturX Admin</span>
             </a>
+            <button class="sidebar__close" id="sidebarClose" type="button">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
         <nav class="sidebar__nav">

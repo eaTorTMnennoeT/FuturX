@@ -254,12 +254,12 @@ renderPageHeader('주문 관리', '실시간 주문을 모니터링하고 관리
                         <?php if ($order['order_type'] === 'market'): ?>
                             <span class="text-muted">시장가</span>
                         <?php else: ?>
-                            $<?= number_format($order['price'], 2) ?>
+                            $<?= formatPrice($order['price'], $order['symbol']) ?>
                         <?php endif; ?>
                     </td>
-                    <td class="num-mono"><?= number_format($order['quantity'], 4) ?></td>
+                    <td class="num-mono"><?= formatQty($order['quantity'], $order['symbol']) ?></td>
                     <td class="num-mono">
-                        <?= number_format($order['filled_quantity'], 4) ?>
+                        <?= formatQty($order['filled_quantity'], $order['symbol']) ?>
                         <span class="fill-percent">(<?= $order['quantity'] > 0 ? min(100, round($order['filled_quantity'] / $order['quantity'] * 100)) : 0 ?>%)</span>
                     </td>
                     <td>
@@ -622,12 +622,12 @@ function getOrderStatusName($status) {
 }
 </style>
 
-<script src="http://localhost:3002/socket.io/socket.io.js"></script>
+<script src="<?= WS_SERVER_URL ?>/socket.io/socket.io.js"></script>
 <script>
 // ========================================
 // 실시간 주문 관리 - Socket.IO
 // ========================================
-const WS_SERVER = 'http://localhost:3002';
+const WS_SERVER = window.FuturXConfig?.wsServerUrl || 'http://localhost:3002';
 let socket = null;
 let isAutoRefresh = true;
 let refreshInterval = null;
@@ -766,7 +766,10 @@ function updateOrderInTable(orderId, newStatus, data) {
             const cells = row.querySelectorAll('td');
             if (cells[7]) {
                 const percent = data.quantity > 0 ? Math.min(100, Math.round(data.filled_quantity / data.quantity * 100)) : 0;
-                cells[7].innerHTML = `${parseFloat(data.filled_quantity).toFixed(4)}<span class="fill-percent">(${percent}%)</span>`;
+                const symbol = row.querySelector('td:nth-child(3) strong')?.textContent?.trim() || 'BTCUSDT';
+                const filledQty = parseFloat(data.filled_quantity) || 0;
+                const filledDisplay = window.FuturX?.formatQty ? window.FuturX.formatQty(filledQty, symbol) : filledQty.toFixed(4);
+                cells[7].innerHTML = `${filledDisplay}<span class="fill-percent">(${percent}%)</span>`;
             }
         }
 
@@ -788,7 +791,10 @@ function createOrderRowHTML(order) {
     const typeName = getTypeName(orderType);
     const statusName = getStatusName(order.status);
     const fillPercent = order.quantity > 0 ? Math.min(100, Math.round((order.filled_quantity || 0) / order.quantity * 100)) : 0;
-    const priceDisplay = orderType === 'market' ? '<span class="text-muted">시장가</span>' : `$${parseFloat(order.price || 0).toFixed(2)}`;
+    const symbol = order.symbol || 'BTCUSDT';
+    const priceDisplay = orderType === 'market'
+        ? '<span class="text-muted">시장가</span>'
+        : `$${window.FuturX?.formatPrice ? window.FuturX.formatPrice(parseFloat(order.price || 0), symbol) : parseFloat(order.price || 0).toFixed(2)}`;
     const createdAt = new Date(order.created_at).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
     const canCancel = ['pending', 'open', 'partially_filled'].includes(order.status);
@@ -801,12 +807,12 @@ function createOrderRowHTML(order) {
                 <span class="user-email">${escapeHtml(order.email || '')}</span>
             </div>
         </td>
-        <td><strong>${escapeHtml(order.symbol || 'BTCUSDT')}</strong></td>
+        <td><strong>${escapeHtml(symbol)}</strong></td>
         <td><span class="type-badge type-${orderType}">${typeName}</span></td>
         <td><span class="side-badge ${order.side}">${order.side === 'buy' ? 'BUY' : 'SELL'}</span></td>
         <td class="num-mono">${priceDisplay}</td>
-        <td class="num-mono">${parseFloat(order.quantity || 0).toFixed(4)}</td>
-        <td class="num-mono">${parseFloat(order.filled_quantity || 0).toFixed(4)}<span class="fill-percent">(${fillPercent}%)</span></td>
+        <td class="num-mono">${window.FuturX?.formatQty ? window.FuturX.formatQty(parseFloat(order.quantity || 0), symbol) : parseFloat(order.quantity || 0).toFixed(4)}</td>
+        <td class="num-mono">${window.FuturX?.formatQty ? window.FuturX.formatQty(parseFloat(order.filled_quantity || 0), symbol) : parseFloat(order.filled_quantity || 0).toFixed(4)}<span class="fill-percent">(${fillPercent}%)</span></td>
         <td><span class="status-badge status-${order.status}">${statusName}</span></td>
         <td class="text-muted">${createdAt}</td>
         <td>
@@ -955,6 +961,7 @@ async function viewOrder(orderId) {
 
         if (data.success && data.order) {
             const order = data.order;
+            const symbol = order.symbol || 'BTCUSDT';
             document.getElementById('orderModalBody').innerHTML = `
                 <div class="order-detail">
                     <div class="order-detail__item full-width">
@@ -983,19 +990,19 @@ async function viewOrder(orderId) {
                     </div>
                     <div class="order-detail__item">
                         <div class="order-detail__label">가격</div>
-                        <div class="order-detail__value">${(order.order_type || order.type) === 'market' ? '시장가' : '$' + parseFloat(order.price || 0).toFixed(2)}</div>
+                        <div class="order-detail__value">${(order.order_type || order.type) === 'market' ? '시장가' : '$' + (window.FuturX?.formatPrice ? window.FuturX.formatPrice(parseFloat(order.price || 0), symbol) : parseFloat(order.price || 0).toFixed(2))}</div>
                     </div>
                     <div class="order-detail__item">
                         <div class="order-detail__label">수량</div>
-                        <div class="order-detail__value">${parseFloat(order.quantity).toFixed(4)}</div>
+                        <div class="order-detail__value">${window.FuturX?.formatQty ? window.FuturX.formatQty(parseFloat(order.quantity || 0), symbol) : parseFloat(order.quantity || 0).toFixed(4)}</div>
                     </div>
                     <div class="order-detail__item">
                         <div class="order-detail__label">체결량</div>
-                        <div class="order-detail__value">${parseFloat(order.filled_quantity || 0).toFixed(4)}</div>
+                        <div class="order-detail__value">${window.FuturX?.formatQty ? window.FuturX.formatQty(parseFloat(order.filled_quantity || 0), symbol) : parseFloat(order.filled_quantity || 0).toFixed(4)}</div>
                     </div>
                     <div class="order-detail__item">
                         <div class="order-detail__label">평균 체결가</div>
-                        <div class="order-detail__value">${order.avg_fill_price ? '$' + parseFloat(order.avg_fill_price).toFixed(2) : '-'}</div>
+                        <div class="order-detail__value">${order.avg_fill_price ? '$' + (window.FuturX?.formatPrice ? window.FuturX.formatPrice(parseFloat(order.avg_fill_price), symbol) : parseFloat(order.avg_fill_price).toFixed(2)) : '-'}</div>
                     </div>
                     <div class="order-detail__item">
                         <div class="order-detail__label">생성일시</div>

@@ -1913,6 +1913,576 @@
     }
 }
 
+/* ==========================================
+   프리미엄 통계 탭 스타일
+   ========================================== */
+
+/* 프리미엄 탭 전환 버튼 */
+.stats-tabs-premium {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+    background: linear-gradient(135deg, rgba(30, 35, 41, 0.8), rgba(24, 26, 32, 0.9));
+    padding: 6px;
+    border-radius: 16px;
+    width: fit-content;
+    border: 1px solid rgba(240, 185, 11, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.stats-tab-premium {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stats-tab-premium i {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.stats-tab-premium:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.stats-tab-premium:hover i {
+    transform: scale(1.1);
+}
+
+.stats-tab-premium.active {
+    background: linear-gradient(135deg, var(--color-primary), #d4a50a);
+    color: var(--bg-primary);
+    box-shadow: 0 4px 15px rgba(240, 185, 11, 0.4);
+}
+
+.stats-tab-premium.active i {
+    transform: scale(1.1);
+}
+
+/* 프리미엄 요약 카드 */
+.stats-summary-premium {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.stats-card-premium {
+    background: linear-gradient(145deg, var(--bg-secondary), var(--bg-tertiary));
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(240, 185, 11, 0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stats-card-premium:hover {
+    transform: translateY(-4px);
+    border-color: rgba(240, 185, 11, 0.3);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.stats-card-premium:hover::before {
+    opacity: 1;
+}
+
+.stats-card-premium--highlight {
+    background: linear-gradient(145deg, rgba(240, 185, 11, 0.15), rgba(240, 185, 11, 0.05));
+    border-color: rgba(240, 185, 11, 0.3);
+}
+
+.stats-card-premium--highlight::before {
+    opacity: 1;
+    background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+}
+
+.stats-card-premium__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(240, 185, 11, 0.2), rgba(240, 185, 11, 0.1));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.stats-card-premium__icon--blue {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
+    color: #3b82f6;
+}
+
+.stats-card-premium__icon--purple {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
+    color: #8b5cf6;
+}
+
+.stats-card-premium__icon--green {
+    background: linear-gradient(135deg, rgba(14, 203, 129, 0.2), rgba(14, 203, 129, 0.1));
+    color: var(--color-success);
+}
+
+.stats-card-premium__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.stats-card-premium__label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-card-premium__value {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    line-height: 1.2;
+    margin-bottom: 8px;
+}
+
+.stats-card-premium--highlight .stats-card-premium__value {
+    color: var(--color-primary);
+}
+
+.stats-card-premium__meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.stats-card-premium__badge {
+    background: rgba(240, 185, 11, 0.15);
+    color: var(--color-primary);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.stats-card-premium__trend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+}
+
+.stats-card-premium__trend.positive {
+    color: var(--color-success);
+}
+
+.stats-card-premium__trend.negative {
+    color: var(--color-danger);
+}
+
+/* 프리미엄 테이블 래퍼 */
+.stats-table-premium-wrapper {
+    background: linear-gradient(145deg, var(--bg-secondary), rgba(24, 26, 32, 0.8));
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+.stats-table-premium-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.stats-table-premium-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.stats-table-premium-header h3 i {
+    color: var(--color-primary);
+}
+
+.stats-table-premium-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.stats-filter-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.stats-filter-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.stats-filter-btn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--bg-primary);
+}
+
+.stats-table-premium-container {
+    overflow-x: auto;
+}
+
+/* 프리미엄 테이블 */
+.stats-table-premium {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stats-table-premium thead {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.stats-table-premium th {
+    padding: 16px 20px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stats-table-premium th .th-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stats-table-premium th i {
+    color: var(--text-tertiary);
+    font-size: 11px;
+}
+
+.stats-table-premium tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(43, 49, 57, 0.5);
+}
+
+.stats-table-premium tbody tr:hover {
+    background: rgba(240, 185, 11, 0.03);
+}
+
+.stats-table-premium tbody tr.row-highlight {
+    background: linear-gradient(90deg, rgba(240, 185, 11, 0.1), transparent);
+}
+
+.stats-table-premium tbody tr.row-weekend {
+    background: rgba(139, 92, 246, 0.03);
+}
+
+.stats-table-premium td {
+    padding: 16px 20px;
+    vertical-align: middle;
+}
+
+/* 날짜 셀 */
+.date-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.date-main {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.date-sub {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.date-sub.weekend {
+    color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.date-badge {
+    background: linear-gradient(135deg, var(--color-primary), #d4a50a);
+    color: var(--bg-primary);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 숫자 셀 */
+.number-cell {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.number-value {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-primary);
+}
+
+.number-unit {
+    font-size: 12px;
+    color: var(--text-tertiary);
+}
+
+/* 금액 셀 */
+.money-cell {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    font-family: var(--font-mono);
+}
+
+.money-currency {
+    font-size: 12px;
+    color: var(--text-tertiary);
+}
+
+.money-value {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-primary);
+}
+
+/* 수익 셀 */
+.earnings-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.earnings-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--color-primary);
+}
+
+.earnings-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.earnings-bar__fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), #fcd535);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
+
+/* 변동 셀 */
+.change-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.change-cell.positive {
+    color: var(--color-success);
+    background: rgba(14, 203, 129, 0.1);
+}
+
+.change-cell.negative {
+    color: var(--color-danger);
+    background: rgba(246, 70, 93, 0.1);
+}
+
+.change-cell i {
+    font-size: 10px;
+}
+
+/* 합계 행 */
+.stats-table-premium tfoot {
+    background: linear-gradient(90deg, rgba(240, 185, 11, 0.1), rgba(240, 185, 11, 0.05));
+}
+
+.stats-table-premium tfoot .total-row td {
+    padding: 20px;
+    border-top: 2px solid rgba(240, 185, 11, 0.3);
+}
+
+.total-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--color-primary);
+}
+
+.total-label i {
+    font-size: 16px;
+}
+
+.number-cell.total .number-value,
+.money-cell.total .money-value,
+.earnings-cell.total .earnings-value {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.earnings-cell.total .earnings-value {
+    color: var(--color-primary);
+}
+
+.avg-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+}
+
+.avg-label span {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.avg-label strong {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+    .stats-summary-premium {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-tabs-premium {
+        width: 100%;
+    }
+
+    .stats-tab-premium {
+        flex: 1;
+        justify-content: center;
+        padding: 12px 16px;
+    }
+
+    .stats-summary-premium {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-card-premium {
+        padding: 20px;
+    }
+
+    .stats-card-premium__value {
+        font-size: 24px;
+    }
+
+    .stats-table-premium-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .stats-table-premium-actions {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .stats-table-premium th,
+    .stats-table-premium td {
+        padding: 12px 16px;
+    }
+
+    .date-cell {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-tab-premium span {
+        display: none;
+    }
+
+    .stats-tab-premium i {
+        font-size: 18px;
+    }
+
+    .stats-card-premium__icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+}
+
 @media (max-width: 768px) {
     .referral-page {
         padding: var(--spacing-md);

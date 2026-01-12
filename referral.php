@@ -383,6 +383,10 @@ require_once 'includes/header.php';
                     <i class="fas fa-coins"></i>
                     <span>수수료 내역</span>
                 </a>
+                <a href="?tab=statistics" class="referral-sidebar__nav-item <?= $currentTab === 'statistics' ? 'active' : '' ?>">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>통계</span>
+                </a>
                 <a href="?tab=withdrawals" class="referral-sidebar__nav-item <?= $currentTab === 'withdrawals' ? 'active' : '' ?>">
                     <i class="fas fa-money-bill-wave"></i>
                     <span>출금 내역</span>
@@ -1559,6 +1563,403 @@ require_once 'includes/header.php';
                 </div>
             </div>
 
+            <?php elseif ($currentTab === 'statistics'): ?>
+            <!-- 통계 탭 -->
+            <div class="referral-section">
+                <div class="referral-section__header">
+                    <h1>수수료 통계</h1>
+                    <div class="referral-section__actions">
+                        <select id="statsYear" class="referral-filter-select" onchange="updateStats()">
+                            <option value="2024">2024년</option>
+                            <option value="2023">2023년</option>
+                        </select>
+                        <button class="btn btn--secondary btn--sm">
+                            <i class="fas fa-download"></i> 엑셀 다운로드
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 프리미엄 통계 탭 전환 -->
+                <div class="stats-tabs-premium">
+                    <button class="stats-tab-premium active" data-tab="daily">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>일별 통계</span>
+                    </button>
+                    <button class="stats-tab-premium" data-tab="monthly">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>월별 통계</span>
+                    </button>
+                </div>
+
+                <!-- 일별 통계 -->
+                <?php
+                $totalDailyReferrals = array_sum(array_column($dailyStats, 'new_referrals'));
+                $totalDailyVolume = array_sum(array_column($dailyStats, 'volume'));
+                $totalDailyEarnings = array_sum(array_column($dailyStats, 'earnings'));
+                $avgDailyEarnings = $totalDailyEarnings / 30;
+                ?>
+                <div class="stats-content" id="dailyStats">
+                    <!-- 프리미엄 요약 카드 -->
+                    <div class="stats-summary-premium">
+                        <div class="stats-card-premium stats-card-premium--highlight">
+                            <div class="stats-card-premium__icon">
+                                <i class="fas fa-sun"></i>
+                            </div>
+                            <div class="stats-card-premium__content">
+                                <span class="stats-card-premium__label">오늘 수익</span>
+                                <span class="stats-card-premium__value">$<?= number_format($dailyStats[29]['earnings'], 2) ?></span>
+                                <div class="stats-card-premium__meta">
+                                    <span class="stats-card-premium__badge"><?= $dailyStats[29]['new_referrals'] ?>건 거래</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-card-premium">
+                            <div class="stats-card-premium__icon stats-card-premium__icon--blue">
+                                <i class="fas fa-calendar-week"></i>
+                            </div>
+                            <div class="stats-card-premium__content">
+                                <span class="stats-card-premium__label">최근 7일</span>
+                                <span class="stats-card-premium__value">$<?= number_format(array_sum(array_column(array_slice($dailyStats, -7), 'earnings')), 2) ?></span>
+                                <div class="stats-card-premium__meta">
+                                    <span><?= array_sum(array_column(array_slice($dailyStats, -7), 'new_referrals')) ?>건</span>
+                                    <span class="stats-card-premium__trend positive"><i class="fas fa-arrow-up"></i> 12.5%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-card-premium">
+                            <div class="stats-card-premium__icon stats-card-premium__icon--purple">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div class="stats-card-premium__content">
+                                <span class="stats-card-premium__label">최근 30일</span>
+                                <span class="stats-card-premium__value">$<?= number_format($totalDailyEarnings, 2) ?></span>
+                                <div class="stats-card-premium__meta">
+                                    <span><?= $totalDailyReferrals ?>건</span>
+                                    <span class="stats-card-premium__trend positive"><i class="fas fa-arrow-up"></i> 8.3%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-card-premium">
+                            <div class="stats-card-premium__icon stats-card-premium__icon--green">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stats-card-premium__content">
+                                <span class="stats-card-premium__label">일 평균</span>
+                                <span class="stats-card-premium__value">$<?= number_format($avgDailyEarnings, 2) ?></span>
+                                <div class="stats-card-premium__meta">
+                                    <span>30일 기준</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 프리미엄 테이블 -->
+                    <div class="stats-table-premium-wrapper">
+                        <div class="stats-table-premium-header">
+                            <h3><i class="fas fa-table"></i> 일별 상세 내역</h3>
+                            <div class="stats-table-premium-actions">
+                                <button class="stats-filter-btn active">전체</button>
+                                <button class="stats-filter-btn">이번 주</button>
+                                <button class="stats-filter-btn">지난 주</button>
+                            </div>
+                        </div>
+                        <div class="stats-table-premium-container">
+                            <table class="stats-table-premium">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <span class="th-content">
+                                                <i class="fas fa-calendar-day"></i> 날짜
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span class="th-content">
+                                                <i class="fas fa-user-plus"></i> 신규 가입
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span class="th-content">
+                                                <i class="fas fa-exchange-alt"></i> 거래량
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span class="th-content">
+                                                <i class="fas fa-coins"></i> 수수료 수익
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span class="th-content">
+                                                <i class="fas fa-percentage"></i> 전일 대비
+                                            </span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $reversedDaily = array_reverse($dailyStats);
+                                    foreach ($reversedDaily as $i => $day):
+                                        $prevEarnings = isset($reversedDaily[$i + 1]) ? $reversedDaily[$i + 1]['earnings'] : $day['earnings'];
+                                        $change = $prevEarnings > 0 ? (($day['earnings'] - $prevEarnings) / $prevEarnings) * 100 : 0;
+                                        $isToday = ($i === 0);
+                                        $dayOfWeek = ['일','월','화','수','목','금','토'][date('w', strtotime($day['date']))];
+                                        $isWeekend = in_array($dayOfWeek, ['토', '일']);
+                                    ?>
+                                    <tr class="<?= $isToday ? 'row-highlight' : '' ?> <?= $isWeekend ? 'row-weekend' : '' ?>">
+                                        <td>
+                                            <div class="date-cell">
+                                                <span class="date-main"><?= date('m월 d일', strtotime($day['date'])) ?></span>
+                                                <span class="date-sub <?= $isWeekend ? 'weekend' : '' ?>"><?= $dayOfWeek ?>요일</span>
+                                                <?php if ($isToday): ?>
+                                                <span class="date-badge">TODAY</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="number-cell">
+                                                <span class="number-value"><?= $day['new_referrals'] ?></span>
+                                                <span class="number-unit">명</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="money-cell">
+                                                <span class="money-currency">$</span>
+                                                <span class="money-value"><?= number_format($day['volume']) ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="earnings-cell">
+                                                <span class="earnings-value">$<?= number_format($day['earnings'], 2) ?></span>
+                                                <div class="earnings-bar">
+                                                    <div class="earnings-bar__fill" style="width: <?= min(100, ($day['earnings'] / 150) * 100) ?>%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="change-cell <?= $change >= 0 ? 'positive' : 'negative' ?>">
+                                                <i class="fas fa-<?= $change >= 0 ? 'arrow-up' : 'arrow-down' ?>"></i>
+                                                <span><?= abs(number_format($change, 1)) ?>%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="total-row">
+                                        <td>
+                                            <div class="total-label">
+                                                <i class="fas fa-calculator"></i>
+                                                <span>합계 (30일)</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="number-cell total">
+                                                <span class="number-value"><?= $totalDailyReferrals ?></span>
+                                                <span class="number-unit">명</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="money-cell total">
+                                                <span class="money-currency">$</span>
+                                                <span class="money-value"><?= number_format($totalDailyVolume) ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="earnings-cell total">
+                                                <span class="earnings-value">$<?= number_format($totalDailyEarnings, 2) ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="avg-label">
+                                                <span>일평균</span>
+                                                <strong>$<?= number_format($avgDailyEarnings, 2) ?></strong>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 월별 통계 -->
+                <?php
+                $totalMonthlyReferrals = array_sum(array_column($monthlyEarnings, 'referrals'));
+                $totalMonthlyVolume = array_sum(array_column($monthlyEarnings, 'volume'));
+                $totalMonthlyEarnings = array_sum(array_column($monthlyEarnings, 'earnings'));
+                $avgMonthlyEarnings = $totalMonthlyEarnings / count($monthlyEarnings);
+                ?>
+                <div class="stats-content" id="monthlyStats" style="display: none;">
+                    <!-- 프리미엄 요약 카드 -->
+                    <div class="stats-summary-premium">
+                        <div class="stats-card-premium stats-card-premium--highlight">
+                            <div class="stats-card-premium__icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="stats-card-premium__content">
+                                <span class="stats-card-premium__label">이번 달</span>
+                                <span class="stats-card-premium__value">$<?= number_format($stats['this_month_earnings'], 2) ?></span>
+                                <div class="stats-card-premium__meta">
+                                    <span class="stats-card-premium__trend <?= $stats['this_month_earnings'] >= $stats['last_month_earnings'] ? 'positive' : 'negative' ?>">
+                                        <i class="fas fa-arrow-<?= $stats['this_month_earnings'] >= $stats['last_month_earnings'] ? 'up' : 'down' ?>"></i>
+                                        <?= abs(number_format((($stats['this_month_earnings'] - $stats['last_month_earnings']) / max(1, $stats['last_month_earnings'])) * 100, 1)) ?>%
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-card-premium">
+                            <div class="stats-card-premium__icon stats-card-premium__icon--blue">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <div class="stats-card-premium__content">
+                                <span class="stats-card-premium__label">지난 달</span>
+                                <span class="stats-card-premium__value">$<?= number_format($stats['last_month_earnings'], 2) ?></span>
+                            </div>
+                        </div>
+                        <div class="stats-card-premium">
+                            <div class="stats-card-premium__icon stats-card-premium__icon--purple">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="stats-card-premium__content">
+                                <span class="stats-card-premium__label">올해 누적</span>
+                                <span class="stats-card-premium__value">$<?= number_format($totalMonthlyEarnings, 2) ?></span>
+                                <div class="stats-card-premium__meta">
+                                    <span><?= count($monthlyEarnings) ?>개월</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-card-premium">
+                            <div class="stats-card-premium__icon stats-card-premium__icon--green">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="stats-card-premium__content">
+                                <span class="stats-card-premium__label">월 평균</span>
+                                <span class="stats-card-premium__value">$<?= number_format($avgMonthlyEarnings, 2) ?></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 프리미엄 테이블 -->
+                    <div class="stats-table-premium-wrapper">
+                        <div class="stats-table-premium-header">
+                            <h3><i class="fas fa-table"></i> 월별 상세 내역</h3>
+                        </div>
+                        <div class="stats-table-premium-container">
+                            <table class="stats-table-premium">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <span class="th-content">
+                                                <i class="fas fa-calendar-alt"></i> 월
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span class="th-content">
+                                                <i class="fas fa-users"></i> 신규 추천인
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span class="th-content">
+                                                <i class="fas fa-chart-area"></i> 총 거래량
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span class="th-content">
+                                                <i class="fas fa-coins"></i> 수수료 수익
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span class="th-content">
+                                                <i class="fas fa-percentage"></i> 전월 대비
+                                            </span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $reversedMonthly = array_reverse($monthlyEarnings);
+                                    foreach ($reversedMonthly as $i => $month):
+                                        $prevEarnings = isset($reversedMonthly[$i + 1]) ? $reversedMonthly[$i + 1]['earnings'] : $month['earnings'];
+                                        $change = $prevEarnings > 0 ? (($month['earnings'] - $prevEarnings) / $prevEarnings) * 100 : 0;
+                                        $monthParts = explode('-', $month['month']);
+                                        $isCurrentMonth = ($i === 0);
+                                    ?>
+                                    <tr class="<?= $isCurrentMonth ? 'row-highlight' : '' ?>">
+                                        <td>
+                                            <div class="date-cell">
+                                                <span class="date-main"><?= $monthParts[0] ?>년 <?= intval($monthParts[1]) ?>월</span>
+                                                <?php if ($isCurrentMonth): ?>
+                                                <span class="date-badge">현재</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="number-cell">
+                                                <span class="number-value"><?= $month['referrals'] ?></span>
+                                                <span class="number-unit">명</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="money-cell">
+                                                <span class="money-currency">$</span>
+                                                <span class="money-value"><?= number_format($month['volume']) ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="earnings-cell">
+                                                <span class="earnings-value">$<?= number_format($month['earnings'], 2) ?></span>
+                                                <div class="earnings-bar">
+                                                    <div class="earnings-bar__fill" style="width: <?= min(100, ($month['earnings'] / 2500) * 100) ?>%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="change-cell <?= $change >= 0 ? 'positive' : 'negative' ?>">
+                                                <i class="fas fa-<?= $change >= 0 ? 'arrow-up' : 'arrow-down' ?>"></i>
+                                                <span><?= abs(number_format($change, 1)) ?>%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="total-row">
+                                        <td>
+                                            <div class="total-label">
+                                                <i class="fas fa-calculator"></i>
+                                                <span>합계 (<?= count($monthlyEarnings) ?>개월)</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="number-cell total">
+                                                <span class="number-value"><?= $totalMonthlyReferrals ?></span>
+                                                <span class="number-unit">명</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="money-cell total">
+                                                <span class="money-currency">$</span>
+                                                <span class="money-value"><?= number_format($totalMonthlyVolume) ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="earnings-cell total">
+                                                <span class="earnings-value">$<?= number_format($totalMonthlyEarnings, 2) ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="avg-label">
+                                                <span>월평균</span>
+                                                <strong>$<?= number_format($avgMonthlyEarnings, 2) ?></strong>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <?php elseif ($currentTab === 'withdrawals'): ?>
             <!-- 출금 내역 탭 -->
             <div class="referral-section">
@@ -2191,6 +2592,40 @@ document.querySelectorAll('.guide-share-btn').forEach(btn => {
         if (shareUrl) {
             window.open(shareUrl, '_blank', 'width=600,height=400');
         }
+    });
+});
+
+// ==========================================
+// 통계 페이지 - 탭 전환
+// ==========================================
+document.querySelectorAll('.stats-tab-premium').forEach(tab => {
+    tab.addEventListener('click', function() {
+        // 모든 탭 비활성화
+        document.querySelectorAll('.stats-tab-premium').forEach(t => t.classList.remove('active'));
+        // 클릭한 탭 활성화
+        this.classList.add('active');
+
+        const tabType = this.dataset.tab;
+        const dailyStats = document.getElementById('dailyStats');
+        const monthlyStats = document.getElementById('monthlyStats');
+
+        if (dailyStats && monthlyStats) {
+            if (tabType === 'daily') {
+                dailyStats.style.display = 'block';
+                monthlyStats.style.display = 'none';
+            } else {
+                dailyStats.style.display = 'none';
+                monthlyStats.style.display = 'block';
+            }
+        }
+    });
+});
+
+// 통계 필터 버튼
+document.querySelectorAll('.stats-filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.stats-filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
     });
 });
 </script>

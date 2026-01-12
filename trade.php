@@ -1,6 +1,14 @@
 <?php
+// 환율 extend 로드 (1시간마다 자동 업데이트)
+require_once __DIR__ . '/extend/exchange_rate.extend.php';
+require_once __DIR__ . '/config.php';
+$usdKrwRate = getUsdKrwRate();
+
+// DB에서 심볼 목록 가져오기
+$symbolsData = getSymbols(true);
+$supportedSymbols = array_keys($symbolsData);
+
 // URL에서 심볼 파라미터 받기 (예: trade.php?symbol=ETHUSDT 또는 /ETHUSDT)
-$supportedSymbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ADAUSDT', 'AVAXUSDT'];
 $urlSymbol = isset($_GET['symbol']) ? strtoupper(trim($_GET['symbol'])) : 'BTCUSDT';
 
 // PATH_INFO로도 받을 수 있게 (예: trade.php/ETHUSDT)
@@ -16,25 +24,18 @@ if (!in_array($urlSymbol, $supportedSymbols)) {
     $urlSymbol = 'BTCUSDT';
 }
 
-// 심볼별 로고 URL
-$symbolLogos = [
-    'BTCUSDT' => 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
-    'ETHUSDT' => 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
-    'SOLUSDT' => 'https://cryptologos.cc/logos/solana-sol-logo.png',
-    'XRPUSDT' => 'https://cryptologos.cc/logos/xrp-xrp-logo.png',
-    'DOGEUSDT' => 'https://cryptologos.cc/logos/dogecoin-doge-logo.png',
-    'ADAUSDT' => 'https://cryptologos.cc/logos/cardano-ada-logo.png',
-    'AVAXUSDT' => 'https://cryptologos.cc/logos/avalanche-avax-logo.png',
-];
-$currentLogo = $symbolLogos[$urlSymbol] ?? $symbolLogos['BTCUSDT'];
+// DB에서 로고 URL 가져오기
+$currentLogo = isset($symbolsData[$urlSymbol]['logo_url']) && $symbolsData[$urlSymbol]['logo_url']
+    ? $symbolsData[$urlSymbol]['logo_url']
+    : 'https://cryptologos.cc/logos/bitcoin-btc-logo.png';
 $baseCoin = str_replace('USDT', '', $urlSymbol);
 
 $pageTitle = $urlSymbol . ' 무기한';
 $pageCSS = ['trade.css'];
 require_once 'includes/head.php';
 ?>
-    <!-- Socket.IO Client -->
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- Socket.IO Client (로컬 ws-server 제공 버전 사용: CDN 차단/오프라인 이슈 방지) -->
+    <script src="<?= WS_SERVER_URL ?>/socket.io/socket.io.js"></script>
     <!-- Lightweight Charts for custom markers -->
     <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
 
@@ -292,70 +293,78 @@ require_once 'includes/head.php';
                     </div>
                     <!-- Positions -->
                     <div class="panel-section" id="positionsPanel">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Symbol</th>
-                                    <th>Size</th>
-                                    <th>Entry Price</th>
-                                    <th>Mark Price</th>
-                                    <th>Liq. Price</th>
-                                    <th>Margin</th>
-                                    <th>PNL (ROE%)</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="positionsBody"></tbody>
-                        </table>
+                        <div class="panel-table-scroll">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Size</th>
+                                        <th>Entry Price</th>
+                                        <th>Mark Price</th>
+                                        <th>Liq. Price</th>
+                                        <th>Margin</th>
+                                        <th>PNL (ROE%)</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="positionsBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                     <!-- Order History -->
                     <div class="panel-section" id="orderHistoryPanel">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Symbol</th>
-                                    <th>Type</th>
-                                    <th>Side</th>
-                                    <th>Price</th>
-                                    <th>Qty</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="orderHistoryBody"></tbody>
-                        </table>
+                        <div class="panel-table-scroll">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Symbol</th>
+                                        <th>Type</th>
+                                        <th>Side</th>
+                                        <th>Price</th>
+                                        <th>Qty</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orderHistoryBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                     <!-- Trade History -->
                     <div class="panel-section" id="tradeHistoryPanel">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Symbol</th>
-                                    <th>Side</th>
-                                    <th>Price</th>
-                                    <th>Qty</th>
-                                    <th>Fee</th>
-                                    <th>Realized PNL</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tradeHistoryBody"></tbody>
-                        </table>
+                        <div class="panel-table-scroll">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Symbol</th>
+                                        <th>Side</th>
+                                        <th>Price</th>
+                                        <th>Qty</th>
+                                        <th>Fee</th>
+                                        <th>Realized PNL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tradeHistoryBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                     <!-- Assets -->
                     <div class="panel-section" id="assetsPanel">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Coin</th>
-                                    <th>Wallet Balance</th>
-                                    <th>Available</th>
-                                    <th>In Order</th>
-                                    <th>USD Value</th>
-                                </tr>
-                            </thead>
-                            <tbody id="assetsBody"></tbody>
-                        </table>
+                        <div class="panel-table-scroll">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Coin</th>
+                                        <th>Wallet Balance</th>
+                                        <th>Available</th>
+                                        <th>In Order</th>
+                                        <th>USD Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assetsBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                     <!-- P&L -->
                     <div class="panel-section" id="pnlPanel">
@@ -590,26 +599,30 @@ require_once 'includes/head.php';
                     <div class="margin-bar-row">
                         <span>Initial Margin</span>
                         <div class="bar-container">
-                            <div class="bar-fill green" style="width: 89%"></div>
+                            <div class="bar-fill green" id="initialMarginBar" style="width: 0%"></div>
                         </div>
-                        <span>89.13%</span>
+                        <span id="initialMarginPercent">0.00%</span>
                     </div>
                     <div class="margin-bar-row">
                         <span>Maintenance Margin</span>
                         <div class="bar-container">
-                            <div class="bar-fill green" style="width: 35%"></div>
+                            <div class="bar-fill green" id="maintenanceMarginBar" style="width: 0%"></div>
                         </div>
-                        <span>35.65%</span>
+                        <span id="maintenanceMarginPercent">0.00%</span>
                     </div>
                 </div>
                 <div class="balance-rows">
                     <div class="balance-row">
                         <span>Margin Balance</span>
-                        <span>0.3044 USDT</span>
+                        <span id="marginBalanceDisplay">0.0000 USDT</span>
                     </div>
                     <div class="balance-row">
                         <span>Available Balance</span>
-                        <span>0.0330 USDT</span>
+                        <span id="availableBalanceDisplay">0.0000 USDT</span>
+                    </div>
+                    <div class="balance-row">
+                        <span>Unrealized PNL</span>
+                        <span id="unrealizedPnlDisplay" class="pnl-value">0.0000 USDT</span>
                     </div>
                 </div>
                 <div class="account-actions">
@@ -662,6 +675,15 @@ require_once 'includes/head.php';
         // ========================================
         // Lightweight Charts 차트 시스템
         // ========================================
+        // PHP에서 URL 심볼 전달 (가장 먼저 설정)
+        window.initialSymbol = '<?= $urlSymbol ?>';
+
+        // 현재 심볼 (전역) - 초기화 시점에 바로 설정
+        let currentSymbol = window.initialSymbol || 'BTCUSDT';
+
+        // USD/KRW 환율 (PHP에서 전달, 1시간마다 자동 업데이트)
+        const USD_KRW = <?php echo $usdKrwRate; ?>;
+
         let chart = null;
         let candleSeries = null;
         let volumeSeries = null;
@@ -676,10 +698,11 @@ require_once 'includes/head.php';
             if (!chartContainer) return;
 
             if (chartMode === 'tradingview') {
-                // 기본 TradingView 위젯
+                // 기본 TradingView 위젯 (현재 심볼 사용)
+                const tvSymbol = currentSymbol || 'BTCUSDT';
                 chartContainer.innerHTML = `
                     <iframe
-                        src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_chart&symbol=BINANCE%3ABTCUSDT&interval=1&hidesidetoolbar=0&symboledit=0&saveimage=0&toolbarbg=161a1e&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FSeoul&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=kr&utm_source=&utm_medium=widget&utm_campaign=chart&utm_term=BINANCE%3ABTCUSDT"
+                        src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_chart&symbol=BINANCE%3A${tvSymbol}&interval=1&hidesidetoolbar=0&symboledit=0&saveimage=0&toolbarbg=161a1e&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FSeoul&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=kr&utm_source=&utm_medium=widget&utm_campaign=chart&utm_term=BINANCE%3A${tvSymbol}"
                         style="width:100%;height:100%;border:none;"
                         allowtransparency="true"
                         scrolling="no"
@@ -721,7 +744,7 @@ require_once 'includes/head.php';
             });
 
             // 캔들스틱 시리즈 (심볼별 소수점 설정)
-            const chartDecimals = PRICE_DECIMALS[currentSymbol] || 2;
+            const chartDecimals = getPriceDecimals(currentSymbol);
             candleSeries = chart.addCandlestickSeries({
                 upColor: '#0ecb81',
                 downColor: '#f6465d',
@@ -846,7 +869,7 @@ require_once 'includes/head.php';
                     const entryPrice = parseFloat(pos.entry_price);
                     const liqPrice = parseFloat(pos.liquidation_price);
                     const isLong = pos.side === 'long';
-                    const size = parseFloat(pos.size).toFixed(4);
+                    const size = formatQty(parseFloat(pos.size), pos.symbol);
 
                     if (entryPrice && !isNaN(entryPrice)) {
                         // 진입가 라인 (굵은 실선)
@@ -889,7 +912,7 @@ require_once 'includes/head.php';
                             lineWidth: 1,
                             lineStyle: LightweightCharts.LineStyle.Dotted,
                             axisLabelVisible: true,
-                            title: `Buy ${qty.toFixed(4)}`,
+                            title: `Buy ${formatQty(qty, currentSymbol)}`,
                         });
                         orderLines.push(orderLine);
                     }
@@ -906,7 +929,7 @@ require_once 'includes/head.php';
                             lineWidth: 1,
                             lineStyle: LightweightCharts.LineStyle.Dotted,
                             axisLabelVisible: true,
-                            title: `Sell ${qty.toFixed(4)}`,
+                            title: `Sell ${formatQty(qty, currentSymbol)}`,
                         });
                         orderLines.push(orderLine);
                     }
@@ -966,67 +989,84 @@ require_once 'includes/head.php';
         // ========================================
         // Socket.IO 실시간 데이터
         // ========================================
-        const SOCKET_SERVER = 'http://localhost:3002';
+        const SOCKET_SERVER = window.FuturXConfig?.wsServerUrl || 'http://localhost:3002';
         let socket = null;
 
-        // 심볼별 소수점 자리수 설정 (공통)
-        const PRICE_DECIMALS = {
-            'BTCUSDT': 2,
-            'ETHUSDT': 2,
-            'BNBUSDT': 2,
-            'SOLUSDT': 2,
-            'XRPUSDT': 4,
-            'DOGEUSDT': 5,
-            'ADAUSDT': 4,
-            'AVAXUSDT': 2,
-            'DOTUSDT': 3,
-            'LINKUSDT': 3,
-            'LTCUSDT': 2,
-            'BCHUSDT': 2,
-            'ATOMUSDT': 3,
-            'ETCUSDT': 2,
-            'XLMUSDT': 5,
-            'TRXUSDT': 5,
-            'NEARUSDT': 3,
-            'APTUSDT': 3,
-            'ARBUSDT': 4,
-            'OPUSDT': 4,
-            'MATICUSDT': 4,
-            'FILUSDT': 3,
-            'ICPUSDT': 3,
-            'SHIBUSDT': 6,
-            'UNIUSDT': 3,
-            'XMRUSDT': 2,
-            'DASHUSDT': 2,
-            'ZECUSDT': 2,
-            'XTZUSDT': 4,
-            'ONTUSDT': 4,
-            'IOTAUSDT': 4
-        };
+        // 심볼별 소수점 자리수 (단일 소스: DB symbols -> window.FuturXConfig.*DecimalsBySymbol)
+        const PRICE_DECIMALS = window.FuturXConfig?.priceDecimalsBySymbol || {};
+        const QTY_DECIMALS = window.FuturXConfig?.qtyDecimalsBySymbol || {};
+        function getPriceDecimals(symbol) {
+            return Number(PRICE_DECIMALS[symbol]) || 2;
+        }
+        function getQtyDecimals(symbol) {
+            return Number(QTY_DECIMALS[symbol]) || 3;
+        }
 
-        // 현재 심볼 (전역)
-        let currentSymbol = window.initialSymbol || 'BTCUSDT';
+        // ========================================
+        // 공통 숫자 포맷 함수 (USD_KRW는 677줄에서 PHP로 설정됨)
+        // ========================================
 
-        // 가격 포맷팅 (심볼에 따른 소수점 자리수) - 공통 함수
+        // 가격 포맷팅 (심볼별 소수점)
         function formatPrice(price, symbol = null) {
             const sym = symbol || currentSymbol;
-            const decimals = PRICE_DECIMALS[sym] || 2;
+            if (window.FuturX?.formatPrice) return window.FuturX.formatPrice(price, sym);
             const p = parseFloat(price);
             if (isNaN(p)) return '-';
-            // 1달러 이상은 천단위 구분자 사용, 미만은 toFixed
-            if (p >= 1) {
-                return p.toLocaleString(undefined, {
-                    minimumFractionDigits: decimals,
-                    maximumFractionDigits: decimals
-                });
-            } else {
-                return p.toFixed(decimals);
-            }
+            const decimals = getPriceDecimals(sym);
+            return p.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
+
+        // 일반 숫자 포맷팅 (천단위 콤마)
+        function formatNum(num, decimals = 2) {
+            const n = parseFloat(num);
+            if (isNaN(n)) return '-';
+            return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
+
+        // 수량 포맷팅 (심볼별 소수점, 표시용: 천단위 포함)
+        function formatQty(qty, symbol = null) {
+            const sym = symbol || currentSymbol;
+            if (window.FuturX?.formatQty) return window.FuturX.formatQty(qty, sym);
+            const q = parseFloat(qty);
+            if (isNaN(q)) return '-';
+            const decimals = getQtyDecimals(sym);
+            return q.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
+
+        // 수량 포맷팅 (입력/페이로드용: 콤마 없이 고정 소수)
+        function formatQtyPlain(qty, symbol = null) {
+            const sym = symbol || currentSymbol;
+            const q = parseFloat(qty);
+            if (isNaN(q)) return '';
+            return q.toFixed(getQtyDecimals(sym));
+        }
+
+        // KRW 포맷팅 (정수, 원)
+        function formatKrw(usd) {
+            const krw = parseFloat(usd) * USD_KRW;
+            if (isNaN(krw)) return '-';
+            return Math.round(krw).toLocaleString('ko-KR');
+        }
+
+        // P&L 포맷팅 (+/- 부호 포함)
+        function formatPnl(pnl, decimals = 2) {
+            const p = parseFloat(pnl);
+            if (isNaN(p)) return '-';
+            const sign = p >= 0 ? '+' : '';
+            return sign + p.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
+
+        // 수수료 포맷팅 (4자리)
+        function formatFee(fee) {
+            const f = parseFloat(fee);
+            if (isNaN(f)) return '0.0000';
+            return f.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
         }
 
         let currentPrice = 0;
         let previousPrice = 0;
         let indexPrice = 0;
+        let allSymbolPrices = {}; // 모든 심볼의 최신 가격 저장
         let high24h = 0;
         let low24h = 0;
         let turnover = 0;
@@ -1098,11 +1138,9 @@ require_once 'includes/head.php';
                 // 심볼 목록 및 가격 요청 (드롭다운용)
                 socket.emit('get:symbols');
 
-                // URL에서 가져온 초기 심볼이 기본값(BTCUSDT)이 아니면 심볼 변경 요청
-                if (currentSymbol !== 'BTCUSDT') {
-                    console.log('[Init] Switching to URL symbol:', currentSymbol);
-                    socket.emit('switch:symbol', { symbol: currentSymbol });
-                }
+                // 항상 현재 심볼로 switch:symbol 요청 (초기 klines 데이터 로드를 위해)
+                console.log('[Init] Switching to symbol:', currentSymbol);
+                socket.emit('switch:symbol', { symbol: currentSymbol });
             });
 
             socket.on('disconnect', () => {
@@ -1192,9 +1230,13 @@ require_once 'includes/head.php';
                 }
             });
 
-            // 모든 심볼 가격 업데이트 (포지션 PnL용)
-            socket.on('prices:all', (allPrices) => {
-                updateAllPositionsPrices(allPrices);
+            // 포지션 심볼 실시간 가격 업데이트 (관리자 설정 간격 적용)
+            socket.on('position:price', (data) => {
+                if (!data.symbol || !data.price) return;
+                // 전역 가격 저장소 업데이트
+                allSymbolPrices[data.symbol] = data.price;
+                // 해당 심볼 포지션만 실시간 업데이트
+                updateSinglePositionPrice(data.symbol, data.price);
             });
 
             // 유저 거래 피드
@@ -1217,6 +1259,34 @@ require_once 'includes/head.php';
                 loadUserBalance();
                 loadUserOrders();
                 loadUserPositions();
+            });
+
+            // 계정 정보 통합 업데이트 (WebSocket 실시간 푸시)
+            socket.on('account:update', (data) => {
+                console.log('[WS] Account update received:', data);
+
+                // 잔고 업데이트
+                if (data.balance !== undefined) {
+                    userBalance = parseFloat(data.balance);
+                }
+                if (data.availableBalance !== undefined) {
+                    userAvailableBalance = parseFloat(data.availableBalance);
+                }
+                if (data.marginBalance !== undefined) {
+                    userMarginBalance = parseFloat(data.marginBalance);
+                }
+                if (data.unrealizedPnl !== undefined) {
+                    userUnrealizedPnl = parseFloat(data.unrealizedPnl);
+                }
+
+                // UI 업데이트
+                updateBalanceDisplay();
+                updateOrderInfo();
+
+                // 포지션 데이터가 있으면 업데이트
+                if (data.positions && Array.isArray(data.positions)) {
+                    renderPositions(data.positions);
+                }
             });
 
             // 지정가 주문 체결 알림 (본인 주문)
@@ -1337,7 +1407,7 @@ require_once 'includes/head.php';
 
                 // 2. 차트 priceFormat 업데이트 (심볼별 소수점)
                 if (candleSeries) {
-                    const newDecimals = PRICE_DECIMALS[data.symbol] || 2;
+                    const newDecimals = getPriceDecimals(data.symbol);
                     candleSeries.applyOptions({
                         priceFormat: {
                             type: 'price',
@@ -1495,8 +1565,7 @@ require_once 'includes/head.php';
                 priceInput.value = formatPrice(currentPrice, currentSymbol);
             }
 
-            // 포지션 실시간 업데이트
-            updatePositionsPrices(currentPrice);
+            // 포지션 실시간 업데이트는 position:price 이벤트로 통합 (관리자 설정 간격 적용)
         }
 
         // ========================================
@@ -1667,6 +1736,11 @@ require_once 'includes/head.php';
             low24h = parseFloat(data.low || data.lowPrice || data.l || low24h);
             turnover = parseFloat(data.quoteVolume || data.q || turnover);
 
+            // 현재 심볼의 가격을 전역 저장소에 저장 (포지션 PNL 계산용)
+            if (currentSymbol && currentPrice > 0) {
+                allSymbolPrices[currentSymbol] = currentPrice;
+            }
+
             // priceChange와 priceChangePercent
             const priceChange = parseFloat(data.priceChange || data.p || 0);
             const priceChangePercent = parseFloat(data.priceChangePercent || data.P || 0);
@@ -1674,6 +1748,8 @@ require_once 'includes/head.php';
 
             updatePriceDisplay();
             updateStats(isUp, priceChange, priceChangePercent);
+
+            // 포지션 PNL 실시간 업데이트는 position:price 이벤트로 통합 (관리자 설정 간격 적용)
         }
 
         // ========================================
@@ -1912,7 +1988,7 @@ require_once 'includes/head.php';
             const maxTotal = Math.max(maxAskTotal, maxBidTotal, 0.1);
 
             // 정밀도에 따른 소수점 자릿수 계산 (심볼별 기본값 참조)
-            const defaultDecimals = PRICE_DECIMALS[currentSymbol] || 2;
+            const defaultDecimals = getPriceDecimals(currentSymbol);
             const precisionDecimals = obPrecision < 1 ? Math.round(Math.abs(Math.log10(obPrecision))) : 0;
             const priceDecimals = Math.max(precisionDecimals, defaultDecimals);
 
@@ -2367,41 +2443,54 @@ require_once 'includes/head.php';
         }
 
         // ========================================
-        // 심볼 드롭다운 설정
+        // 쿠키 유틸리티 (전역)
         // ========================================
-        const symbolConfigs = {
-            'BTCUSDT': { icon: '₿', color: '#f7931a', name: 'Bitcoin', logo: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
-            'ETHUSDT': { icon: 'Ξ', color: '#627eea', name: 'Ethereum', logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.png' },
-            'BNBUSDT': { icon: 'B', color: '#f3ba2f', name: 'BNB', logo: 'https://cryptologos.cc/logos/bnb-bnb-logo.png' },
-            'SOLUSDT': { icon: '◎', color: '#00d18c', name: 'Solana', logo: 'https://cryptologos.cc/logos/solana-sol-logo.png' },
-            'XRPUSDT': { icon: '✕', color: '#23292f', name: 'Ripple', logo: 'https://cryptologos.cc/logos/xrp-xrp-logo.png' },
-            'DOGEUSDT': { icon: 'Ð', color: '#c2a633', name: 'Dogecoin', logo: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png' },
-            'ADAUSDT': { icon: 'A', color: '#0033ad', name: 'Cardano', logo: 'https://cryptologos.cc/logos/cardano-ada-logo.png' },
-            'AVAXUSDT': { icon: 'A', color: '#e84142', name: 'Avalanche', logo: 'https://cryptologos.cc/logos/avalanche-avax-logo.png' },
-            'DOTUSDT': { icon: '●', color: '#e6007a', name: 'Polkadot', logo: 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png' },
-            'LINKUSDT': { icon: '⬡', color: '#375bd2', name: 'Chainlink', logo: 'https://cryptologos.cc/logos/chainlink-link-logo.png' },
-            'LTCUSDT': { icon: 'Ł', color: '#bfbbbb', name: 'Litecoin', logo: 'https://cryptologos.cc/logos/litecoin-ltc-logo.png' },
-            'BCHUSDT': { icon: 'B', color: '#8dc351', name: 'Bitcoin Cash', logo: 'https://cryptologos.cc/logos/bitcoin-cash-bch-logo.png' },
-            'ATOMUSDT': { icon: '⚛', color: '#2e3148', name: 'Cosmos', logo: 'https://cryptologos.cc/logos/cosmos-atom-logo.png' },
-            'ETCUSDT': { icon: 'E', color: '#328332', name: 'Ethereum Classic', logo: 'https://cryptologos.cc/logos/ethereum-classic-etc-logo.png' },
-            'XLMUSDT': { icon: '*', color: '#000000', name: 'Stellar', logo: 'https://cryptologos.cc/logos/stellar-xlm-logo.png' },
-            'TRXUSDT': { icon: 'T', color: '#ff0013', name: 'TRON', logo: 'https://cryptologos.cc/logos/tron-trx-logo.png' },
-            'NEARUSDT': { icon: 'N', color: '#00c08b', name: 'NEAR', logo: 'https://cryptologos.cc/logos/near-protocol-near-logo.png' },
-            'APTUSDT': { icon: 'A', color: '#4cd2c0', name: 'Aptos', logo: 'https://cryptologos.cc/logos/aptos-apt-logo.png' },
-            'ARBUSDT': { icon: 'A', color: '#28a0f0', name: 'Arbitrum', logo: 'https://cryptologos.cc/logos/arbitrum-arb-logo.png' },
-            'OPUSDT': { icon: 'O', color: '#ff0420', name: 'Optimism', logo: 'https://cryptologos.cc/logos/optimism-ethereum-op-logo.png' },
-            'MATICUSDT': { icon: 'M', color: '#8247e5', name: 'Polygon', logo: 'https://cryptologos.cc/logos/polygon-matic-logo.png' },
-            'FILUSDT': { icon: 'F', color: '#0090ff', name: 'Filecoin', logo: 'https://cryptologos.cc/logos/filecoin-fil-logo.png' },
-            'ICPUSDT': { icon: 'I', color: '#29abe2', name: 'Internet Computer', logo: 'https://cryptologos.cc/logos/internet-computer-icp-logo.png' },
-            'SHIBUSDT': { icon: 'S', color: '#ffa409', name: 'Shiba Inu', logo: 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png' },
-            'UNIUSDT': { icon: 'U', color: '#ff007a', name: 'Uniswap', logo: 'https://cryptologos.cc/logos/uniswap-uni-logo.png' },
-            'XMRUSDT': { icon: 'M', color: '#ff6600', name: 'Monero', logo: 'https://cryptologos.cc/logos/monero-xmr-logo.png' },
-            'DASHUSDT': { icon: 'D', color: '#008ce7', name: 'Dash', logo: 'https://cryptologos.cc/logos/dash-dash-logo.png' },
-            'ZECUSDT': { icon: 'Z', color: '#f4b728', name: 'Zcash', logo: 'https://cryptologos.cc/logos/zcash-zec-logo.png' },
-            'XTZUSDT': { icon: 'X', color: '#a6e000', name: 'Tezos', logo: 'https://cryptologos.cc/logos/tezos-xtz-logo.png' },
-            'ONTUSDT': { icon: 'O', color: '#32a4be', name: 'Ontology', logo: 'https://cryptologos.cc/logos/ontology-ont-logo.png' },
-            'IOTAUSDT': { icon: 'I', color: '#242424', name: 'IOTA', logo: 'https://cryptologos.cc/logos/iota-miota-logo.png' }
-        };
+        function setCookie(name, value, days = 365) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+        }
+
+        function getCookie(name) {
+            const value = document.cookie.split('; ').find(row => row.startsWith(name + '='));
+            return value ? decodeURIComponent(value.split('=')[1]) : null;
+        }
+
+        // 헤더 별표 동기화 (전역)
+        function syncHeaderStar() {
+            const headerStar = document.getElementById('symbolFavorite');
+            const currentSymbolName = document.getElementById('currentSymbolName')?.textContent;
+            if (!headerStar || !currentSymbolName) return;
+
+            const saved = getCookie('futurx_favorites');
+            let favorites = [];
+            if (saved) {
+                try { favorites = JSON.parse(saved); } catch(e) {}
+            }
+
+            if (favorites.includes(currentSymbolName)) {
+                headerStar.classList.add('active');
+                headerStar.textContent = '★';
+            } else {
+                headerStar.classList.remove('active');
+                headerStar.textContent = '☆';
+            }
+        }
+
+        // ========================================
+        // 심볼 드롭다운 설정 (DB에서 로드)
+        // ========================================
+        const symbolConfigs = <?php
+            $jsConfigs = [];
+            foreach ($symbolsData as $sym => $data) {
+                $jsConfigs[$sym] = [
+                    'icon' => $data['icon'] ?? substr($data['base_asset'], 0, 1),
+                    'color' => $data['color'] ?? '#ffffff',
+                    'name' => $data['display_name'] ?? $data['base_asset'],
+                    'logo' => $data['logo_url'] ?? 'https://cryptologos.cc/logos/bitcoin-btc-logo.png'
+                ];
+            }
+            echo json_encode($jsConfigs, JSON_UNESCAPED_UNICODE);
+        ?>;
 
         // 심볼 드롭다운 목록 동적 생성 (바이낸스 스타일)
         function generateSymbolList() {
@@ -2603,18 +2692,7 @@ require_once 'includes/head.php';
                 }
             }
 
-            // 쿠키 유틸리티
-            function setCookie(name, value, days = 365) {
-                const expires = new Date(Date.now() + days * 864e5).toUTCString();
-                document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
-            }
-
-            function getCookie(name) {
-                const value = document.cookie.split('; ').find(row => row.startsWith(name + '='));
-                return value ? decodeURIComponent(value.split('=')[1]) : null;
-            }
-
-            // 즐겨찾기 저장 (쿠키)
+            // 즐겨찾기 저장 (쿠키) - 전역 함수 사용
             function saveFavorites() {
                 const favorites = [];
                 document.querySelectorAll('.dropdown-item').forEach(item => {
@@ -2629,7 +2707,7 @@ require_once 'includes/head.php';
                 syncHeaderStar();
             }
 
-            // 즐겨찾기 불러오기 (쿠키)
+            // 즐겨찾기 불러오기 (쿠키) - 전역 함수 사용
             function loadFavorites() {
                 const saved = getCookie('futurx_favorites');
                 if (saved) {
@@ -2643,27 +2721,6 @@ require_once 'includes/head.php';
                             }
                         });
                     } catch(e) {}
-                }
-            }
-
-            // 헤더 별표 동기화 (현재 심볼이 즐겨찾기인지 확인)
-            function syncHeaderStar() {
-                const headerStar = document.getElementById('symbolFavorite');
-                const currentSymbol = document.getElementById('currentSymbolName')?.textContent;
-                if (!headerStar || !currentSymbol) return;
-
-                const saved = getCookie('futurx_favorites');
-                let favorites = [];
-                if (saved) {
-                    try { favorites = JSON.parse(saved); } catch(e) {}
-                }
-
-                if (favorites.includes(currentSymbol)) {
-                    headerStar.classList.add('active');
-                    headerStar.textContent = '★';
-                } else {
-                    headerStar.classList.remove('active');
-                    headerStar.textContent = '☆';
                 }
             }
 
@@ -2890,7 +2947,7 @@ require_once 'includes/head.php';
             const baseCoin = symbol.replace('USDT', '');
 
             // 심볼별 기본 정밀도 및 옵션 (PRICE_DECIMALS 기반 자동 생성)
-            const decimals = PRICE_DECIMALS[symbol] || 2;
+            const decimals = getPriceDecimals(symbol);
             const minPrecision = Math.pow(10, -decimals);
             const defaultOptions = [minPrecision, minPrecision * 10, minPrecision * 100, minPrecision * 1000];
 
@@ -3007,7 +3064,10 @@ require_once 'includes/head.php';
         // ========================================
         // 슬라이더 및 주문 입력 연동
         // ========================================
+        let userBalance = 0;
         let userAvailableBalance = 0;
+        let userMarginBalance = 0;
+        let userUnrealizedPnl = 0;
         let sliderPercent = 0;
         let updateOrderInfoPending = false;
 
@@ -3144,6 +3204,27 @@ require_once 'includes/head.php';
             });
         }
 
+        // 잔고 표시 업데이트 (WebSocket account:update용)
+        function updateBalanceDisplay() {
+            const formatBalance = (val) => val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            const marginBalanceEl = document.getElementById('marginBalanceDisplay');
+            const availableBalanceEl = document.getElementById('availableBalanceDisplay');
+            const orderAvailable = document.getElementById('orderAvailable');
+
+            // 실제 주문 가능 금액 = 가용잔고 + 미실현 PNL (바이낸스 방식)
+            const orderableBalance = userAvailableBalance + userUnrealizedPnl;
+
+            if (marginBalanceEl) marginBalanceEl.textContent = formatBalance(userMarginBalance + userUnrealizedPnl) + ' USDT';
+            if (availableBalanceEl) availableBalanceEl.textContent = formatBalance(orderableBalance) + ' USDT';
+            if (orderAvailable) orderAvailable.textContent = formatBalance(orderableBalance) + ' USDT';
+            if (typeof updateUnrealizedPnlDisplay === 'function') updateUnrealizedPnlDisplay(userUnrealizedPnl);
+            if (typeof updateMarginBars === 'function' && userMarginBalance > 0) {
+                const initialMargin = userMarginBalance - userAvailableBalance;
+                updateMarginBars((initialMargin / userMarginBalance) * 100, (initialMargin / userMarginBalance) * 20);
+            }
+        }
+
+
         // 주문 정보 업데이트
         function updateOrderInfo() {
             const quantityInput = document.getElementById('quantityInput');
@@ -3156,14 +3237,15 @@ require_once 'includes/head.php';
             const qty = parseFloat(quantityInput?.value) || 0;
             const margin = parseFloat(amountInput?.value) || 0;
 
-            // Available
+            // Available (미실현 PNL 포함 - 바이낸스 방식)
+            const orderableBalance = userAvailableBalance + userUnrealizedPnl;
             if (orderAvailable) {
-                orderAvailable.textContent = userAvailableBalance.toFixed(2) + ' USDT';
+                orderAvailable.textContent = orderableBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USDT';
             }
 
-            // Max Size
-            if (orderMaxSize && currentPrice > 0 && userAvailableBalance > 0) {
-                const maxQty = (userAvailableBalance * userLeverage) / currentPrice;
+            // Max Size (미실현 PNL 포함)
+            if (orderMaxSize && currentPrice > 0 && orderableBalance > 0) {
+                const maxQty = (orderableBalance * userLeverage) / currentPrice;
                 orderMaxSize.textContent = maxQty.toFixed(6) + ' BTC';
             }
 
@@ -3532,6 +3614,7 @@ require_once 'includes/head.php';
                     const fee = pos.total_fee / 2;
                     const qtyUsdt = qty * pos.exit_price;
                     const baseCoin = pos.symbol.replace('USDT', '');
+                    const pnlKrw = pos.realized_pnl * USD_KRW;
 
                     return `
                         <tr>
@@ -3547,14 +3630,19 @@ require_once 'includes/head.php';
                             <td>${formatPrice(pos.exit_price, pos.symbol)}</td>
                             <td>
                                 <div class="qty-cell">
-                                    <span>${qty.toFixed(4)} ${baseCoin}</span>
-                                    <span class="qty-usdt">${qtyUsdt.toFixed(2)} USDT</span>
+                                    <span>${formatQty(qty)} ${baseCoin}</span>
+                                    <span class="qty-usdt">${formatNum(qtyUsdt)} USDT</span>
                                 </div>
                             </td>
-                            <td class="${pnlClass}">${pos.realized_pnl >= 0 ? '+' : ''}${pos.realized_pnl.toFixed(2)}</td>
-                            <td>${fee.toFixed(4)}</td>
-                            <td>${fee.toFixed(4)}</td>
-                            <td>0.0000</td>
+                            <td class="${pnlClass}">
+                                <div class="pnl-cell">
+                                    <span>${formatPnl(pos.realized_pnl)}</span>
+                                    <span class="pnl-krw">${formatKrw(pos.realized_pnl)} KRW</span>
+                                </div>
+                            </td>
+                            <td>${formatFee(fee)}</td>
+                            <td>${formatFee(fee)}</td>
+                            <td>${formatFee(0)}</td>
                         </tr>
                     `;
                 }).join('');
@@ -3574,10 +3662,15 @@ require_once 'includes/head.php';
                                     <span class="symbol-type">Perp</span>
                                 </div>
                             </td>
-                            <td class="${pnlClass}">${pos.realized_pnl >= 0 ? '+' : ''}${pos.realized_pnl.toFixed(2)}</td>
-                            <td>${fee.toFixed(4)}</td>
-                            <td>${fee.toFixed(4)}</td>
-                            <td>0.0000</td>
+                            <td class="${pnlClass}">
+                                <div class="pnl-cell">
+                                    <span>${formatPnl(pos.realized_pnl)}</span>
+                                    <span class="pnl-krw">${formatKrw(pos.realized_pnl)} KRW</span>
+                                </div>
+                            </td>
+                            <td>${formatFee(fee)}</td>
+                            <td>${formatFee(fee)}</td>
+                            <td>${formatFee(0)}</td>
                             <td class="date-cell">${openedAt}</td>
                             <td class="duration-cell">${pos.duration}</td>
                             <td class="date-cell">${closedAt}</td>
@@ -3848,7 +3941,14 @@ require_once 'includes/head.php';
                 if (data.success) {
                     currentUser = data.data.user;
                     updateAuthUI(true);
+                    // 먼저 기본 wallet 표시 후, 상세 balance 로드
                     updateWalletDisplay(data.data.wallets);
+                    // loadUserBalance는 아래에서 정의되므로 setTimeout으로 호출
+                    setTimeout(() => {
+                        if (typeof loadUserBalance === 'function') {
+                            loadUserBalance();
+                        }
+                    }, 100);
                     loadUserPositions();
                     loadUserOrders();
 
@@ -3883,33 +3983,85 @@ require_once 'includes/head.php';
         // 전역 wallet 데이터 저장
         let currentWallets = [];
 
-        function updateWalletDisplay(wallets) {
+        function updateWalletDisplay(wallets, balanceData = null) {
             // 전역 wallet 데이터 저장
             currentWallets = wallets;
 
             const usdtWallet = wallets.find(w => w.currency === 'USDT');
             if (usdtWallet) {
-                const balance = parseFloat(usdtWallet.balance) || 0;
-                const availableBalance = parseFloat(usdtWallet.available_balance) || 0;
+                const walletBalance = parseFloat(usdtWallet.balance) || 0;
 
-                // 전역 변수 업데이트 (주문 패널용)
+                // 바이낸스 스타일 계산 (API에서 계산된 값 사용)
+                let marginBalance = walletBalance;
+                let availableBalance = parseFloat(usdtWallet.available_balance) || 0;
+                let initialMargin = 0;
+                let maintenanceMargin = 0;
+                let unrealizedPnl = 0;
+
+                // API 응답에서 계산된 비율 가져오기
+                let imRatio = 0;
+                let mmRatio = 0;
+
+                if (balanceData) {
+                    // API에서 계산된 값 사용 (바이낸스 스타일)
+                    marginBalance = parseFloat(balanceData.margin_balance) || walletBalance;
+                    availableBalance = parseFloat(balanceData.available_balance) || availableBalance;
+                    // Total IM = Position IM + Order IM
+                    initialMargin = parseFloat(balanceData.total_im) || parseFloat(balanceData.position_margin) || 0;
+                    maintenanceMargin = parseFloat(balanceData.maintenance_margin) || 0;
+                    unrealizedPnl = parseFloat(balanceData.unrealized_pnl) || 0;
+                    // API에서 계산된 비율 직접 사용
+                    imRatio = parseFloat(balanceData.im_ratio) || 0;
+                    mmRatio = parseFloat(balanceData.mm_ratio) || 0;
+                }
+
+                // 전역 변수 업데이트 (주문 패널용 + WebSocket용)
+                userBalance = walletBalance;
                 userAvailableBalance = availableBalance;
+                userMarginBalance = marginBalance;
+                userUnrealizedPnl = unrealizedPnl;
 
                 // 헤더 잔고 표시
                 const userBalanceEl = document.getElementById('userBalance');
                 if (userBalanceEl) {
-                    userBalanceEl.textContent = availableBalance.toFixed(2) + ' USDT';
+                    userBalanceEl.textContent = marginBalance.toFixed(2) + ' USDT';
                 }
 
-                // 계좌 정보 업데이트
-                const balanceRows = document.querySelectorAll('.balance-row');
-                if (balanceRows[0]) {
-                    balanceRows[0].querySelector('span:last-child').textContent =
-                        balance.toFixed(4) + ' USDT';
+                // 계좌 정보 업데이트 (바이낸스 스타일)
+                const marginBalanceEl = document.getElementById('marginBalanceDisplay');
+                const availableBalanceEl = document.getElementById('availableBalanceDisplay');
+
+                // 숫자 포맷 함수 (간결하게)
+                const formatBalance = (val) => {
+                    return val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                };
+
+                // Margin Balance = Wallet Balance + Unrealized PNL (실질 계정 가치)
+                if (marginBalanceEl) {
+                    marginBalanceEl.textContent = formatBalance(marginBalance) + ' USDT';
                 }
-                if (balanceRows[1]) {
-                    balanceRows[1].querySelector('span:last-child').textContent =
-                        availableBalance.toFixed(4) + ' USDT';
+                // Available Balance = Margin Balance - Initial Margin (새 포지션에 사용 가능한 금액)
+                if (availableBalanceEl) {
+                    availableBalanceEl.textContent = formatBalance(availableBalance) + ' USDT';
+                }
+
+                // 전역 변수에 저장 (실시간 PNL 업데이트용)
+                window.currentWalletBalance = parseFloat(balanceData?.wallet_balance) || walletBalance;
+                window.currentInitialMargin = initialMargin;
+                window.currentMaintenanceMargin = maintenanceMargin;
+
+                // 미실현 PNL 표시
+                updateUnrealizedPnlDisplay(unrealizedPnl);
+
+                // 마진 비율 표시 (API에서 계산된 비율 사용, 또는 직접 계산)
+                if (imRatio > 0 || mmRatio > 0) {
+                    updateMarginBars(imRatio, mmRatio);
+                } else if (marginBalance > 0 && initialMargin > 0) {
+                    const calcImRatio = (initialMargin / marginBalance) * 100;
+                    const calcMmRatio = (maintenanceMargin / marginBalance) * 100;
+                    updateMarginBars(calcImRatio, calcMmRatio);
+                } else {
+                    updateMarginBars(0, 0);
                 }
 
                 // 주문 패널 정보 업데이트
@@ -3920,6 +4072,117 @@ require_once 'includes/head.php';
             const assetsPanel = document.getElementById('assetsPanel');
             if (assetsPanel && assetsPanel.classList.contains('active')) {
                 renderAssetsTable(wallets);
+            }
+        }
+
+        // 이전 PNL 값 캐싱 (깜빡임 방지)
+        let lastValidPnl = null;
+
+        // 미실현 PNL 표시 업데이트 (Margin Balance, Available Balance도 함께 업데이트)
+        function updateUnrealizedPnlDisplay(pnl) {
+            const pnlEl = document.getElementById('unrealizedPnlDisplay');
+            if (!pnlEl) return;
+
+            const pnlValue = parseFloat(pnl);
+
+            // 0이거나 NaN이면 이전 값 유지 (깜빡임 방지)
+            // 단, 실제로 포지션이 없어서 0인 경우는 예외
+            if ((isNaN(pnlValue) || pnlValue === 0) && lastValidPnl !== null && window.currentInitialMargin > 0) {
+                return; // 이전 값 유지
+            }
+
+            // 유효한 값이면 캐시 업데이트
+            if (!isNaN(pnlValue)) {
+                lastValidPnl = pnlValue;
+                userUnrealizedPnl = pnlValue; // 전역 변수도 업데이트
+            }
+
+            const displayValue = lastValidPnl !== null ? lastValidPnl : 0;
+            pnlEl.textContent = (displayValue >= 0 ? '+' : '') + displayValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USDT';
+
+            // 색상 클래스 적용
+            pnlEl.classList.remove('positive', 'negative');
+            if (displayValue > 0) {
+                pnlEl.classList.add('positive');
+            } else if (displayValue < 0) {
+                pnlEl.classList.add('negative');
+            }
+
+            // Margin Balance = Wallet Balance + Unrealized PNL (실시간 업데이트)
+            const walletBalance = window.currentWalletBalance || 0;
+            const initialMargin = window.currentInitialMargin || 0;
+            const maintenanceMargin = window.currentMaintenanceMargin || 0;
+
+            if (walletBalance > 0) {
+                const marginBalance = walletBalance + displayValue;
+                const availableBalance = marginBalance - initialMargin;
+
+                const marginBalanceEl = document.getElementById('marginBalanceDisplay');
+                const availableBalanceEl = document.getElementById('availableBalanceDisplay');
+                const orderAvailable = document.getElementById('orderAvailable');
+
+                const formatBalance = (val) => val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+                if (marginBalanceEl) {
+                    marginBalanceEl.textContent = formatBalance(marginBalance) + ' USDT';
+                }
+                if (availableBalanceEl) {
+                    availableBalanceEl.textContent = formatBalance(availableBalance) + ' USDT';
+                }
+                // 주문창 Available도 동일하게 업데이트 (미실현 PNL 포함)
+                if (orderAvailable) {
+                    orderAvailable.textContent = formatBalance(availableBalance) + ' USDT';
+                }
+
+                // 마진 비율도 실시간 업데이트
+                if (marginBalance > 0) {
+                    const initialMarginRatio = (initialMargin / marginBalance) * 100;
+                    const maintenanceMarginRatio = (maintenanceMargin / marginBalance) * 100;
+                    updateMarginBars(initialMarginRatio, maintenanceMarginRatio);
+                }
+            }
+        }
+
+        // 마진 바 업데이트
+        function updateMarginBars(initialMargin, maintenanceMargin) {
+            const initialBar = document.getElementById('initialMarginBar');
+            const initialPercent = document.getElementById('initialMarginPercent');
+            const maintenanceBar = document.getElementById('maintenanceMarginBar');
+            const maintenancePercent = document.getElementById('maintenanceMarginPercent');
+
+            // 최대 100%로 제한
+            const initialCapped = Math.min(100, Math.max(0, initialMargin));
+            const maintenanceCapped = Math.min(100, Math.max(0, maintenanceMargin));
+
+            if (initialBar) {
+                initialBar.style.width = initialCapped + '%';
+                // 위험도에 따른 색상 변경
+                initialBar.classList.remove('green', 'yellow', 'red');
+                if (initialCapped >= 80) {
+                    initialBar.classList.add('red');
+                } else if (initialCapped >= 50) {
+                    initialBar.classList.add('yellow');
+                } else {
+                    initialBar.classList.add('green');
+                }
+            }
+            if (initialPercent) {
+                initialPercent.textContent = initialCapped.toFixed(2) + '%';
+            }
+
+            if (maintenanceBar) {
+                maintenanceBar.style.width = maintenanceCapped + '%';
+                maintenanceBar.classList.remove('green', 'yellow', 'red');
+                if (maintenanceCapped >= 80) {
+                    maintenanceBar.classList.add('red');
+                } else if (maintenanceCapped >= 50) {
+                    maintenanceBar.classList.add('yellow');
+                } else {
+                    maintenanceBar.classList.add('green');
+                }
+            }
+            if (maintenancePercent) {
+                maintenancePercent.textContent = maintenanceCapped.toFixed(2) + '%';
             }
         }
 
@@ -4037,7 +4300,8 @@ require_once 'includes/head.php';
 
                 const data = await response.json();
                 if (data.success) {
-                    updateWalletDisplay(data.data.wallets);
+                    // balanceData 전체를 전달하여 마진/PNL 정보도 업데이트
+                    updateWalletDisplay(data.data.wallets, data.data);
                 }
             } catch (error) {
                 console.error('Load balance error:', error);
@@ -4063,38 +4327,19 @@ require_once 'includes/head.php';
                 if (data.success) {
                     currentWallets = data.data.wallets;
                     renderAssetsTable(data.data.wallets);
-                    // 헤더 잔고도 업데이트
-                    updateWalletDisplay(data.data.wallets);
+                    // 헤더 잔고도 업데이트 (balanceData 포함)
+                    updateWalletDisplay(data.data.wallets, data.data);
                 }
             } catch (error) {
                 console.error('Load assets error:', error);
             }
         }
 
-        // 코인 아이콘 URL 가져오기
+        // 코인 아이콘 URL 가져오기 (DB symbolConfigs 활용)
         function getCoinIconUrl(currency) {
-            const symbol = currency.toLowerCase();
-            return `https://assets.coingecko.com/coins/images/1/small/bitcoin.png`; // fallback
+            const symbol = currency + 'USDT';
+            return symbolConfigs[symbol]?.logo || 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png';
         }
-
-        // 코인 아이콘 맵핑 (CoinGecko 기준)
-        const COIN_ICONS = {
-            'USDT': 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
-            'BTC': 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
-            'ETH': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
-            'SOL': 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
-            'XRP': 'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
-            'DOGE': 'https://assets.coingecko.com/coins/images/5/small/dogecoin.png',
-            'BNB': 'https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png',
-            'ADA': 'https://assets.coingecko.com/coins/images/975/small/cardano.png',
-            'AVAX': 'https://assets.coingecko.com/coins/images/12559/small/Avalanche_Circle_RedWhite_Trans.png',
-            'MATIC': 'https://assets.coingecko.com/coins/images/4713/small/polygon.png',
-            'LINK': 'https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png',
-            'DOT': 'https://assets.coingecko.com/coins/images/12171/small/polkadot.png',
-            'UNI': 'https://assets.coingecko.com/coins/images/12504/small/uni.png',
-            'ATOM': 'https://assets.coingecko.com/coins/images/1481/small/cosmos_hub.png',
-            'LTC': 'https://assets.coingecko.com/coins/images/2/small/litecoin.png'
-        };
 
         // Assets 테이블 렌더링
         function renderAssetsTable(wallets) {
@@ -4127,7 +4372,7 @@ require_once 'includes/head.php';
                     }
                 }
 
-                const iconUrl = COIN_ICONS[wallet.currency] || `https://assets.coingecko.com/coins/images/1/small/bitcoin.png`;
+                const iconUrl = getCoinIconUrl(wallet.currency);
 
                 return `
                     <tr>
@@ -4158,6 +4403,12 @@ require_once 'includes/head.php';
                 const data = await response.json();
                 if (data.success) {
                     renderPositions(data.data.positions);
+
+                    // 포지션 심볼들 실시간 구독 (거래소 방식)
+                    if (socket && socket.connected && data.data.positions.length > 0) {
+                        const positionSymbols = [...new Set(data.data.positions.map(p => p.symbol))];
+                        socket.emit('subscribe:positions', { symbols: positionSymbols });
+                    }
 
                     // 탭 카운트 업데이트
                     const posTab = document.querySelectorAll('.panel-tab')[1];
@@ -4238,18 +4489,9 @@ require_once 'includes/head.php';
         // 포지션 데이터 저장 (실시간 업데이트용)
         let userPositions = [];
 
-        // 심볼별 로고 URL
+        // 심볼별 로고 URL (DB symbolConfigs 활용)
         function getSymbolLogo(symbol) {
-            const logos = {
-                'BTCUSDT': 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
-                'ETHUSDT': 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
-                'SOLUSDT': 'https://cryptologos.cc/logos/solana-sol-logo.png',
-                'XRPUSDT': 'https://cryptologos.cc/logos/xrp-xrp-logo.png',
-                'DOGEUSDT': 'https://cryptologos.cc/logos/dogecoin-doge-logo.png',
-                'ADAUSDT': 'https://cryptologos.cc/logos/cardano-ada-logo.png',
-                'AVAXUSDT': 'https://cryptologos.cc/logos/avalanche-avax-logo.png'
-            };
-            return logos[symbol] || '';
+            return symbolConfigs[symbol]?.logo || '';
         }
 
         function renderPositions(positions) {
@@ -4265,8 +4507,16 @@ require_once 'includes/head.php';
 
             tbody.innerHTML = positions.map(p => {
                 const pnlClass = parseFloat(p.unrealized_pnl) >= 0 ? 'up' : 'down';
-                const roeClass = parseFloat(p.roe) >= 0 ? 'up' : 'down';
                 const logoUrl = getSymbolLogo(p.symbol);
+                const size = parseFloat(p.size);
+                const markPrice = parseFloat(p.mark_price) || 0;
+                const sizeUsdt = size * markPrice;
+                const pnlUsdt = parseFloat(p.unrealized_pnl);
+                const pnlKrw = pnlUsdt * USD_KRW;
+                const roe = parseFloat(p.roe);
+                const formatNum = (n, d = 2) => n.toLocaleString('en-US', {minimumFractionDigits: d, maximumFractionDigits: d});
+                const formatKrw = (n) => Math.round(n).toLocaleString('ko-KR');
+                const coinName = p.symbol.replace('USDT', '');
                 return `
                     <tr data-position-id="${p.id}" data-symbol="${p.symbol}" data-side="${p.side}" data-entry="${p.entry_price}">
                         <td>
@@ -4274,12 +4524,18 @@ require_once 'includes/head.php';
                                 <img src="${logoUrl}" alt="${p.symbol}" class="position-coin-logo" style="width: 20px; height: 20px; margin-right: 6px; vertical-align: middle;">${p.symbol}
                             </div>
                         </td>
-                        <td class="${p.side}">${p.side === 'long' ? '+' : '-'}${parseFloat(p.size).toFixed(4)} ${p.symbol.replace('USDT', '')}</td>
+                        <td class="${p.side}">
+                            <div>${p.side === 'long' ? '+' : '-'}${formatNum(size, 2)} ${coinName}</div>
+                            <div style="font-size: 11px; color: #888;">${formatNum(sizeUsdt, 2)} USDT</div>
+                        </td>
                         <td>${formatPrice(parseFloat(p.entry_price), p.symbol)}</td>
-                        <td class="mark-price-cell">${formatPrice(parseFloat(p.mark_price), p.symbol)}</td>
+                        <td class="mark-price-cell">${formatPrice(markPrice, p.symbol)}</td>
                         <td>${formatPrice(parseFloat(p.liquidation_price), p.symbol)}</td>
-                        <td>${parseFloat(p.margin).toFixed(2)} USDT</td>
-                        <td class="pnl-cell ${pnlClass}">${parseFloat(p.unrealized_pnl).toFixed(2)} (${parseFloat(p.roe).toFixed(2)}%)</td>
+                        <td>${formatNum(parseFloat(p.margin))} USDT</td>
+                        <td class="pnl-cell ${pnlClass}">
+                            <div>${pnlUsdt >= 0 ? '+' : ''}${formatNum(pnlUsdt)} USDT (${formatNum(roe)}%)</div>
+                            <div style="font-size: 11px; color: #888;">₩${pnlKrw >= 0 ? '+' : ''}${formatKrw(pnlKrw)} KRW</div>
+                        </td>
                         <td>
                             <button class="close-position-btn" onclick="closePosition('${p.id}', '${p.symbol}', '${p.side}', ${p.size})">
                                 닫기
@@ -4330,12 +4586,11 @@ require_once 'includes/head.php';
         function updatePositionsPrices(newPrice) {
             if (!userPositions || userPositions.length === 0) return;
 
+            let totalUnrealizedPnl = 0; // 총 미실현 PNL
+
             const rows = document.querySelectorAll('#positionsBody tr[data-position-id]');
             rows.forEach(row => {
                 const symbol = row.dataset.symbol;
-                // 현재 활성 심볼의 포지션만 업데이트
-                if (symbol !== currentSymbol) return;
-
                 const side = row.dataset.side;
                 const entryPrice = parseFloat(row.dataset.entry);
                 const position = userPositions.find(p => p.id == row.dataset.positionId);
@@ -4344,35 +4599,65 @@ require_once 'includes/head.php';
                 const size = parseFloat(position.size);
                 const leverage = parseFloat(position.leverage) || 10;
 
+                // 현재 심볼이면 새 가격 사용, 아니면 기존 저장된 가격 사용
+                const priceToUse = (symbol === currentSymbol) ? newPrice : (allSymbolPrices[symbol] || parseFloat(position.mark_price));
+
                 // PnL 계산
                 let pnl = 0;
                 if (side === 'long') {
-                    pnl = (newPrice - entryPrice) * size;
+                    pnl = (priceToUse - entryPrice) * size;
                 } else {
-                    pnl = (entryPrice - newPrice) * size;
+                    pnl = (entryPrice - priceToUse) * size;
                 }
+
+                // 총 PNL에 합산
+                totalUnrealizedPnl += pnl;
 
                 const margin = parseFloat(position.margin);
                 const roe = margin > 0 ? (pnl / margin) * 100 : 0;
 
-                // DOM 업데이트
-                const markPriceCell = row.querySelector('.mark-price-cell');
-                const pnlCell = row.querySelector('.pnl-cell');
+                // 현재 활성 심볼의 포지션만 DOM 업데이트
+                if (symbol === currentSymbol) {
+                    const markPriceCell = row.querySelector('.mark-price-cell');
+                    const pnlCell = row.querySelector('.pnl-cell');
+                    const sizeCell = row.querySelector('td:nth-child(2)');
 
-                if (markPriceCell) {
-                    markPriceCell.textContent = formatPrice(newPrice, symbol);
-                }
+                    if (markPriceCell) {
+                        markPriceCell.textContent = formatPrice(newPrice, symbol);
+                    }
 
-                if (pnlCell) {
-                    pnlCell.className = `pnl-cell ${pnl >= 0 ? 'up' : 'down'}`;
-                    pnlCell.textContent = `${pnl.toFixed(2)} (${roe.toFixed(2)}%)`;
+                    if (sizeCell) {
+                        const coinName = symbol.replace('USDT', '');
+                        const sizeUsdt = size * priceToUse;
+                        const fmtSize = size.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        const fmtSizeUsdt = sizeUsdt.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        sizeCell.innerHTML = `<div>${side === 'long' ? '+' : '-'}${fmtSize} ${coinName}</div><div style="font-size: 11px; color: #888;">${fmtSizeUsdt} USDT</div>`;
+                    }
+
+                    if (pnlCell) {
+                        pnlCell.className = `pnl-cell ${pnl >= 0 ? 'up' : 'down'}`;
+                        const fmtPnl = pnl.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        const fmtRoe = roe.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        const pnlKrwVal = pnl * USD_KRW;
+                        const fmtKrw = Math.round(pnlKrwVal).toLocaleString('ko-KR');
+                        pnlCell.innerHTML = `<div>${pnl >= 0 ? '+' : ''}${fmtPnl} USDT (${fmtRoe}%)</div><div style="font-size: 11px; color: #888;">₩${pnlKrwVal >= 0 ? '+' : ''}${fmtKrw} KRW</div>`;
+                    }
                 }
             });
+
+            // 총 미실현 PNL 업데이트
+            updateUnrealizedPnlDisplay(totalUnrealizedPnl);
         }
 
         // 모든 심볼의 포지션 가격/PnL 업데이트
         function updateAllPositionsPrices(allPrices) {
-            if (!userPositions || userPositions.length === 0) return;
+            if (!userPositions || userPositions.length === 0) {
+                // 포지션이 없으면 PNL을 0으로
+                updateUnrealizedPnlDisplay(0);
+                return;
+            }
+
+            let totalUnrealizedPnl = 0; // 총 미실현 PNL
 
             const rows = document.querySelectorAll('#positionsBody tr[data-position-id]');
             rows.forEach(row => {
@@ -4396,22 +4681,104 @@ require_once 'includes/head.php';
                     pnl = (entryPrice - price) * size;
                 }
 
+                // 총 PNL에 합산
+                totalUnrealizedPnl += pnl;
+
                 const margin = parseFloat(position.margin);
                 const roe = margin > 0 ? (pnl / margin) * 100 : 0;
 
                 // DOM 업데이트
                 const markPriceCell = row.querySelector('.mark-price-cell');
                 const pnlCell = row.querySelector('.pnl-cell');
+                const sizeCell = row.querySelector('td:nth-child(2)');
 
                 if (markPriceCell) {
                     markPriceCell.textContent = formatPrice(price, symbol);
                 }
 
+                if (sizeCell) {
+                    const coinName = symbol.replace('USDT', '');
+                    const sizeUsdt = size * price;
+                    const fmtSize = size.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    const fmtSizeUsdt = sizeUsdt.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    sizeCell.innerHTML = `<div>${side === 'long' ? '+' : '-'}${fmtSize} ${coinName}</div><div style="font-size: 11px; color: #888;">${fmtSizeUsdt} USDT</div>`;
+                }
+
                 if (pnlCell) {
                     pnlCell.className = `pnl-cell ${pnl >= 0 ? 'up' : 'down'}`;
-                    pnlCell.textContent = `${pnl.toFixed(2)} (${roe.toFixed(2)}%)`;
+                    const fmtPnl = pnl.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    const fmtRoe = roe.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    const pnlKrwVal = pnl * USD_KRW;
+                    const fmtKrw = Math.round(pnlKrwVal).toLocaleString('ko-KR');
+                    pnlCell.innerHTML = `<div>${pnl >= 0 ? '+' : ''}${fmtPnl} USDT (${fmtRoe}%)</div><div style="font-size: 11px; color: #888;">₩${pnlKrwVal >= 0 ? '+' : ''}${fmtKrw} KRW</div>`;
                 }
             });
+
+            // 총 미실현 PNL 업데이트
+            updateUnrealizedPnlDisplay(totalUnrealizedPnl);
+        }
+
+        // 단일 심볼 포지션 실시간 업데이트 (거래소 방식)
+        function updateSinglePositionPrice(symbol, price) {
+            if (!userPositions || userPositions.length === 0) return;
+
+            let totalUnrealizedPnl = 0;
+
+            const rows = document.querySelectorAll('#positionsBody tr[data-position-id]');
+            rows.forEach(row => {
+                const rowSymbol = row.dataset.symbol;
+                const position = userPositions.find(p => p.id == row.dataset.positionId);
+                if (!position) return;
+
+                const side = row.dataset.side;
+                const entryPrice = parseFloat(row.dataset.entry);
+                const size = parseFloat(position.size);
+                const margin = parseFloat(position.margin);
+
+                // 해당 심볼이면 새 가격, 아니면 저장된 가격 사용
+                const priceToUse = (rowSymbol === symbol) ? price : (allSymbolPrices[rowSymbol] || parseFloat(position.mark_price));
+
+                // PnL 계산
+                let pnl = 0;
+                if (side === 'long') {
+                    pnl = (priceToUse - entryPrice) * size;
+                } else {
+                    pnl = (entryPrice - priceToUse) * size;
+                }
+                totalUnrealizedPnl += pnl;
+
+                // 해당 심볼 row만 DOM 업데이트
+                if (rowSymbol === symbol) {
+                    const roe = margin > 0 ? (pnl / margin) * 100 : 0;
+                    const markPriceCell = row.querySelector('.mark-price-cell');
+                    const pnlCell = row.querySelector('.pnl-cell');
+                    const sizeCell = row.querySelector('td:nth-child(2)');
+
+                    if (markPriceCell) {
+                        markPriceCell.textContent = formatPrice(price, symbol);
+                    }
+
+                    if (sizeCell) {
+                        const coinName = symbol.replace('USDT', '');
+                        const sizeUsdt = size * price;
+                        const fmtSize = size.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        const fmtSizeUsdt = sizeUsdt.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        sizeCell.innerHTML = `<div>${side === 'long' ? '+' : '-'}${fmtSize} ${coinName}</div><div style="font-size: 11px; color: #888;">${fmtSizeUsdt} USDT</div>`;
+                    }
+
+                    if (pnlCell) {
+                        pnlCell.className = `pnl-cell ${pnl >= 0 ? 'up' : 'down'}`;
+                        const fmtPnl = pnl.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        const fmtRoe = roe.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        const pnlKrwVal = pnl * USD_KRW;
+                        const fmtKrw = Math.round(pnlKrwVal).toLocaleString('ko-KR');
+                        pnlCell.innerHTML = `<div>${pnl >= 0 ? '+' : ''}${fmtPnl} USDT (${fmtRoe}%)</div><div style="font-size: 11px; color: #888;">₩${pnlKrwVal >= 0 ? '+' : ''}${fmtKrw} KRW</div>`;
+                    }
+                }
+            });
+
+            // 총 미실현 PNL 업데이트
+            updateUnrealizedPnlDisplay(totalUnrealizedPnl);
         }
 
         function renderOpenOrders(orders) {
@@ -4614,7 +4981,8 @@ require_once 'includes/head.php';
         // 1분마다 OI 업데이트 (펀딩비율은 Node 서버 @markPrice에서 실시간 수신)
         setInterval(fetchOpenInterest, 60000);
 
-        // 로그인 상태면 30초마다 잔고/포지션 업데이트 (최적화)
+        // 로그인 상태면 30초마다 잔고/포지션 업데이트 (fallback)
+        // 주요 업데이트는 WebSocket account:update 이벤트로 실시간 수신
         setInterval(() => {
             if (authToken) {
                 loadUserBalance();

@@ -571,9 +571,9 @@ renderPageHeader('실시간 접속자', '현재 접속 중인 사용자를 실�
 }
 </style>
 
-<script src="http://localhost:3002/socket.io/socket.io.js"></script>
+<script src="<?= WS_SERVER_URL ?>/socket.io/socket.io.js"></script>
 <script>
-const WS_SERVER = 'http://localhost:3002';
+const WS_SERVER = window.FuturXConfig?.wsServerUrl || 'http://localhost:3002';
 let socket = null;
 let onlineUsers = new Map();
 let recentConnections = [];

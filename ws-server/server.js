@@ -21,11 +21,31 @@ const Redis = require('ioredis');
 const Queue = require('bull');
 
 // ========================================
+// 파일 로깅 함수
+// ========================================
+const LOG_FILE = path.join(__dirname, 'debug.log');
+function logToFile(message) {
+    const timestamp = new Date().toISOString();
+    const logLine = `[${timestamp}] ${message}\n`;
+    fs.appendFileSync(LOG_FILE, logLine);
+    console.log(message);
+}
+
+// ========================================
 // 설정
 // ========================================
 const PORT = 3002;
+const userLastBalance = new Map(); // 유저별 이전 잔고 저장
 const BINANCE_WS_URL = 'wss://fstream.binance.com/ws';
 const BINANCE_REST_URL = 'https://fapi.binance.com';
+
+// 실시간 설정 (관리자 페이지에서 변경 가능)
+const serverSettings = {
+    positionPriceInterval: 200, // 포지션 가격 업데이트 간격 (ms) - 기본 0.2초
+};
+
+// 심볼별 마지막 포지션 가격 전송 시간
+const lastPositionPriceEmit = new Map();
 
 // DB 설정
 const DB_CONFIG = {
@@ -59,16 +79,27 @@ let redisSub = null;
 let orderQueue = null;
 
 // ========================================
-// 지원 심볼 목록
+// 지원 심볼 목록 (DB에서 로드)
 // ========================================
-const SUPPORTED_SYMBOLS = [
-    'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT',
-    'DOGEUSDT', 'ADAUSDT', 'AVAXUSDT', 'DOTUSDT', 'LINKUSDT',
-    'LTCUSDT', 'BCHUSDT', 'ATOMUSDT', 'ETCUSDT', 'XLMUSDT',
-    'TRXUSDT', 'NEARUSDT', 'APTUSDT', 'ARBUSDT', 'OPUSDT',
-    'MATICUSDT', 'FILUSDT', 'ICPUSDT', 'SHIBUSDT', 'UNIUSDT',
-    'XMRUSDT', 'DASHUSDT', 'ZECUSDT', 'XTZUSDT', 'ONTUSDT', 'IOTAUSDT'
-];
+let SUPPORTED_SYMBOLS = [];
+
+// DB에서 활성화된 심볼 목록 로드
+async function loadSymbolsFromDB() {
+    try {
+        const pool = mysql.createPool(DB_CONFIG);
+        const [rows] = await pool.query('SELECT symbol FROM symbols WHERE is_active = 1 ORDER BY sort_order ASC');
+        await pool.end();
+
+        SUPPORTED_SYMBOLS = rows.map(row => row.symbol);
+        console.log(`[DB] ✅ ${SUPPORTED_SYMBOLS.length}개 심볼 로드: ${SUPPORTED_SYMBOLS.join(', ')}`);
+        return SUPPORTED_SYMBOLS;
+    } catch (err) {
+        console.error('[DB] ❌ 심볼 로드 실패:', err.message);
+        // 실패 시 기본값
+        SUPPORTED_SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT'];
+        return SUPPORTED_SYMBOLS;
+    }
+}
 
 // ========================================
 // 글로벌 상태
@@ -362,13 +393,22 @@ function handleAggTrade(data) {
     if (recentTrades.length > 50) recentTrades.pop();
 
     // 해당 심볼을 구독한 클라이언트에게만 가격 브로드캐스트 (room 기반)
-    io.to(`symbol:${symbol}`).emit('price:update', {
+    const priceData = {
         symbol: symbol,
         price: price,
         previousPrice: prevPrice,
         change: price - prevPrice,
         time: Date.now()
-    });
+    };
+    io.to(`symbol:${symbol}`).emit('price:update', priceData);
+
+    // 포지션 구독자에게 가격 전송 (쓰로틀링 적용)
+    const now = Date.now();
+    const lastEmit = lastPositionPriceEmit.get(symbol) || 0;
+    if (now - lastEmit >= serverSettings.positionPriceInterval) {
+        io.to(`position:${symbol}`).emit('position:price', priceData);
+        lastPositionPriceEmit.set(symbol, now);
+    }
 
     // 해당 심볼 구독자에게 체결 브로드캐스트
     io.to(`symbol:${symbol}`).emit('trade:new', trade);
@@ -945,6 +985,31 @@ function handleBroadcast(data) {
             }
             break;
 
+        case 'account:update':
+            const userSockets = findAllUserSockets(payload.user_id);
+            if (userSockets.length > 0) {
+                const updateData = {
+                    balance: payload.balance,
+                    positions: payload.positions,
+                    marginBalance: payload.margin_balance,
+                    availableBalance: payload.available_balance,
+                    unrealizedPnl: payload.unrealized_pnl,
+                    timestamp: Date.now()
+                };
+                userSockets.forEach(socketId => io.to(socketId).emit('account:update', updateData));
+
+                // 로그: 유저 닉네임 + 가용잔고 변화
+                const userInfo = connectedUsers.get(userSockets[0]);
+                const userName = userInfo?.nickname || userInfo?.email || `UID:${payload.user_id}`;
+                const prevBal = userLastBalance.get(payload.user_id) || payload.available_balance;
+                const currBal = payload.available_balance;
+                const diff = currBal - prevBal;
+                const diffStr = diff >= 0 ? `+${diff.toFixed(2)}` : diff.toFixed(2);
+                console.log(`[Account] ${userName} | 가용: $${prevBal.toFixed(2)} → $${currBal.toFixed(2)} (${diffStr}) | Pos: ${payload.positions?.length || 0}`);
+                userLastBalance.set(payload.user_id, currBal);
+            }
+            break;
+
         default:
             console.log(`[Broadcast] 알 수 없는 타입: ${type}`);
     }
@@ -957,6 +1022,17 @@ function findUserSocket(userId) {
         }
     }
     return null;
+}
+
+// ?? ???? ?? ?? ID ?? (?? ?/? ??)
+function findAllUserSockets(userId) {
+    const sockets = [];
+    for (const [socketId, user] of connectedUsers) {
+        if (user.userId == userId) {
+            sockets.push(socketId);
+        }
+    }
+    return sockets;
 }
 
 // ========================================
@@ -1242,6 +1318,31 @@ io.on('connection', (socket) => {
         });
     });
 
+    // 포지션 심볼 구독 (다중 심볼 실시간 가격 수신용)
+    socket.on('subscribe:positions', (data) => {
+        const { symbols } = data;
+        if (!symbols || !Array.isArray(symbols)) return;
+
+        // 기존 포지션 구독 해제
+        if (socket.positionSymbols) {
+            socket.positionSymbols.forEach(sym => {
+                if (sym !== socket.currentSymbol) {
+                    socket.leave(`position:${sym}`);
+                }
+            });
+        }
+
+        // 새 포지션 심볼들 구독
+        socket.positionSymbols = symbols;
+        symbols.forEach(sym => {
+            if (SUPPORTED_SYMBOLS.includes(sym)) {
+                socket.join(`position:${sym}`);
+            }
+        });
+
+        console.log(`[Socket ${socket.id.slice(-6)}] 포지션 심볼 구독: ${symbols.join(', ')}`);
+    });
+
     // 심볼 목록 및 현재 가격 요청
     socket.on('get:symbols', () => {
         const symbolsList = SUPPORTED_SYMBOLS.map(symbol => {
@@ -1284,6 +1385,26 @@ io.on('connection', (socket) => {
             console.log(`[Admin] Kicking user: ${user?.email || socketId}`);
             targetSocket.emit('kicked', { reason: '관리자에 의해 강제퇴장 되었습니다.' });
             targetSocket.disconnect(true);
+        }
+    });
+
+    // 관리자: 서버 설정 조회
+    socket.on('admin:get_settings', () => {
+        socket.emit('admin:settings', {
+            positionPriceInterval: serverSettings.positionPriceInterval
+        });
+    });
+
+    // 관리자: 서버 설정 변경
+    socket.on('admin:update_settings', (data) => {
+        if (data.positionPriceInterval !== undefined) {
+            const interval = parseInt(data.positionPriceInterval);
+            if (interval >= 50 && interval <= 5000) {
+                serverSettings.positionPriceInterval = interval;
+                console.log(`[Admin] 포지션 가격 업데이트 간격 변경: ${interval}ms`);
+                // 모든 관리자에게 변경 알림
+                io.emit('admin:settings_updated', { positionPriceInterval: interval });
+            }
         }
     });
 
@@ -2127,6 +2248,9 @@ async function start() {
         // DB 연결
         dbPool = mysql.createPool(DB_CONFIG);
         console.log('[DB] ✅ 연결 풀 생성 완료');
+
+        // DB에서 심볼 목록 로드
+        await loadSymbolsFromDB();
 
         // Redis 초기화
         await initRedis();

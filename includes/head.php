@@ -61,9 +61,29 @@ if ($currentUser) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="common.css">
     <?php foreach ($pageCSS as $css): ?>
-    <link rel="stylesheet" href="<?= htmlspecialchars($css) ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars($css) ?>?v=<?= time() ?>">
     <?php endforeach; ?>
     <!-- Toast Notification System -->
     <script src="js/toast.js"></script>
+    <!-- Common formatters (symbol decimals from DB) -->
+    <script src="js/formatters.js"></script>
+    <!-- PHP Config to JS -->
+    <script>
+        <?php
+        // DB symbols -> decimals maps (single source of truth)
+        $symbols = function_exists('getSymbols') ? getSymbols(true) : [];
+        $priceDecimalsBySymbol = [];
+        $qtyDecimalsBySymbol = [];
+        foreach ($symbols as $sym => $row) {
+            $priceDecimalsBySymbol[$sym] = isset($row['price_decimals']) ? (int)$row['price_decimals'] : 2;
+            $qtyDecimalsBySymbol[$sym] = isset($row['qty_decimals']) ? (int)$row['qty_decimals'] : 3;
+        }
+        ?>
+
+        window.FuturXConfig = window.FuturXConfig || {};
+        window.FuturXConfig.wsServerUrl = '<?= WS_SERVER_URL ?>';
+        window.FuturXConfig.priceDecimalsBySymbol = <?= json_encode($priceDecimalsBySymbol, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        window.FuturXConfig.qtyDecimalsBySymbol = <?= json_encode($qtyDecimalsBySymbol, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    </script>
 </head>
 <body>
