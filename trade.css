@@ -23,7 +23,7 @@
     --red-bg: rgba(246, 70, 93, 0.1);
     --yellow: #f0b90b;
     --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    --mono: 'JetBrains Mono', monospace;
+    --mono: 'IBM Plex Mono', monospace;
 }
 
 body {
@@ -59,111 +59,16 @@ body {
 }
 
 /* ========================================
-   Header
+   Trade Page Header Override
+   (common.css 헤더 스타일 사용, 일부 오버라이드)
    ======================================== */
+
+/* 공통 헤더 변수 매핑 */
 .header {
-    height: 64px;
-    background: var(--bg-card);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.logo-icon {
-    width: 28px;
-    height: 28px;
-    background: var(--yellow);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: #000;
-    font-size: 14px;
-}
-
-.logo-text {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text);
-}
-
-.nav {
-    display: flex;
-    gap: 24px;
-}
-
-.nav-link {
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 14px 0;
-    position: relative;
-}
-
-.nav-link:hover {
-    color: var(--text);
-}
-
-.nav-link.active {
-    color: var(--text);
-}
-
-.nav-link.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--yellow);
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.header-btn {
-    padding: 6px 12px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text-secondary);
-    font-size: 12px;
-    cursor: pointer;
-}
-
-.header-btn:hover {
-    background: var(--bg-hover);
-    color: var(--text);
-}
-
-.header-btn.primary {
-    background: var(--yellow);
-    border-color: var(--yellow);
-    color: #000;
+    --bg-secondary: var(--bg-card);
+    --border-color: var(--border);
+    --color-primary: var(--yellow);
+    --text-primary: var(--text);
 }
 
 /* ========================================
@@ -250,27 +155,7 @@ body {
     height: 40px;
 }
 
-/* 메뉴 토글 버튼 */
-.menu-toggle-btn {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 18px;
-    cursor: pointer;
-    border-radius: 4px;
-    flex-shrink: 0;
-}
-
-.menu-toggle-btn:hover {
-    background: var(--bg-hover);
-    color: var(--text);
-}
-
+/* 바이낸스 스타일 심볼 셀렉터 */
 .symbol-info-bar .symbol-selector {
     position: relative;
     flex-shrink: 0;
@@ -290,6 +175,19 @@ body {
     background: var(--bg-hover);
 }
 
+/* 즐겨찾기 별 아이콘 */
+.symbol-info-bar .symbol-star {
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.symbol-info-bar .symbol-star:hover,
+.symbol-info-bar .symbol-star.active {
+    color: #f0b90b;
+}
+
 .symbol-info-bar .coin-logo {
     width: 24px;
     height: 24px;
@@ -297,6 +195,7 @@ body {
     flex-shrink: 0;
 }
 
+/* 심볼 텍스트 영역 */
 .symbol-info-bar .symbol-text {
     display: flex;
     flex-direction: column;
@@ -319,7 +218,11 @@ body {
 .symbol-info-bar .dropdown-arrow {
     font-size: 10px;
     color: var(--text-muted);
-    margin-left: 2px;
+    transition: transform 0.2s;
+}
+
+.symbol-info-bar .symbol-selector.open .dropdown-arrow {
+    transform: rotate(180deg);
 }
 
 .symbol-info-bar .price-section {
@@ -344,6 +247,15 @@ body {
     color: var(--text-secondary);
     font-family: var(--mono);
     line-height: 1;
+}
+
+/* 영역 구분자 */
+.symbol-info-bar .bar-divider {
+    color: var(--text-muted);
+    opacity: 0.3;
+    font-size: 14px;
+    margin: 0 4px;
+    flex-shrink: 0;
 }
 
 .symbol-info-bar .stat-item {
@@ -378,107 +290,370 @@ body {
     color: var(--red);
 }
 
-/* Symbol Dropdown */
+/* Symbol Dropdown - Binance Style (Exact) */
 .symbol-dropdown {
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
-    width: 320px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    width: 480px;
+    background: #0b0e11;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     z-index: 1000;
     display: none;
+    overflow: hidden;
 }
 
-.symbol-dropdown.show {
+.symbol-dropdown.show,
+.symbol-selector.open .symbol-dropdown {
     display: block;
 }
 
-.symbol-dropdown .dropdown-header {
-    padding: 12px;
-    border-bottom: 1px solid var(--border);
+/* Search Box */
+.dropdown-search-box {
+    padding: 12px 16px 8px;
+    position: relative;
+}
+
+.dropdown-search-box .search-icon {
+    position: absolute;
+    left: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #5e6673;
+    font-size: 14px;
+    margin-top: 2px;
 }
 
 .symbol-dropdown .dropdown-search {
     width: 100%;
-    padding: 8px 12px;
-    background: var(--bg-input);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
+    padding: 8px 12px 8px 32px;
+    background: #1e2329;
+    border: 1px solid #2b3139;
+    border-radius: 4px;
+    color: #eaecef;
     font-size: 13px;
+}
+
+.symbol-dropdown .dropdown-search:focus {
+    outline: none;
+    border-color: #474d57;
+}
+
+.symbol-dropdown .dropdown-search::placeholder {
+    color: #5e6673;
+}
+
+/* Tabs Row - 바이낸스 스타일 (정확히) */
+.dropdown-tabs-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid #2b3139;
+    position: relative;
 }
 
 .symbol-dropdown .dropdown-tabs {
     display: flex;
-    padding: 8px 12px;
-    gap: 8px;
-    border-bottom: 1px solid var(--border);
+    gap: 24px;
 }
 
 .symbol-dropdown .dropdown-tab {
-    padding: 4px 12px;
-    background: transparent;
+    position: relative;
+    padding: 10px 0;
+    background: transparent !important;
     border: none;
-    color: var(--text-secondary);
-    font-size: 12px;
+    color: #848e9c;
+    font-size: 14px;
+    font-weight: 400;
     cursor: pointer;
-    border-radius: 4px;
+    transition: color 0.15s;
+}
+
+.symbol-dropdown .dropdown-tab:hover {
+    color: #eaecef;
 }
 
 .symbol-dropdown .dropdown-tab.active {
-    background: var(--bg-hover);
-    color: var(--text);
+    color: #eaecef !important;
+    background: transparent !important;
 }
 
+.symbol-dropdown .dropdown-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 2px;
+    background: #f0b90b;
+    border-radius: 1px;
+    z-index: 1;
+}
+
+/* All Button */
+.dropdown-all-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: transparent;
+    border: none;
+    color: #eaecef;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.dropdown-all-btn:hover {
+    color: #f0b90b;
+}
+
+.dropdown-all-btn .arrow {
+    font-size: 8px;
+    color: #848e9c;
+}
+
+/* Sub Tabs - 바이낸스 스타일 (정확히) */
+.dropdown-subtabs {
+    display: flex;
+    padding: 8px 16px;
+    gap: 6px;
+    background: #0b0e11;
+    border-bottom: 1px solid #2b3139;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.dropdown-subtab {
+    padding: 4px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: #848e9c;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.dropdown-subtab:hover {
+    color: #eaecef;
+}
+
+.dropdown-subtab.active {
+    color: #eaecef;
+    background: #2b3139;
+}
+
+/* List Header - 바이낸스 스타일 (정확히) */
+.dropdown-list-header {
+    display: flex;
+    align-items: center;
+    padding: 6px 16px;
+    font-size: 11px;
+    color: #5e6673;
+    background: #0b0e11;
+}
+
+.dropdown-list-header .header-col {
+    cursor: pointer;
+    transition: color 0.15s;
+    white-space: nowrap;
+}
+
+.dropdown-list-header .header-col:hover {
+    color: #848e9c;
+}
+
+.dropdown-list-header .col-symbol {
+    flex: 1;
+    padding-left: 52px; /* star(20) + logo(20) + gap(12) */
+}
+
+.dropdown-list-header .col-price {
+    width: 90px;
+    text-align: right;
+}
+
+.dropdown-list-header .col-change {
+    width: 70px;
+    text-align: right;
+}
+
+/* Sort Buttons - Binance Style */
+.sort-btn {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    transition: color 0.15s;
+}
+
+.sort-btn:hover {
+    color: #848e9c;
+}
+
+.sort-icon {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 6px;
+    line-height: 1;
+    margin-left: 2px;
+    gap: 0px;
+}
+
+.sort-icon .arrow-up,
+.sort-icon .arrow-down {
+    color: #5e6673;
+    transition: color 0.15s;
+}
+
+.sort-btn:hover .arrow-up,
+.sort-btn:hover .arrow-down {
+    color: #848e9c;
+}
+
+/* 오름차순 활성화 - 위 화살표만 노란색 */
+.sort-btn.asc .arrow-up {
+    color: #f0b90b;
+}
+
+/* 내림차순 활성화 - 아래 화살표만 노란색 */
+.sort-btn.desc .arrow-down {
+    color: #f0b90b;
+}
+
+.sort-separator {
+    margin: 0 4px;
+    opacity: 0.5;
+}
+
+/* List */
 .symbol-dropdown .dropdown-list {
-    max-height: 280px;
+    max-height: 360px;
+    min-height: 200px;
     overflow-y: auto;
+    background: #0b0e11;
 }
 
+/* Empty State */
+.dropdown-empty {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0b0e11;
+    color: #5e6673;
+    font-size: 13px;
+}
+
+.symbol-dropdown .dropdown-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.symbol-dropdown .dropdown-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.symbol-dropdown .dropdown-list::-webkit-scrollbar-thumb {
+    background: #363c45;
+    border-radius: 2px;
+}
+
+/* Items - 바이낸스 스타일 (정확히) */
 .symbol-dropdown .dropdown-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
+    padding: 8px 16px;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.1s;
 }
 
-.symbol-dropdown .dropdown-item:hover,
+.symbol-dropdown .dropdown-item:hover {
+    background: #1e2329;
+}
+
 .symbol-dropdown .dropdown-item.active {
-    background: var(--bg-hover);
+    background: #1e2329;
+}
+
+.symbol-dropdown .item-star {
+    width: 20px;
+    color: #f0b90b;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color 0.15s;
+    flex-shrink: 0;
+}
+
+.symbol-dropdown .item-star.inactive {
+    color: #474d57;
+}
+
+.symbol-dropdown .item-star:hover {
+    color: #f0b90b;
 }
 
 .symbol-dropdown .item-logo {
     width: 20px;
     height: 20px;
     border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.symbol-dropdown .item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
 }
 
 .symbol-dropdown .item-name {
-    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 13px;
     font-weight: 500;
+    color: #eaecef;
+}
+
+.symbol-dropdown .item-name .perp-badge {
+    font-size: 10px;
+    padding: 1px 4px;
+    background: #2b3139;
+    color: #848e9c;
+    border-radius: 2px;
+    font-weight: 400;
+}
+
+.symbol-dropdown .item-vol {
+    font-size: 11px;
+    color: #5e6673;
 }
 
 .symbol-dropdown .item-price {
-    font-size: 12px;
+    width: 90px;
+    font-size: 13px;
     font-family: var(--mono);
-    color: var(--text);
+    color: #eaecef;
+    text-align: right;
+    flex-shrink: 0;
 }
 
 .symbol-dropdown .item-change {
-    font-size: 11px;
+    width: 70px;
+    font-size: 13px;
     font-family: var(--mono);
-    min-width: 60px;
     text-align: right;
+    flex-shrink: 0;
 }
 
-.symbol-dropdown .item-change.up { color: var(--green); }
-.symbol-dropdown .item-change.down { color: var(--red); }
+.symbol-dropdown .item-change.up { color: #0ecb81; }
+.symbol-dropdown .item-change.down { color: #f6465d; }
 
 /* ========================================
    Trade Header (바이비트 스타일)
@@ -652,181 +827,7 @@ body {
     transform: rotate(180deg);
 }
 
-/* Symbol Dropdown */
-.symbol-dropdown {
-    position: fixed;
-    top: 92px;
-    left: 12px;
-    width: 500px;
-    max-height: 450px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    display: none;
-    overflow: hidden;
-}
-
-.symbol-selector.open .symbol-dropdown {
-    display: block;
-    animation: dropdownSlide 0.2s ease;
-}
-
-@keyframes dropdownSlide {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.dropdown-header {
-    padding: 12px;
-    border-bottom: 1px solid var(--border);
-}
-
-.dropdown-search {
-    width: 100%;
-    padding: 8px 12px;
-    background: var(--bg-input);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text);
-    font-size: 12px;
-    outline: none;
-}
-
-.dropdown-search:focus {
-    border-color: var(--yellow);
-}
-
-.dropdown-search::placeholder {
-    color: var(--text-muted);
-}
-
-.dropdown-tabs {
-    display: flex;
-    gap: 4px;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-}
-
-.dropdown-tab {
-    padding: 6px 12px;
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 11px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-.dropdown-tab:hover {
-    color: var(--text);
-    background: var(--bg-hover);
-}
-
-.dropdown-tab.active {
-    color: var(--yellow);
-    background: rgba(240, 185, 11, 0.1);
-}
-
-.dropdown-list-header {
-    display: grid;
-    grid-template-columns: 140px 100px 80px 1fr;
-    padding: 8px 12px;
-    font-size: 10px;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-input);
-}
-
-.dropdown-list {
-    max-height: 280px;
-    overflow-y: auto;
-}
-
-.dropdown-item {
-    display: grid;
-    grid-template-columns: 24px 24px 92px 100px 80px 1fr;
-    align-items: center;
-    padding: 10px 12px;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    border-bottom: 1px solid rgba(43, 49, 57, 0.5);
-}
-
-.dropdown-item:hover {
-    background: var(--bg-hover);
-}
-
-.dropdown-item.active {
-    background: rgba(240, 185, 11, 0.1);
-}
-
-.item-star {
-    color: var(--text-muted);
-    font-size: 12px;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.item-star:hover,
-.item-star.active {
-    color: var(--yellow);
-}
-
-.item-icon {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    color: #fff;
-    font-weight: 600;
-}
-
-.item-icon.btc { background: #f7931a; }
-.item-icon.eth { background: #627eea; }
-.item-icon.sol { background: #00d18c; }
-.item-icon.xrp { background: #23292f; border: 1px solid #848e9c; }
-.item-icon.doge { background: #c2a633; }
-
-.item-name {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text);
-}
-
-.item-price {
-    font-size: 12px;
-    font-family: var(--mono);
-    color: var(--text);
-    text-align: right;
-}
-
-.item-change {
-    font-size: 11px;
-    font-family: var(--mono);
-    text-align: right;
-}
-
-.item-change.up { color: var(--green); }
-.item-change.down { color: var(--red); }
-
-.item-volume {
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--text-secondary);
-    text-align: right;
-}
+/* 레거시 드롭다운 스타일 삭제됨 - 상단 Binance Style CSS 사용 */
 
 .symbol-icon {
     width: 20px;
@@ -2165,23 +2166,10 @@ body {
    Animations
    ======================================== */
 
-/* 가격 플래시 애니메이션 */
-@keyframes flashGreen {
-    0% { background: rgba(14, 203, 129, 0.3); }
-    100% { background: transparent; }
-}
-
-@keyframes flashRed {
-    0% { background: rgba(246, 70, 93, 0.3); }
-    100% { background: transparent; }
-}
-
-.flash-green {
-    animation: flashGreen 0.3s ease-out;
-}
-
+/* 가격 플래시 애니메이션 - 비활성화 */
+.flash-green,
 .flash-red {
-    animation: flashRed 0.3s ease-out;
+    /* 배경 플래시 효과 제거 */
 }
 
 /* 오더북 행 트랜지션 */
@@ -2525,6 +2513,16 @@ body {
 .coin-icon.btc { background: #f7931a; color: #fff; }
 .coin-icon.eth { background: #627eea; color: #fff; }
 .coin-icon.usdt { background: #26a17b; color: #fff; }
+.coin-icon.sol { background: #14f195; color: #111; }
+.coin-icon.xrp { background: #23292f; color: #fff; }
+.coin-icon.doge { background: #c2a633; color: #fff; }
+.coin-icon.ada { background: #0033ad; color: #fff; }
+.coin-icon.avax { background: #e84142; color: #fff; }
+
+.symbol-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
 
 /* ========================================
    Connection Overlay
@@ -2950,4 +2948,636 @@ body {
         opacity: 1;
         transform: translateX(0);
     }
+}
+
+/* ========================================
+   P&L Panel Styles (Bybit Style)
+   ======================================== */
+
+/* P&L Panel */
+#pnlPanel {
+    flex-direction: column;
+    height: 100%;
+}
+
+#pnlPanel.active {
+    display: flex;
+}
+
+/* P&L Header */
+.pnl-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    height: 40px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.pnl-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 100%;
+}
+
+.pnl-main-tabs {
+    display: flex;
+    gap: 4px;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    height: 100%;
+    align-items: center;
+}
+
+.pnl-main-tab {
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+
+.pnl-main-tab:hover {
+    color: var(--text);
+}
+
+.pnl-main-tab.active {
+    background: var(--bg-input);
+    border-color: var(--border);
+    color: var(--text);
+    font-weight: 500;
+}
+
+.pnl-period-tabs {
+    display: flex;
+    gap: 4px;
+    margin-left: 16px;
+    padding-left: 16px;
+    border-left: 1px solid var(--border);
+    align-items: center;
+    height: 20px;
+}
+
+.pnl-period-tab {
+    padding: 2px 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.pnl-period-tab:hover {
+    color: var(--text);
+}
+
+.pnl-period-tab.active {
+    background: transparent;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.pnl-period-tab.active::after {
+    display: none;
+}
+
+.pnl-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.pnl-performance-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.pnl-performance-btn:hover {
+    color: var(--text);
+    border-color: var(--text-muted);
+    text-decoration: none;
+}
+
+.pnl-performance-btn .arrow {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* P&L Table Wrapper */
+.pnl-table-wrapper {
+    overflow-x: auto;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.pnl-table-wrapper::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+.pnl-table-wrapper::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+.pnl-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+/* P&L Footer */
+.pnl-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-card);
+    flex-shrink: 0;
+}
+
+.pnl-stats {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* Trading Performance Modal */
+.performance-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+}
+
+.performance-modal.active {
+    display: block;
+}
+
+.performance-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.performance-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.performance-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.performance-header h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.perf-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+}
+
+.perf-close-btn:hover {
+    color: var(--text);
+}
+
+.performance-body {
+    padding: 16px;
+}
+
+.perf-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.perf-card {
+    background: var(--bg-input);
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.perf-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.perf-value {
+    font-size: 16px;
+    font-weight: 600;
+    font-family: var(--mono);
+    color: var(--text);
+}
+
+.perf-value.positive {
+    color: var(--green);
+}
+
+.perf-value.negative {
+    color: var(--red);
+}
+
+/* Legacy styles */
+.pnl-summary {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.pnl-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 100px;
+    padding: 8px 12px;
+    background: var(--bg-input);
+    border-radius: 6px;
+}
+
+.pnl-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pnl-value {
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--mono);
+    color: var(--text);
+}
+
+.pnl-value.up {
+    color: var(--green);
+}
+
+.pnl-value.down {
+    color: var(--red);
+}
+
+.pnl-history-wrapper {
+    overflow-x: auto;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.pnl-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.pnl-table th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-dark);
+    z-index: 1;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 10px 16px;
+    text-align: left;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+/* 컬럼 너비 설정 (Bybit 스타일) - 10 컬럼 */
+.pnl-table th:nth-child(1) { width: 10%; }    /* Market */
+.pnl-table th:nth-child(2) { width: 10%; }    /* Instrument */
+.pnl-table th:nth-child(3) { width: 8%; }     /* Direction */
+.pnl-table th:nth-child(4) { width: 12%; }    /* Entry Price */
+.pnl-table th:nth-child(5) { width: 12%; }    /* Exit Price */
+.pnl-table th:nth-child(6) { width: 12%; }    /* Qty */
+.pnl-table th:nth-child(7) { width: 10%; text-align: right; }   /* P&L */
+.pnl-table th:nth-child(8) { width: 9%; text-align: right; }    /* Opening Fee */
+.pnl-table th:nth-child(9) { width: 9%; text-align: right; }    /* Closing Fee */
+.pnl-table th:nth-child(10) { width: 8%; text-align: right; }   /* Funding Fee */
+
+.pnl-table td {
+    font-family: var(--mono);
+    font-size: 12px;
+    white-space: nowrap;
+    padding: 12px 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.pnl-table td:nth-child(7),
+.pnl-table td:nth-child(8),
+.pnl-table td:nth-child(9),
+.pnl-table td:nth-child(10) {
+    text-align: right;
+}
+
+.pnl-table tbody tr:hover {
+    background: var(--bg-hover);
+}
+
+.pnl-table .symbol-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.pnl-table .symbol-name {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.pnl-table .symbol-type {
+    font-size: 9px;
+    color: var(--text-muted);
+}
+
+.pnl-table .qty-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.pnl-table .qty-usdt {
+    font-size: 9px;
+    color: var(--text-muted);
+}
+
+.pnl-table .side-long {
+    color: var(--green);
+    font-weight: 600;
+}
+
+.pnl-table .side-short {
+    color: var(--red);
+    font-weight: 600;
+}
+
+.pnl-table .pnl-positive {
+    color: var(--green);
+    font-weight: 600;
+}
+
+.pnl-table .pnl-negative {
+    color: var(--red);
+    font-weight: 600;
+}
+
+.pnl-table .roe-positive {
+    color: var(--green);
+    background: var(--green-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.pnl-table .roe-negative {
+    color: var(--red);
+    background: var(--red-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.pnl-table .status-liquidated {
+    color: var(--red);
+    font-weight: 600;
+}
+
+.pnl-table .date-cell {
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+.pnl-table .duration-cell {
+    color: var(--yellow);
+    font-weight: 500;
+}
+
+.pnl-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.pnl-pagination button {
+    padding: 6px 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pnl-pagination button:hover:not(:disabled) {
+    background: var(--bg-hover);
+    border-color: var(--text-muted);
+}
+
+.pnl-pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pnl-pagination .page-info {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* Details Button */
+.details-btn {
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.details-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--text-muted);
+    color: var(--text);
+}
+
+.empty-cell {
+    text-align: center !important;
+    padding: 60px 20px !important;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .pnl-summary {
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .pnl-card {
+        min-width: 80px;
+        padding: 6px 8px;
+        flex: 1;
+    }
+
+    .pnl-label {
+        font-size: 9px;
+    }
+
+    .pnl-value {
+        font-size: 12px;
+    }
+
+    .pnl-history-wrapper {
+        max-height: 250px;
+    }
+}
+
+/* ========================================
+   Assets Tab Styles
+   ======================================== */
+
+#assetsPanel .data-table {
+    width: 100%;
+}
+
+#assetsPanel .data-table th {
+    text-align: left;
+    padding: 10px 16px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+#assetsPanel .data-table th:nth-child(2),
+#assetsPanel .data-table th:nth-child(3),
+#assetsPanel .data-table th:nth-child(4),
+#assetsPanel .data-table th:nth-child(5) {
+    text-align: right;
+}
+
+#assetsPanel .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+#assetsPanel .data-table tr:hover {
+    background: var(--bg-hover);
+}
+
+.asset-coin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.coin-icon-img {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.coin-icon-fallback {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--yellow), #f7931a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: #000;
+}
+
+.coin-name {
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--text);
+}
+
+#assetsPanel .num-cell {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+}
+
+#assetsPanel .empty-row {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 40px 16px;
 }

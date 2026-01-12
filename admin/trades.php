@@ -22,7 +22,7 @@ try {
     $params = [];
 
     if ($search) {
-        $where[] = "(u.username LIKE :search OR u.email LIKE :search OR t.trade_id LIKE :search)";
+        $where[] = "(u.username LIKE :search OR u.email LIKE :search OR t.order_id LIKE :search)";
         $params['search'] = "%$search%";
     }
 
@@ -165,7 +165,7 @@ renderPageHeader('거래관리', '체결된 거래 내역을 관리합니다', [
         <table class="table">
             <thead>
                 <tr>
-                    <th>거래ID</th>
+                    <th>주문ID</th>
                     <th>회원</th>
                     <th>심볼</th>
                     <th>방향</th>
@@ -190,7 +190,7 @@ renderPageHeader('거래관리', '체결된 거래 내역을 관리합니다', [
                 <?php else: ?>
                 <?php foreach ($trades as $trade): ?>
                 <tr>
-                    <td class="num-mono"><?= htmlspecialchars(substr($trade['trade_id'], 0, 12)) ?>...</td>
+                    <td class="num-mono"><?= htmlspecialchars(substr($trade['order_id'], 0, 12)) ?>...</td>
                     <td><?= htmlspecialchars($trade['nickname'] ?: $trade['username']) ?></td>
                     <td><strong><?= $trade['symbol'] ?></strong></td>
                     <td>

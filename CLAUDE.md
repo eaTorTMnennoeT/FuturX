@@ -260,16 +260,60 @@ URL: http://localhost:3002
 - get:users (접속자 목록 요청)
 - admin:identify (관리자 식별)
 - admin:kick_user (강제 퇴장)
+- subscribe (심볼/인터벌 구독)
 
 서버 → 클라이언트:
 - users:list (접속자 목록)
 - user:connected / user:disconnected
 - user:updated
 - binance:price (실시간 가격)
+- depth (호가창 데이터)
+- trades (초기 체결 내역)
+- trade:new (실시간 체결)
+- klines (초기 캔들 데이터)
+- kline (실시간 캔들 업데이트)
+- ticker (24시간 통계)
+- markPrice (마크가격, 펀딩비율, 다음 펀딩시간)
 
 [Binance WebSocket]
 - wss://stream.binance.com:9443/ws/btcusdt@trade
 - 실시간 BTC/USDT 가격 수신
+
+====================================
+14-1. 데이터 아키텍처 (절대 위반 금지)
+====================================
+
+*** 중요: B-Book 시스템 보안을 위한 필수 규칙 ***
+
+브라우저에서 Binance WebSocket에 직접 연결하면
+개발자 도구로 데이터 조작이 가능하다.
+따라서 모든 실시간 데이터는 Node 서버를 경유해야 한다.
+
+[Node 서버 경유 필수 (브라우저 직접 연결 금지)]
+- @depth20@100ms (호가창 상위 20개, 100ms 간격)
+- @trade (체결 내역)
+- @kline_1m (1분봉 캔들)
+- @ticker (24시간 통계, 현재가)
+- @markPrice (마크가격, 펀딩비율, 다음 펀딩시간)
+
+데이터 흐름:
+Binance WebSocket → Node Server → Socket.IO → Browser
+
+[브라우저 직접 REST API 호출 허용]
+- 미결제약정(OI): GET /fapi/v1/openInterest
+  (WebSocket 미제공, 표시 전용)
+
+[금지 사항]
+- 브라우저에서 Binance WebSocket 직접 연결
+- 차트 데이터를 Binance에서 직접 로드
+- 호가창/체결 데이터를 Binance에서 직접 로드
+- Node 서버 우회하는 실시간 데이터 수신
+
+[이유]
+이 플랫폼은 B-Book 방식으로 운영된다.
+사용자가 브라우저에서 WebSocket 데이터를 조작하면
+허위 가격으로 주문을 넣어 시스템을 악용할 수 있다.
+Node 서버가 단일 데이터 소스 역할을 해야 무결성 보장.
 
 ====================================
 15. Admin 페이지 구조

@@ -8,6 +8,8 @@
     "dev": "node --watch server.js"
   },
   "dependencies": {
+    "bull": "^4.16.5",
+    "ioredis": "^5.9.1",
     "mysql2": "^3.6.0",
     "socket.io": "^4.7.2",
     "ws": "^8.14.2"

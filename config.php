@@ -26,13 +26,41 @@ define('DB_CHARSET', 'utf8mb4');
 define('JWT_SECRET', 'your-super-secret-key-change-in-production-2024');
 define('JWT_EXPIRY', 86400 * 7); // 7일
 
-// 거래 설정
+// 거래 설정 (기본값)
 define('MIN_TRADE_AMOUNT', 0.001);
 define('MAX_LEVERAGE', 125);
 define('DEFAULT_LEVERAGE', 10);
-define('TAKER_FEE', 0.0006); // 0.06%
-define('MAKER_FEE', 0.0002); // 0.02%
+define('DEFAULT_TAKER_FEE', 0.0006); // 0.06%
+define('DEFAULT_MAKER_FEE', 0.0002); // 0.02%
 define('FUNDING_RATE', 0.0001); // 0.01%
+
+// DB settings에서 수수료 가져오기
+function getTradingFees() {
+    static $fees = null;
+    if ($fees === null) {
+        try {
+            $db = getDB();
+            $stmt = $db->query("SELECT `key`, `value` FROM settings WHERE `key` IN ('taker_fee', 'maker_fee')");
+            $results = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+            $fees = [
+                'taker' => isset($results['taker_fee']) ? (float)$results['taker_fee'] : DEFAULT_TAKER_FEE,
+                'maker' => isset($results['maker_fee']) ? (float)$results['maker_fee'] : DEFAULT_MAKER_FEE
+            ];
+        } catch (Exception $e) {
+            $fees = ['taker' => DEFAULT_TAKER_FEE, 'maker' => DEFAULT_MAKER_FEE];
+        }
+    }
+    return $fees;
+}
+
+// 동적 수수료 상수 (하위 호환성)
+function getTakerFee() {
+    return getTradingFees()['taker'];
+}
+
+function getMakerFee() {
+    return getTradingFees()['maker'];
+}
 
 // 지원 심볼
 define('SUPPORTED_SYMBOLS', [

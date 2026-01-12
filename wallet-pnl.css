@@ -1,0 +1,1512 @@
+/* ========================================
+   P&L Analysis Page Styles
+   Page Prefix: .pnl-
+   ======================================== */
+
+/* ========================================
+   페이지 헤더
+   ======================================== */
+.pnl-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.pnl-header__left {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-md);
+}
+
+.pnl-header__left h1 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.pnl-header__subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+.pnl-header__right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+/* 기간 선택 */
+.pnl-period {
+    display: flex;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xs);
+}
+
+.pnl-period__btn {
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.pnl-period__btn:hover {
+    color: var(--text-primary);
+}
+
+.pnl-period__btn.active {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* ========================================
+   P&L 요약 카드
+   ======================================== */
+.pnl-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.pnl-summary__card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.pnl-summary__card--main {
+    grid-column: span 2;
+    background: linear-gradient(135deg, var(--bg-secondary), rgba(240, 185, 11, 0.05));
+    border-color: rgba(240, 185, 11, 0.2);
+}
+
+.pnl-summary__icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(240, 185, 11, 0.15);
+    border-radius: var(--radius-md);
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.pnl-summary__icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.pnl-summary__icon--win {
+    background: rgba(14, 203, 129, 0.15);
+    color: var(--color-long);
+}
+
+.pnl-summary__icon--trades {
+    background: rgba(30, 136, 229, 0.15);
+    color: var(--color-info);
+}
+
+.pnl-summary__icon--avg {
+    background: rgba(156, 39, 176, 0.15);
+    color: #9c27b0;
+}
+
+.pnl-summary__icon--fee {
+    background: rgba(255, 152, 0, 0.15);
+    color: #ff9800;
+}
+
+.pnl-summary__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.pnl-summary__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.pnl-summary__value {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pnl-summary__value.positive {
+    color: var(--color-long);
+}
+
+.pnl-summary__value.negative {
+    color: var(--color-short);
+}
+
+.pnl-summary__sub {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   P&L 차트
+   ======================================== */
+.pnl-chart {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-xl);
+    overflow: hidden;
+}
+
+.pnl-chart__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pnl-chart__header h3 {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.pnl-chart__tabs {
+    display: flex;
+    gap: var(--spacing-xs);
+    background: var(--bg-tertiary);
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-md);
+}
+
+.pnl-chart__tab {
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.pnl-chart__tab:hover {
+    color: var(--text-primary);
+}
+
+.pnl-chart__tab.active {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.pnl-chart__body {
+    padding: var(--spacing-lg);
+    height: 280px;
+}
+
+.pnl-chart__body canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* ========================================
+   필터
+   ======================================== */
+.pnl-filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.pnl-filters__left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.pnl-search {
+    position: relative;
+    width: 200px;
+}
+
+.pnl-search svg {
+    position: absolute;
+    left: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--text-tertiary);
+}
+
+.pnl-search input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    padding-left: 36px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.pnl-search input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.pnl-search input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.pnl-select select {
+    padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23848e9c' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.pnl-select select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.pnl-filters__count {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   거래 테이블
+   ======================================== */
+.pnl-table-wrapper {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: calc(100vh - 650px);
+    min-height: 300px;
+}
+
+.pnl-table-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.pnl-table-wrapper::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+}
+
+.pnl-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.pnl-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--border-color-light);
+}
+
+.pnl-table {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    min-width: 1310px;
+}
+
+.pnl-table__header {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.pnl-table__col {
+    padding: 0 var(--spacing-sm);
+    white-space: nowrap;
+}
+
+.pnl-table__body {
+    max-height: none;
+    min-height: 300px;
+}
+
+.pnl-table__row {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    transition: background var(--transition-fast);
+}
+
+.pnl-table__row:last-child {
+    border-bottom: none;
+}
+
+.pnl-table__row:hover {
+    background: var(--bg-tertiary);
+}
+
+/* 심볼 */
+.pnl-symbol {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pnl-symbol__name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.pnl-symbol__type {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+/* 방향 */
+.pnl-side {
+    display: inline-block;
+    padding: 2px var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+}
+
+.pnl-side--long {
+    background: var(--color-long-bg);
+    color: var(--color-long);
+}
+
+.pnl-side--short {
+    background: var(--color-short-bg);
+    color: var(--color-short);
+}
+
+/* 레버리지 */
+.pnl-leverage {
+    font-size: var(--font-size-sm);
+    font-family: var(--font-mono);
+    color: var(--color-warning);
+}
+
+/* 가격 */
+.pnl-price {
+    font-size: var(--font-size-sm);
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+}
+
+/* 사이즈 */
+.pnl-size {
+    font-size: var(--font-size-sm);
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+}
+
+/* P&L 결과 */
+.pnl-result {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.pnl-result__value {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    font-family: var(--font-mono);
+}
+
+.pnl-result__percent {
+    font-size: var(--font-size-xs);
+    font-family: var(--font-mono);
+}
+
+.pnl-result.positive .pnl-result__value,
+.pnl-result.positive .pnl-result__percent {
+    color: var(--color-long);
+}
+
+.pnl-result.negative .pnl-result__value,
+.pnl-result.negative .pnl-result__percent {
+    color: var(--color-short);
+}
+
+/* 수수료 */
+.pnl-fee {
+    font-size: var(--font-size-sm);
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+}
+
+/* 시간 */
+.pnl-time {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pnl-time__open,
+.pnl-time__close {
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
+}
+
+.pnl-time__open {
+    color: var(--text-secondary);
+}
+
+.pnl-time__close {
+    color: #eaecef;
+}
+
+/* 기간 */
+.pnl-duration {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    padding: 2px var(--spacing-sm);
+    border-radius: var(--radius-sm);
+}
+
+/* ========================================
+   빈 상태
+   ======================================== */
+.pnl-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl);
+    text-align: center;
+}
+
+.pnl-empty svg {
+    width: 64px;
+    height: 64px;
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.pnl-empty p {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.pnl-empty span {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+/* ========================================
+   페이지네이션
+   ======================================== */
+.pnl-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+.pnl-pagination__btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.pnl-pagination__btn:not(:disabled):hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--border-color-light);
+}
+
+.pnl-pagination__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pnl-pagination__btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.pnl-pagination__info {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   반응형 - 태블릿
+   ======================================== */
+@media (max-width: 1200px) {
+    .pnl-summary__card--main {
+        grid-column: span 1;
+    }
+
+    .pnl-table__col--fee,
+    .pnl-table__col--duration {
+        display: none;
+    }
+}
+
+@media (max-width: 1024px) {
+    .pnl-table__col--close {
+        display: none;
+    }
+}
+
+/* ========================================
+   반응형 - 모바일
+   ======================================== */
+@media (max-width: 768px) {
+    .pnl-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pnl-header__right {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .pnl-period {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .pnl-summary {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .pnl-summary__card--main {
+        grid-column: span 2;
+    }
+
+    .pnl-chart__body {
+        height: 200px;
+    }
+
+    .pnl-filters__left {
+        width: 100%;
+    }
+
+    .pnl-search {
+        width: 100%;
+    }
+
+    .pnl-select {
+        flex: 1;
+    }
+
+    .pnl-select select {
+        width: 100%;
+    }
+
+    /* 모바일에서는 테이블 가로 스크롤 */
+    .pnl-table {
+        min-width: 1100px;
+    }
+
+    .pnl-result {
+        flex-direction: row;
+        gap: var(--spacing-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    .pnl-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .pnl-summary__card--main {
+        grid-column: span 1;
+    }
+
+    .pnl-period__btn {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: var(--font-size-xs);
+    }
+}
+
+/* ========================================
+   포커스 스타일
+   ======================================== */
+.pnl-period__btn:focus-visible,
+.pnl-chart__tab:focus-visible,
+.pnl-search input:focus-visible,
+.pnl-select select:focus-visible,
+.pnl-pagination__btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* ========================================
+   스크롤바
+   ======================================== */
+.pnl-table__body::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.pnl-table__body::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.pnl-table__body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.pnl-table__body::-webkit-scrollbar-thumb:hover {
+    background: var(--border-color-light);
+}
+
+/* ========================================
+   애니메이션
+   ======================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pnl-summary__card {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.pnl-summary__card:nth-child(2) { animation-delay: 0.05s; }
+.pnl-summary__card:nth-child(3) { animation-delay: 0.1s; }
+.pnl-summary__card:nth-child(4) { animation-delay: 0.15s; }
+.pnl-summary__card:nth-child(5) { animation-delay: 0.2s; }
+
+/* ========================================
+   P&L Top Summary (상단 요약)
+   ======================================== */
+.pnl-top-summary {
+    display: flex;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pnl-top-summary__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.pnl-top-summary__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.pnl-top-summary__value {
+    font-size: 24px;
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+}
+
+.pnl-top-summary__value.positive {
+    color: var(--color-long);
+}
+
+.pnl-top-summary__value.negative {
+    color: var(--color-short);
+}
+
+.pnl-top-summary__value small {
+    font-size: 12px;
+    font-weight: var(--font-weight-normal);
+    color: var(--text-tertiary);
+    margin-left: 4px;
+}
+
+/* ========================================
+   Charts Section (차트 + 랭킹)
+   ======================================== */
+.pnl-charts-section {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* P&L Chart Card */
+.pnl-chart-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.pnl-chart-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pnl-chart-card__header h3 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.chart-link {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+}
+
+.chart-link:hover {
+    color: var(--color-primary);
+}
+
+.pnl-chart-card__body {
+    padding: var(--spacing-lg);
+    height: 220px;
+}
+
+.pnl-chart-card__body canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* P&L Ranking Card */
+.pnl-ranking-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.pnl-ranking-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pnl-ranking-card__header h3 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.pnl-ranking-card__body {
+    padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.pnl-ranking__header {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.pnl-ranking__item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+}
+
+.pnl-ranking__coin {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-width: 100px;
+}
+
+.pnl-ranking__coin img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.pnl-ranking__coin span {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.pnl-ranking__bar-container {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.pnl-ranking__bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.pnl-ranking__bar.positive {
+    background: var(--color-long);
+}
+
+.pnl-ranking__bar.negative {
+    background: var(--color-short);
+}
+
+.pnl-ranking__value {
+    font-size: var(--font-size-xs);
+    font-family: var(--font-mono);
+    min-width: 100px;
+    text-align: right;
+}
+
+.pnl-ranking__value.positive {
+    color: var(--color-long);
+}
+
+.pnl-ranking__value.negative {
+    color: var(--color-short);
+}
+
+.pnl-ranking__empty {
+    padding: var(--spacing-xl);
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+/* ========================================
+   Stats Section (통계 탭 + 그리드)
+   ======================================== */
+.pnl-stats-section {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.pnl-stats-tabs {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.pnl-stats-tab {
+    padding: var(--spacing-xs) 0;
+    background: transparent;
+    border: none;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
+    cursor: pointer;
+    position: relative;
+    transition: color var(--transition-fast);
+}
+
+.pnl-stats-tab:hover {
+    color: var(--text-secondary);
+}
+
+.pnl-stats-tab.active {
+    color: var(--text-primary);
+}
+
+.pnl-stats-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-primary);
+}
+
+.pnl-stats-timestamp {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.pnl-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-lg);
+}
+
+.pnl-stats-card {
+    padding: var(--spacing-md);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.pnl-stats-card__icon {
+    font-size: 18px;
+    margin-bottom: var(--spacing-xs);
+}
+
+.pnl-stats-card__icon.red {
+    color: var(--color-short);
+}
+
+.pnl-stats-card__icon.green {
+    color: var(--color-long);
+}
+
+.pnl-stats-card__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.pnl-stats-card__value {
+    font-size: 20px;
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.pnl-stats-card__value.positive {
+    color: var(--color-long);
+}
+
+.pnl-stats-card__value.negative {
+    color: var(--color-short);
+}
+
+.pnl-stats-card__value small {
+    font-size: 12px;
+    font-weight: var(--font-weight-normal);
+    color: var(--text-tertiary);
+    margin-left: 4px;
+}
+
+.pnl-stats-card__sub {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.pnl-stats-card__sub .green {
+    color: var(--color-long);
+}
+
+.pnl-stats-card__sub .red {
+    color: var(--color-short);
+}
+
+/* ========================================
+   Details Section (상세 테이블)
+   ======================================== */
+.pnl-details-section {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.pnl-details-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pnl-details-header h3 {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.pnl-details-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.pnl-details-timestamp {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.pnl-refresh-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all var(--transition-fast);
+}
+
+.pnl-refresh-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.pnl-type-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+.pnl-type-tab {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-tertiary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+
+.pnl-type-tab:hover {
+    color: var(--text-secondary);
+}
+
+.pnl-type-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+/* 테이블 컬럼 스타일 - 고정 너비 기반 */
+.pnl-table__col--symbol {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.pnl-table__col--qty {
+    width: 75px;
+    flex-shrink: 0;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.pnl-table__col--entry,
+.pnl-table__col--exit {
+    width: 95px;
+    flex-shrink: 0;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.pnl-table__col--type {
+    width: 90px;
+    flex-shrink: 0;
+}
+
+.pnl-table__col--pnl {
+    width: 110px;
+    flex-shrink: 0;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+.pnl-table__col--pnl.positive {
+    color: var(--color-long);
+}
+
+.pnl-table__col--pnl.negative {
+    color: var(--color-short);
+}
+
+.pnl-table__col--result {
+    width: 60px;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.pnl-table__col--volume {
+    width: 115px;
+    flex-shrink: 0;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.pnl-table__col--fee {
+    width: 95px;
+    flex-shrink: 0;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.pnl-table__col--time {
+    width: 145px;
+    flex-shrink: 0;
+}
+
+/* Contract (심볼 with 아이콘) */
+.pnl-contract {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.pnl-contract img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.pnl-contract span {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+}
+
+/* Trade Type Badge */
+.pnl-trade-type {
+    display: inline-block;
+    padding: 2px var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+}
+
+.pnl-trade-type.long {
+    background: var(--color-long-bg);
+    color: var(--color-long);
+}
+
+.pnl-trade-type.short {
+    background: var(--color-short-bg);
+    color: var(--color-short);
+}
+
+/* Result Badge */
+.pnl-result-badge {
+    display: inline-block;
+    padding: 2px var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+}
+
+.pnl-result-badge.win {
+    background: rgba(14, 203, 129, 0.15);
+    color: var(--color-long);
+}
+
+.pnl-result-badge.loss {
+    background: rgba(246, 70, 93, 0.15);
+    color: var(--color-short);
+}
+
+/* 테이블 빈 상태 */
+.pnl-table__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl);
+    text-align: center;
+    min-height: 200px;
+}
+
+.pnl-table__empty p {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.pnl-table__empty span {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+/* Pagination 버튼 스타일 추가 */
+.pnl-pagination {
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+/* ========================================
+   Charts Section 반응형
+   ======================================== */
+@media (max-width: 1200px) {
+    .pnl-charts-section {
+        grid-template-columns: 1fr;
+    }
+
+    .pnl-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .pnl-top-summary {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .pnl-top-summary__value {
+        font-size: 20px;
+    }
+
+    .pnl-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pnl-type-tabs {
+        padding: 0 var(--spacing-md);
+    }
+
+    .pnl-type-tab {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .pnl-details-header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: flex-start;
+    }
+}
+
+/* ========================================
+   Long/Short Positions Section (바이빗 스타일)
+   ======================================== */
+.pnl-positions-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.pnl-position-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.pnl-position-card__header {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pnl-position-card__header h3 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.pnl-position-card__link {
+    color: var(--text-tertiary);
+    transition: color var(--transition-fast);
+}
+
+.pnl-position-card__link:hover {
+    color: var(--color-primary);
+}
+
+.pnl-position-card__link svg {
+    display: block;
+}
+
+.pnl-position-card__body {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    align-items: start;
+}
+
+.pnl-position-stat {
+    display: flex;
+    flex-direction: column;
+    min-height: 70px;
+}
+
+.pnl-position-stat__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    height: 32px;
+    line-height: 16px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.pnl-position-stat__value {
+    font-size: 20px;
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    height: 28px;
+    line-height: 28px;
+    margin-bottom: 4px;
+}
+
+.pnl-position-stat__value.positive {
+    color: var(--color-long);
+}
+
+.pnl-position-stat__value.negative {
+    color: var(--color-short);
+}
+
+.pnl-position-stat__value small {
+    font-size: 12px;
+    font-weight: var(--font-weight-normal);
+    color: var(--text-tertiary);
+}
+
+.pnl-position-stat__icon {
+    font-size: 16px;
+}
+
+.pnl-position-stat__icon.green {
+    color: var(--color-long);
+}
+
+.pnl-position-stat__sub {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    height: 16px;
+    line-height: 16px;
+}
+
+.pnl-position-stat__coins {
+    display: flex;
+    height: 28px;
+    align-items: center;
+}
+
+.pnl-position-stat__coins img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-secondary);
+    margin-left: -6px;
+}
+
+.pnl-position-stat__coins img:first-child {
+    margin-left: 0;
+}
+
+.pnl-position-stat__coins .no-data {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+/* Positions 반응형 */
+@media (max-width: 1400px) {
+    .pnl-position-card__body {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1200px) {
+    .pnl-positions-section {
+        grid-template-columns: 1fr;
+    }
+
+    .pnl-position-card__body {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .pnl-position-card__body {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .pnl-position-card__body {
+        grid-template-columns: 1fr;
+    }
+}

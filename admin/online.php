@@ -356,6 +356,44 @@ renderPageHeader('실시간 접속자', '현재 접속 중인 사용자를 실�
     color: var(--text-tertiary);
 }
 
+.log-item__userid {
+    font-size: 11px;
+    color: var(--color-primary);
+    margin-left: 4px;
+}
+
+.log-item__sid {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.log-item__sid i {
+    margin-right: 3px;
+    font-size: 9px;
+}
+
+.log-item__device {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.log-item__page {
+    font-size: 10px;
+    color: var(--color-primary);
+    background: rgba(99, 102, 241, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.log-item__page i {
+    margin-right: 3px;
+    font-size: 9px;
+}
+
 .table-wrapper {
     overflow-x: auto;
 }
@@ -808,20 +846,35 @@ function renderConnectionLogs() {
         return;
     }
 
-    container.innerHTML = recentConnections.map(log => `
-        <div class="log-item">
-            <div class="log-item__icon connect">
-                <i class="fas fa-sign-in-alt"></i>
-            </div>
-            <div class="log-item__content">
-                <div class="log-item__user">${log.nickname || log.email || 'Guest'}</div>
-                <div class="log-item__meta">
-                    <span class="log-item__ip">${log.ip || '-'}</span>
-                    <span class="log-item__time">${formatTimeAgo(log.time)}</span>
+    container.innerHTML = recentConnections.map(log => {
+        const user = log.user || log;
+        const displayName = user.nickname || user.email || 'Guest';
+        const isLoggedIn = user.userId && user.userId !== 'guest';
+        const socketShort = (user.socketId || '').substring(0, 8);
+        const deviceIcon = getDeviceIcon(user.device);
+        const pageName = getPageName(user.currentPage);
+
+        return `
+            <div class="log-item">
+                <div class="log-item__icon connect">
+                    <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <div class="log-item__content">
+                    <div class="log-item__user">
+                        ${isLoggedIn ? `<i class="fas fa-user-check" style="color:#4ade80;margin-right:4px;" title="로그인 유저"></i>` : `<i class="fas fa-user" style="color:#888;margin-right:4px;" title="Guest"></i>`}
+                        ${displayName}
+                        ${isLoggedIn ? `<span class="log-item__userid">(${user.userId})</span>` : ''}
+                    </div>
+                    <div class="log-item__meta">
+                        <span class="log-item__sid" title="Socket ID"><i class="fas fa-fingerprint"></i> ${socketShort}</span>
+                        <span class="log-item__device"><i class="fas ${deviceIcon}"></i></span>
+                        <span class="log-item__page"><i class="fas ${pageName.icon}"></i> ${pageName.label}</span>
+                        <span class="log-item__time">${formatTimeAgo(log.time)}</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // 이탈 로그 렌더링
@@ -833,21 +886,36 @@ function renderDisconnectionLogs() {
         return;
     }
 
-    container.innerHTML = recentDisconnections.map(log => `
-        <div class="log-item">
-            <div class="log-item__icon disconnect">
-                <i class="fas fa-sign-out-alt"></i>
-            </div>
-            <div class="log-item__content">
-                <div class="log-item__user">${log.nickname || log.email || 'Guest'}</div>
-                <div class="log-item__meta">
-                    <span class="log-item__ip">${log.ip || '-'}</span>
-                    <span class="log-item__time">${formatTimeAgo(log.time)}</span>
-                    ${log.duration ? `<span class="log-item__duration">(${formatDuration(log.duration)})</span>` : ''}
+    container.innerHTML = recentDisconnections.map(log => {
+        const user = log.user || log;
+        const displayName = user.nickname || user.email || 'Guest';
+        const isLoggedIn = user.userId && user.userId !== 'guest';
+        const socketShort = (user.socketId || '').substring(0, 8);
+        const deviceIcon = getDeviceIcon(user.device);
+        const pageName = getPageName(user.currentPage);
+
+        return `
+            <div class="log-item">
+                <div class="log-item__icon disconnect">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <div class="log-item__content">
+                    <div class="log-item__user">
+                        ${isLoggedIn ? `<i class="fas fa-user-check" style="color:#f87171;margin-right:4px;" title="로그인 유저"></i>` : `<i class="fas fa-user" style="color:#888;margin-right:4px;" title="Guest"></i>`}
+                        ${displayName}
+                        ${isLoggedIn ? `<span class="log-item__userid">(${user.userId})</span>` : ''}
+                    </div>
+                    <div class="log-item__meta">
+                        <span class="log-item__sid" title="Socket ID"><i class="fas fa-fingerprint"></i> ${socketShort}</span>
+                        <span class="log-item__device"><i class="fas ${deviceIcon}"></i></span>
+                        <span class="log-item__page"><i class="fas ${pageName.icon}"></i> ${pageName.label}</span>
+                        <span class="log-item__time">${formatTimeAgo(log.time)}</span>
+                        ${log.duration ? `<span class="log-item__duration">(${formatDuration(log.duration)})</span>` : ''}
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // 접속 시간 포맷

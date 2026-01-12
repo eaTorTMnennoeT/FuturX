@@ -107,6 +107,16 @@ switch ($action) {
         handleGetPrice();
         break;
 
+    // P&L 히스토리 (종료된 포지션)
+    case 'get_pnl_history':
+        handleGetPnlHistory($db);
+        break;
+
+    // P&L 통계
+    case 'get_pnl_stats':
+        handleGetPnlStats($db);
+        break;
+
     default:
         errorResponse('Unknown action', 400);
 }
@@ -264,7 +274,7 @@ function handlePlaceOrder($db) {
     // 필요 마진 계산
     $notionalValue = $quantity * $price;
     $requiredMargin = $notionalValue / $leverage;
-    $fee = $notionalValue * TAKER_FEE;
+    $fee = $notionalValue * getTakerFee();
     $totalRequired = $requiredMargin + $fee;
 
     // 잔고 확인
@@ -344,6 +354,7 @@ function handlePlaceOrder($db) {
             // 시장가 체결 브로드캐스트
             broadcastToWS('order:filled', [
                 'user_id' => $user['id'],
+                'login_id' => $user['username'] ?? $user['email'],
                 'nickname' => $user['nickname'],
                 'order_id' => $orderId,
                 'symbol' => $symbol,
@@ -358,6 +369,7 @@ function handlePlaceOrder($db) {
             if (!$result['is_close'] ?? false) {
                 broadcastToWS('position:opened', [
                     'user_id' => $user['id'],
+                    'login_id' => $user['username'] ?? $user['email'],
                     'nickname' => $user['nickname'],
                     'symbol' => $symbol,
                     'side' => $positionSide,
@@ -370,6 +382,7 @@ function handlePlaceOrder($db) {
             // 지정가 주문 접수 브로드캐스트
             broadcastToWS('order:placed', [
                 'user_id' => $user['id'],
+                'login_id' => $user['username'] ?? $user['email'],
                 'nickname' => $user['nickname'],
                 'order_id' => $orderId,
                 'symbol' => $symbol,
@@ -530,7 +543,7 @@ function handleCancelOrder($db) {
         // 동결 마진 반환
         $remainingQty = $order['quantity'] - $order['filled_quantity'];
         $refundMargin = ($remainingQty * $order['price']) / $order['leverage'];
-        $refundFee = ($remainingQty * $order['price']) * TAKER_FEE;
+        $refundFee = ($remainingQty * $order['price']) * getTakerFee();
         $totalRefund = $refundMargin + $refundFee;
 
         $stmt = $db->prepare("UPDATE wallets SET available_balance = available_balance + ?, frozen_balance = frozen_balance - ? WHERE user_id = ? AND currency = 'USDT'");
@@ -541,6 +554,7 @@ function handleCancelOrder($db) {
         // WebSocket 브로드캐스트 - 주문 취소
         broadcastToWS('order:cancelled', [
             'user_id' => $user['id'],
+            'login_id' => $user['username'] ?? $user['email'],
             'nickname' => $user['nickname'],
             'order_id' => $orderId,
             'symbol' => $order['symbol'],
@@ -689,7 +703,7 @@ function handleClosePosition($db) {
 
     // 필요 수수료 계산
     $notionalValue = $closeQty * $currentPrice;
-    $fee = $notionalValue * TAKER_FEE;
+    $fee = $notionalValue * getTakerFee();
 
     try {
         $db->beginTransaction();
@@ -975,4 +989,196 @@ function handleGetBalance($db) {
     }
 
     successResponse($result);
+}
+
+// ========================================
+// P&L 히스토리 (종료된 포지션)
+// ========================================
+function handleGetPnlHistory($db) {
+    $user = requireAuth($db);
+
+    $symbol = $_GET['symbol'] ?? '';
+    $limit = min(100, max(10, intval($_GET['limit'] ?? 50)));
+    $offset = max(0, intval($_GET['offset'] ?? 0));
+
+    $where = "user_id = ? AND status IN ('closed', 'liquidated')";
+    $params = [$user['id']];
+
+    if ($symbol) {
+        $where .= " AND symbol = ?";
+        $params[] = strtoupper($symbol);
+    }
+
+    // 종료된 포지션 조회
+    $stmt = $db->prepare("
+        SELECT
+            id,
+            symbol,
+            side,
+            entry_price,
+            exit_price,
+            size,
+            margin,
+            leverage,
+            realized_pnl,
+            status,
+            opened_at,
+            closed_at,
+            TIMESTAMPDIFF(SECOND, opened_at, closed_at) as duration_seconds
+        FROM positions
+        WHERE $where
+        ORDER BY closed_at DESC
+        LIMIT $limit OFFSET $offset
+    ");
+    $stmt->execute($params);
+    $positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // 연관된 거래(trades)에서 수수료 합계 및 마지막 거래 가격 조회
+    foreach ($positions as &$pos) {
+        $stmt = $db->prepare("
+            SELECT
+                COALESCE(SUM(fee), 0) as total_fee,
+                COALESCE(SUM(quote_quantity), 0) as total_volume,
+                (SELECT price FROM trades WHERE position_id = ? ORDER BY created_at DESC LIMIT 1) as last_trade_price
+            FROM trades
+            WHERE position_id = ?
+        ");
+        $stmt->execute([$pos['id'], $pos['id']]);
+        $tradeData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $pos['total_fee'] = floatval($tradeData['total_fee']);
+        $pos['total_volume'] = floatval($tradeData['total_volume']);
+        $pos['entry_price'] = floatval($pos['entry_price']);
+
+        // exit_price가 NULL이면 마지막 거래 가격 또는 entry_price 사용
+        $exitPrice = $pos['exit_price'] ?? $tradeData['last_trade_price'] ?? $pos['entry_price'];
+        $pos['exit_price'] = floatval($exitPrice);
+
+        $pos['size'] = floatval($pos['size']);
+        $pos['margin'] = floatval($pos['margin']);
+        $pos['realized_pnl'] = floatval($pos['realized_pnl']);
+        $pos['leverage'] = intval($pos['leverage']);
+
+        // ROE% 계산: (PNL / 마진) * 100
+        $pos['roe_percent'] = $pos['margin'] > 0
+            ? round(($pos['realized_pnl'] / $pos['margin']) * 100, 2)
+            : 0;
+
+        // Duration 포맷
+        $pos['duration'] = formatDuration($pos['duration_seconds']);
+    }
+
+    // 전체 개수
+    $stmt = $db->prepare("SELECT COUNT(*) FROM positions WHERE $where");
+    $stmt->execute($params);
+    $totalCount = $stmt->fetchColumn();
+
+    successResponse([
+        'positions' => $positions,
+        'total' => intval($totalCount),
+        'limit' => $limit,
+        'offset' => $offset
+    ]);
+}
+
+// 시간 포맷 헬퍼
+function formatDuration($seconds) {
+    if (!$seconds || $seconds < 0) return '-';
+
+    $days = floor($seconds / 86400);
+    $hours = floor(($seconds % 86400) / 3600);
+    $minutes = floor(($seconds % 3600) / 60);
+    $secs = $seconds % 60;
+
+    if ($days > 0) {
+        return "{$days}D {$hours}H";
+    } elseif ($hours > 0) {
+        return "{$hours}H {$minutes}M";
+    } elseif ($minutes > 0) {
+        return "{$minutes}M {$secs}S";
+    } else {
+        return "{$secs}S";
+    }
+}
+
+// ========================================
+// P&L 통계 (기간별 손익)
+// ========================================
+function handleGetPnlStats($db) {
+    $user = requireAuth($db);
+
+    $userId = $user['id'];
+
+    // 오늘 PNL
+    $stmt = $db->prepare("
+        SELECT COALESCE(SUM(realized_pnl), 0) as pnl
+        FROM positions
+        WHERE user_id = ? AND status IN ('closed', 'liquidated') AND DATE(closed_at) = CURDATE()
+    ");
+    $stmt->execute([$userId]);
+    $todayPnl = floatval($stmt->fetchColumn());
+
+    // 7일 PNL
+    $stmt = $db->prepare("
+        SELECT COALESCE(SUM(realized_pnl), 0) as pnl
+        FROM positions
+        WHERE user_id = ? AND status IN ('closed', 'liquidated') AND closed_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+    ");
+    $stmt->execute([$userId]);
+    $weekPnl = floatval($stmt->fetchColumn());
+
+    // 30일 PNL
+    $stmt = $db->prepare("
+        SELECT COALESCE(SUM(realized_pnl), 0) as pnl
+        FROM positions
+        WHERE user_id = ? AND status IN ('closed', 'liquidated') AND closed_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    ");
+    $stmt->execute([$userId]);
+    $monthPnl = floatval($stmt->fetchColumn());
+
+    // 전체 PNL
+    $stmt = $db->prepare("
+        SELECT COALESCE(SUM(realized_pnl), 0) as pnl
+        FROM positions
+        WHERE user_id = ? AND status IN ('closed', 'liquidated')
+    ");
+    $stmt->execute([$userId]);
+    $totalPnl = floatval($stmt->fetchColumn());
+
+    // 전체 수수료
+    $stmt = $db->prepare("
+        SELECT COALESCE(SUM(fee), 0) as total_fee
+        FROM trades
+        WHERE user_id = ?
+    ");
+    $stmt->execute([$userId]);
+    $totalFee = floatval($stmt->fetchColumn());
+
+    // 거래 통계
+    $stmt = $db->prepare("
+        SELECT
+            COUNT(*) as total_trades,
+            SUM(CASE WHEN realized_pnl > 0 THEN 1 ELSE 0 END) as win_count,
+            SUM(CASE WHEN realized_pnl <= 0 THEN 1 ELSE 0 END) as loss_count
+        FROM positions
+        WHERE user_id = ? AND status IN ('closed', 'liquidated')
+    ");
+    $stmt->execute([$userId]);
+    $tradeStats = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $winRate = $tradeStats['total_trades'] > 0
+        ? round(($tradeStats['win_count'] / $tradeStats['total_trades']) * 100, 1)
+        : 0;
+
+    successResponse([
+        'today' => $todayPnl,
+        'week' => $weekPnl,
+        'month' => $monthPnl,
+        'total' => $totalPnl,
+        'total_fee' => $totalFee,
+        'total_trades' => intval($tradeStats['total_trades']),
+        'win_count' => intval($tradeStats['win_count']),
+        'loss_count' => intval($tradeStats['loss_count']),
+        'win_rate' => $winRate
+    ]);
 }

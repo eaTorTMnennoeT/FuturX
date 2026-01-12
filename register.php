@@ -17,36 +17,12 @@ $csrf_token = generateCSRFToken();
 // 레퍼럴 코드 (GET 파라미터)
 $referral_code = isset($_GET['ref']) ? e($_GET['ref']) : '';
 
-$page_title = '회원가입 - CryptoFutures';
-$page_css = 'register.css';
+$pageTitle = '회원가입';
+$pageCSS = ['register.css'];
+
+require_once 'includes/head.php';
+require_once 'includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?></title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-    <!-- Styles -->
-    <link rel="stylesheet" href="common.css">
-    <link rel="stylesheet" href="<?php echo $page_css; ?>">
-</head>
-<body>
-    <!-- 헤더 -->
-    <header class="header">
-        <a href="index.php" class="header__logo">
-            <div class="header__logo-icon">CF</div>
-            <span>CryptoFutures</span>
-        </a>
-        <div class="header__actions">
-            <a href="login.php" class="btn btn--secondary">로그인</a>
-        </div>
-    </header>
 
     <!-- 메인 콘텐츠 -->
     <main class="main">

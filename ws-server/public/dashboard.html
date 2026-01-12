@@ -641,6 +641,11 @@
 
                 <div class="nav-section">
                     <div class="nav-section-title">Trading</div>
+                    <a class="nav-item" data-page="orderbooks">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-label">Orderbooks</span>
+                        <span class="nav-badge green">LIVE</span>
+                    </a>
                     <a class="nav-item" data-page="positions">
                         <span class="nav-icon">📈</span>
                         <span class="nav-label">Positions</span>
@@ -834,6 +839,13 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </section>
+
+                <!-- Orderbooks Page -->
+                <section class="page-section" id="page-orderbooks">
+                    <div class="grid-3" id="orderbooksGrid">
+                        <!-- 코인별 호가창이 여기에 동적으로 생성됨 -->
                     </div>
                 </section>
 
@@ -1651,7 +1663,200 @@
             socket.emit('get:trades');
             socket.emit('get:all_users');
             socket.emit('get:wallets');
+            socket.emit('get:symbols');
         }, 500);
+
+        // ==========================================
+        // 코인별 호가창 (Orderbooks)
+        // ==========================================
+        const SUPPORTED_SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ADAUSDT', 'AVAXUSDT'];
+        const symbolOrderbooks = new Map(); // symbol -> { bids, asks }
+        const symbolPrices = new Map(); // symbol -> price
+
+        // 심볼 목록 수신
+        socket.on('symbols:list', (data) => {
+            if (data.symbols) {
+                data.symbols.forEach(s => {
+                    symbolPrices.set(s.symbol, s.price);
+                });
+                initOrderbooksGrid();
+            }
+        });
+
+        // 심볼별 가격 업데이트
+        socket.on('symbol:price', (data) => {
+            symbolPrices.set(data.symbol, data.price);
+            updateSymbolPriceInOrderbook(data.symbol, data.price, data.priceChangePercent);
+        });
+
+        // 호가창 그리드 초기화
+        function initOrderbooksGrid() {
+            const grid = document.getElementById('orderbooksGrid');
+            grid.innerHTML = SUPPORTED_SYMBOLS.map(symbol => {
+                const baseCoin = symbol.replace('USDT', '');
+                const price = symbolPrices.get(symbol) || 0;
+                const formattedPrice = formatSymbolPrice(symbol, price);
+                return `
+                    <div class="card" id="ob-card-${symbol}">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon ${getSymbolIconClass(symbol)}">${getSymbolIcon(symbol)}</div>
+                                ${baseCoin}/USDT
+                            </div>
+                            <span class="card-badge" id="ob-price-${symbol}">${formattedPrice}</span>
+                        </div>
+                        <div class="orderbook-container">
+                            <div>
+                                <div class="ob-section-title ask">ASKS</div>
+                                <div class="ob-list" id="ob-asks-${symbol}">
+                                    <div class="empty-state" style="padding: 20px;">
+                                        <div class="empty-icon" style="font-size: 20px;">📡</div>
+                                        <div class="empty-text" style="font-size: 11px;">Loading...</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="ob-section-title bid">BIDS</div>
+                                <div class="ob-list" id="ob-bids-${symbol}">
+                                    <div class="empty-state" style="padding: 20px;">
+                                        <div class="empty-icon" style="font-size: 20px;">📡</div>
+                                        <div class="empty-text" style="font-size: 11px;">Loading...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="spread-display" style="margin-top: 8px; padding: 6px 12px;">
+                            <span class="spread-label">Spread</span>
+                            <span class="spread-value" id="ob-spread-${symbol}">--</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 각 코인별 호가창 로드
+            SUPPORTED_SYMBOLS.forEach(symbol => {
+                fetchOrderbookForSymbol(symbol);
+            });
+        }
+
+        function getSymbolIcon(symbol) {
+            const icons = {
+                'BTCUSDT': '₿',
+                'ETHUSDT': 'Ξ',
+                'SOLUSDT': '◎',
+                'XRPUSDT': '✕',
+                'DOGEUSDT': 'Ð',
+                'ADAUSDT': '₳',
+                'AVAXUSDT': 'A'
+            };
+            return icons[symbol] || symbol[0];
+        }
+
+        function getSymbolIconClass(symbol) {
+            const classes = {
+                'BTCUSDT': 'gold',
+                'ETHUSDT': 'blue',
+                'SOLUSDT': 'green',
+                'XRPUSDT': 'blue',
+                'DOGEUSDT': 'gold',
+                'ADAUSDT': 'blue',
+                'AVAXUSDT': 'red'
+            };
+            return classes[symbol] || 'blue';
+        }
+
+        function formatSymbolPrice(symbol, price) {
+            if (!price || price <= 0) return 'Loading...';
+            if (symbol === 'BTCUSDT') return '$' + price.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+            if (symbol === 'ETHUSDT') return '$' + price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            if (['DOGEUSDT', 'XRPUSDT', 'ADAUSDT'].includes(symbol)) return '$' + price.toFixed(5);
+            if (['SOLUSDT', 'AVAXUSDT'].includes(symbol)) return '$' + price.toFixed(2);
+            return '$' + price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        // 바이낸스 REST API로 호가창 가져오기
+        async function fetchOrderbookForSymbol(symbol) {
+            try {
+                const response = await fetch(`https://fapi.binance.com/fapi/v1/depth?symbol=${symbol}&limit=10`);
+                const data = await response.json();
+
+                if (data.bids && data.asks) {
+                    symbolOrderbooks.set(symbol, {
+                        bids: data.bids.map(([price, qty]) => ({ price: parseFloat(price), quantity: parseFloat(qty) })),
+                        asks: data.asks.map(([price, qty]) => ({ price: parseFloat(price), quantity: parseFloat(qty) }))
+                    });
+                    renderSymbolOrderbook(symbol);
+                }
+            } catch (error) {
+                console.error(`[Orderbook] Error fetching ${symbol}:`, error);
+            }
+        }
+
+        // 심볼별 호가창 렌더링
+        function renderSymbolOrderbook(symbol) {
+            const ob = symbolOrderbooks.get(symbol);
+            if (!ob) return;
+
+            const asksList = document.getElementById(`ob-asks-${symbol}`);
+            const bidsList = document.getElementById(`ob-bids-${symbol}`);
+            const spreadEl = document.getElementById(`ob-spread-${symbol}`);
+
+            if (!asksList || !bidsList) return;
+
+            // Asks (reversed, 높은 가격이 위로)
+            const asks = (ob.asks || []).slice(0, 6).reverse();
+            asksList.innerHTML = asks.map(a => `
+                <div class="ob-row ask">
+                    <span class="ob-price ask">${formatOrderbookPrice(a.price, symbol)}</span>
+                    <span class="ob-qty">${a.quantity.toFixed(4)}</span>
+                </div>
+            `).join('') || '<div class="empty-state" style="padding: 10px;"><div class="empty-text" style="font-size: 11px;">No data</div></div>';
+
+            // Bids
+            const bids = (ob.bids || []).slice(0, 6);
+            bidsList.innerHTML = bids.map(b => `
+                <div class="ob-row bid">
+                    <span class="ob-price bid">${formatOrderbookPrice(b.price, symbol)}</span>
+                    <span class="ob-qty">${b.quantity.toFixed(4)}</span>
+                </div>
+            `).join('') || '<div class="empty-state" style="padding: 10px;"><div class="empty-text" style="font-size: 11px;">No data</div></div>';
+
+            // Spread
+            if (asks.length && bids.length) {
+                const lowestAsk = ob.asks[0]?.price || 0;
+                const highestBid = ob.bids[0]?.price || 0;
+                const spread = lowestAsk - highestBid;
+                const spreadPct = (spread / lowestAsk * 100).toFixed(3);
+                spreadEl.textContent = `$${spread.toFixed(2)} (${spreadPct}%)`;
+            }
+        }
+
+        function formatOrderbookPrice(price, symbol) {
+            // 코인별 가격 포맷
+            if (symbol === 'BTCUSDT') return price.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+            if (symbol === 'ETHUSDT') return price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            if (['DOGEUSDT', 'XRPUSDT', 'ADAUSDT'].includes(symbol)) return price.toFixed(5);
+            return price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        function updateSymbolPriceInOrderbook(symbol, price, changePercent) {
+            const priceEl = document.getElementById(`ob-price-${symbol}`);
+            if (priceEl && price > 0) {
+                priceEl.textContent = formatSymbolPrice(symbol, price);
+                priceEl.style.color = changePercent >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+            }
+        }
+
+        // 호가창 주기적 갱신 (5초마다)
+        setInterval(() => {
+            // Orderbooks 페이지가 활성화된 경우에만
+            const orderbooksPage = document.getElementById('page-orderbooks');
+            if (orderbooksPage && orderbooksPage.classList.contains('active')) {
+                SUPPORTED_SYMBOLS.forEach(symbol => {
+                    fetchOrderbookForSymbol(symbol);
+                });
+            }
+        }, 5000);
     </script>
 </body>
 </html>

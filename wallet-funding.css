@@ -1,0 +1,948 @@
+/* ========================================
+   Funding Account Page Styles
+   Page Prefix: .funding-
+   ======================================== */
+
+/* ========================================
+   페이지 헤더
+   ======================================== */
+.funding-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.funding-header__left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.funding-header__left h1 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.funding-header__right {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+/* ========================================
+   자산 요약
+   ======================================== */
+.funding-summary {
+    display: flex;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-lg);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.funding-summary__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.funding-summary__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.funding-summary__value {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-sm);
+}
+
+.funding-summary__amount {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.funding-summary__btc {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   프로모션 배너
+   ======================================== */
+.funding-promo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, rgba(240, 185, 11, 0.1), rgba(240, 185, 11, 0.05));
+    border: 1px solid rgba(240, 185, 11, 0.2);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.funding-promo__icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(240, 185, 11, 0.15);
+    border-radius: var(--radius-md);
+    color: var(--color-primary);
+}
+
+.funding-promo__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.funding-promo__content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.funding-promo__text {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.funding-promo__highlight {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: rgba(240, 185, 11, 0.15);
+    border-radius: var(--radius-sm);
+}
+
+.funding-promo__link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-primary);
+    white-space: nowrap;
+}
+
+.funding-promo__link svg {
+    width: 16px;
+    height: 16px;
+}
+
+.funding-promo__link:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   필터 및 검색
+   ======================================== */
+.funding-filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.funding-filters__left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.funding-search {
+    position: relative;
+    width: 240px;
+}
+
+.funding-search svg {
+    position: absolute;
+    left: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--text-tertiary);
+}
+
+.funding-search input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    padding-left: 40px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.funding-search input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.funding-search input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+/* 체크박스 */
+.funding-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.funding-checkbox input {
+    display: none;
+}
+
+.funding-checkbox__mark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.funding-checkbox input:checked + .funding-checkbox__mark {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.funding-checkbox input:checked + .funding-checkbox__mark::after {
+    content: '';
+    width: 5px;
+    height: 9px;
+    border: 2px solid var(--bg-primary);
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translateY(-1px);
+}
+
+.funding-convert {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.funding-convert svg {
+    width: 16px;
+    height: 16px;
+}
+
+.funding-convert:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--border-color-light);
+}
+
+/* ========================================
+   자산 테이블
+   ======================================== */
+.funding-table {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.funding-table__header {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.funding-table__col {
+    padding: 0 var(--spacing-sm);
+}
+
+.funding-table__col--coin {
+    flex: 2;
+    min-width: 200px;
+}
+
+.funding-table__col--total,
+.funding-table__col--available,
+.funding-table__col--inuse,
+.funding-table__col--equiv {
+    flex: 1;
+    min-width: 120px;
+    text-align: right;
+}
+
+.funding-table__col--action {
+    flex: 1;
+    min-width: 180px;
+    text-align: right;
+}
+
+.funding-table__body {
+    max-height: calc(100vh - 450px);
+    overflow-y: auto;
+}
+
+.funding-table__row {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    transition: background var(--transition-fast);
+}
+
+.funding-table__row:last-child {
+    border-bottom: none;
+}
+
+.funding-table__row:hover {
+    background: var(--bg-tertiary);
+}
+
+/* ========================================
+   코인 정보
+   ======================================== */
+.funding-coin {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.funding-coin__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    flex-shrink: 0;
+}
+
+.funding-coin__icon--usdt {
+    background: linear-gradient(135deg, #26a17b, #1e8c6a);
+    color: white;
+}
+
+.funding-coin__icon--btc {
+    background: linear-gradient(135deg, #f7931a, #e67e00);
+    color: white;
+}
+
+.funding-coin__icon--eth {
+    background: linear-gradient(135deg, #627eea, #4a6dd8);
+    color: white;
+}
+
+.funding-coin__icon--usdc {
+    background: linear-gradient(135deg, #2775ca, #1e5ea8);
+    color: white;
+}
+
+.funding-coin__icon--sol {
+    background: linear-gradient(135deg, #9945ff, #14f195);
+    color: white;
+}
+
+.funding-coin__icon--xrp {
+    background: linear-gradient(135deg, #23292f, #1a1f24);
+    color: white;
+}
+
+.funding-coin__icon--doge {
+    background: linear-gradient(135deg, #c3a634, #a18b2a);
+    color: white;
+}
+
+.funding-coin__icon--hmstr {
+    background: linear-gradient(135deg, #ff6b35, #e55a2b);
+    color: white;
+}
+
+.funding-coin__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.funding-coin__symbol {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.funding-coin__name {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.funding-coin__apy {
+    margin-left: var(--spacing-sm);
+    padding: 2px var(--spacing-sm);
+    background: rgba(0, 200, 83, 0.15);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-success);
+}
+
+/* ========================================
+   금액 표시
+   ======================================== */
+.funding-amount {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+/* ========================================
+   액션 버튼
+   ======================================== */
+.funding-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+}
+
+.funding-actions__link {
+    font-size: var(--font-size-sm);
+    color: var(--color-primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.funding-actions__link:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   빈 상태
+   ======================================== */
+.funding-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl);
+    text-align: center;
+}
+
+.funding-empty svg {
+    width: 64px;
+    height: 64px;
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.funding-empty p {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.funding-empty span {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+/* ========================================
+   전송 모달
+   ======================================== */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+}
+
+.modal.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.modal__container {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    margin: var(--spacing-md);
+    transform: translateY(20px);
+    transition: transform var(--transition-normal);
+}
+
+.modal.open .modal__container {
+    transform: translateY(0);
+}
+
+.modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal__header h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.modal__close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.modal__close:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.modal__close svg {
+    width: 20px;
+    height: 20px;
+}
+
+.modal__body {
+    padding: var(--spacing-lg);
+}
+
+.modal__footer {
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+/* 전송 방향 */
+.transfer-direction {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.transfer-account {
+    flex: 1;
+}
+
+.transfer-account label {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.transfer-account select {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+}
+
+.transfer-account select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.transfer-swap {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-top: var(--spacing-lg);
+    transition: all var(--transition-fast);
+}
+
+.transfer-swap:hover {
+    background: var(--bg-hover);
+    color: var(--color-primary);
+}
+
+.transfer-swap svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* 코인 선택 */
+.transfer-coin {
+    margin-bottom: var(--spacing-lg);
+}
+
+.transfer-coin label {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.transfer-coin__select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.transfer-coin__select:hover {
+    border-color: var(--border-color-light);
+}
+
+.transfer-coin__selected {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.transfer-coin__icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #26a17b, #1e8c6a);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+}
+
+.transfer-coin__select svg {
+    width: 18px;
+    height: 18px;
+    color: var(--text-tertiary);
+}
+
+/* 전송 금액 */
+.transfer-amount label {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.transfer-amount__input {
+    display: flex;
+    align-items: center;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.transfer-amount__input:focus-within {
+    border-color: var(--color-primary);
+}
+
+.transfer-amount__input input {
+    flex: 1;
+    padding: var(--spacing-md);
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: var(--font-size-lg);
+    font-family: var(--font-mono);
+}
+
+.transfer-amount__input input:focus {
+    outline: none;
+}
+
+.transfer-amount__input input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.transfer-amount__right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding-right: var(--spacing-md);
+}
+
+.transfer-amount__coin {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.transfer-amount__max {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: rgba(240, 185, 11, 0.15);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-primary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.transfer-amount__max:hover {
+    background: rgba(240, 185, 11, 0.25);
+}
+
+.transfer-amount__info {
+    margin-top: var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.transfer-amount__info strong {
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   반응형 - 태블릿
+   ======================================== */
+@media (max-width: 1024px) {
+    .funding-table__col--total,
+    .funding-table__col--inuse {
+        display: none;
+    }
+
+    .funding-table__col--coin {
+        flex: 2;
+    }
+
+    .funding-table__col--available,
+    .funding-table__col--equiv {
+        flex: 1;
+    }
+
+    .funding-promo__content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+}
+
+/* ========================================
+   반응형 - 모바일
+   ======================================== */
+@media (max-width: 768px) {
+    .funding-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .funding-header__right {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .funding-header__right .btn {
+        flex: 1;
+        min-width: calc(50% - var(--spacing-xs));
+        text-align: center;
+        justify-content: center;
+    }
+
+    .funding-summary {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .funding-promo {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .funding-promo__content {
+        align-items: center;
+    }
+
+    .funding-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .funding-filters__left {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .funding-search {
+        width: 100%;
+    }
+
+    .funding-convert {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* 모바일 테이블 카드 뷰 */
+    .funding-table__header {
+        display: none;
+    }
+
+    .funding-table__row {
+        flex-wrap: wrap;
+        padding: var(--spacing-md);
+    }
+
+    .funding-table__col {
+        padding: var(--spacing-xs);
+    }
+
+    .funding-table__col--coin {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .funding-table__col--available {
+        flex: 1;
+        text-align: left;
+    }
+
+    .funding-table__col--available::before {
+        content: 'Available';
+        display: block;
+        font-size: var(--font-size-xs);
+        color: var(--text-tertiary);
+        margin-bottom: 2px;
+    }
+
+    .funding-table__col--equiv {
+        flex: 1;
+    }
+
+    .funding-table__col--equiv::before {
+        content: 'Value';
+        display: block;
+        font-size: var(--font-size-xs);
+        color: var(--text-tertiary);
+        margin-bottom: 2px;
+    }
+
+    .funding-table__col--action {
+        width: 100%;
+        margin-top: var(--spacing-sm);
+        padding-top: var(--spacing-sm);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .funding-actions {
+        justify-content: space-around;
+    }
+
+    /* 모달 */
+    .modal__container {
+        max-width: none;
+        max-height: 100vh;
+        margin: 0;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        position: absolute;
+        bottom: 0;
+    }
+
+    .transfer-direction {
+        flex-direction: column;
+    }
+
+    .transfer-swap {
+        margin-top: 0;
+        transform: rotate(90deg);
+    }
+}
+
+/* ========================================
+   포커스 스타일
+   ======================================== */
+.funding-search input:focus-visible,
+.funding-checkbox input:focus-visible + .funding-checkbox__mark,
+.funding-convert:focus-visible,
+.funding-actions__link:focus-visible,
+.transfer-account select:focus-visible,
+.transfer-coin__select:focus-visible,
+.transfer-amount__input:focus-visible,
+.transfer-swap:focus-visible,
+.transfer-amount__max:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* ========================================
+   스크롤바 스타일
+   ======================================== */
+.funding-table__body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.funding-table__body::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.funding-table__body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.funding-table__body::-webkit-scrollbar-thumb:hover {
+    background: var(--border-color-light);
+}
