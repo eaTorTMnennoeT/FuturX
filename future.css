@@ -4092,22 +4092,40 @@ td.type-limit,
         justify-content: center;
     }
 
-    /* 모바일에서 P&L 테이블 영역 표시 */
+    /* 모바일에서 P&L 테이블 영역 - 내부 스크롤 제거, 부모 스크롤 사용 */
     .pnl-table-wrapper {
         flex: 1 1 auto;
-        min-height: 200px;
-        max-height: 300px;
+        min-height: auto;
+        max-height: none;
+        overflow-y: visible;
     }
 
     #pnlPanel {
         display: flex;
         flex-direction: column;
         height: auto;
-        min-height: 350px;
+        min-height: auto;
+        overflow: visible;
     }
 
     #pnlPanel.active {
         display: flex;
+    }
+
+    /* 모바일에서 Assets 내부 스크롤 제거 */
+    .assets-body {
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    /* 모바일에서 bottom-panel-section 스크롤 제거 */
+    .bottom-panel-section {
+        overflow: visible;
+        height: auto;
+    }
+
+    .bottom-panel-section.active {
+        overflow: visible;
     }
 }
 
