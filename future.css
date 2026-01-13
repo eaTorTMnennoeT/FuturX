@@ -4213,52 +4213,45 @@ td.type-limit,
     font-weight: 600;
 }
 
-/* Status 배지 스타일 - Bybit 스타일 Pill Badge */
+/* Status 배지 스타일 - 미니멀 고급 스타일 */
 .status-badge {
     display: inline-block;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
 }
 
 .status-badge.filled {
-    background: rgba(46, 204, 113, 0.15);
+    background: rgba(46, 204, 113, 0.08);
     color: #2ecc71;
-    border: 1px solid rgba(46, 204, 113, 0.3);
 }
 
 .status-badge.canceled {
-    background: rgba(240, 185, 11, 0.15);
+    background: rgba(240, 185, 11, 0.08);
     color: #f0b90b;
-    border: 1px solid rgba(240, 185, 11, 0.3);
 }
 
 .status-badge.expired {
-    background: rgba(132, 142, 156, 0.15);
-    color: #848e9c;
-    border: 1px solid rgba(132, 142, 156, 0.3);
+    background: rgba(132, 142, 156, 0.08);
+    color: #6c757d;
 }
 
 .status-badge.rejected {
-    background: rgba(246, 70, 93, 0.15);
+    background: rgba(246, 70, 93, 0.08);
     color: #f6465d;
-    border: 1px solid rgba(246, 70, 93, 0.3);
 }
 
 .status-badge.open,
 .status-badge.new {
-    background: rgba(52, 152, 219, 0.15);
+    background: rgba(52, 152, 219, 0.08);
     color: #3498db;
-    border: 1px solid rgba(52, 152, 219, 0.3);
 }
 
 .status-badge.partial {
-    background: rgba(155, 89, 182, 0.15);
+    background: rgba(155, 89, 182, 0.08);
     color: #9b59b6;
-    border: 1px solid rgba(155, 89, 182, 0.3);
 }
 
 /* P&L 컬럼 색상 */
