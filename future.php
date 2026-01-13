@@ -246,8 +246,8 @@ require_once 'includes/head.php';
                 </div>
             </div>
             <div class="bottom-panel-section" id="historyPanel">
-                <div class="panel-table-wrapper">
-                    <table class="positions-table">
+                <div class="history-table-wrapper">
+                    <table class="history-table">
                         <thead>
                             <tr>
                                 <th>Time</th>
@@ -264,10 +264,14 @@ require_once 'includes/head.php';
                         </tbody>
                     </table>
                 </div>
+                <div class="history-footer">
+                    <div class="history-stats" id="orderHistoryStats">Total: 0 records</div>
+                    <div class="history-pagination" id="orderHistoryPagination"></div>
+                </div>
             </div>
             <div class="bottom-panel-section" id="tradesPanel">
-                <div class="panel-table-wrapper">
-                    <table class="positions-table">
+                <div class="history-table-wrapper">
+                    <table class="history-table">
                         <thead>
                             <tr>
                                 <th>Time</th>
@@ -283,6 +287,10 @@ require_once 'includes/head.php';
                             <tr><td colspan="7" class="empty-cell">거래 내역이 없습니다</td></tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="history-footer">
+                    <div class="history-stats" id="tradeHistoryStats">Total: 0 records</div>
+                    <div class="history-pagination" id="tradeHistoryPagination"></div>
                 </div>
             </div>
             <div class="bottom-panel-section" id="assetsPanel">
@@ -522,16 +530,18 @@ require_once 'includes/head.php';
                         </div>
                         <!-- 2줄: 드롭다운 + 아이콘 -->
                         <div class="ob-footer-row2">
-                            <div class="ob-decimal-box">
-                                <span>1</span>
+                            <div class="ob-decimal-box" id="mobilePrecisionBox">
+                                <select id="precisionSelect" class="precision-select">
+                                    <option value="0.1">0.1</option>
+                                    <option value="1" selected>1</option>
+                                    <option value="10">10</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
                                 <span class="ob-decimal-arrow">▼</span>
                             </div>
                             <div class="ob-mode-box">
                                 <span class="ob-icon-list">≡</span>
-                                <span class="ob-icon-bars">
-                                    <span class="bar-red"></span>
-                                    <span class="bar-green"></span>
-                                </span>
                             </div>
                         </div>
                     </div>
@@ -1548,6 +1558,15 @@ require_once 'includes/head.php';
                 const skipUrl = window._skipUrlUpdate || false;
                 window._skipUrlUpdate = false; // 플래그 리셋
                 updateSymbolUI(data.symbol, !skipUrl);
+
+                // 6. 주문 입력 필드를 새 심볼 현재가로 초기화
+                const mobilePriceInput = document.getElementById('mobilePriceInput');
+                if (mobilePriceInput && currentPrice > 0) {
+                    const decimals = PRICE_DECIMALS[data.symbol] || 2;
+                    mobilePriceInput.value = currentPrice.toFixed(decimals);
+                    mobilePriceInput.dispatchEvent(new Event('input'));
+                }
+
                 showToast(`${data.symbol} 차트로 전환되었습니다.`, 'info');
             });
 
@@ -1708,17 +1727,26 @@ require_once 'includes/head.php';
             if (currentPrice > 0) {
                 // 정밀도에 맞게 소수점 자릿수 계산
                 const decimalPlaces = precision < 1 ? Math.abs(Math.floor(Math.log10(precision))) : 0;
-                const basePrice = parseFloat((Math.round(currentPrice / precision) * precision).toFixed(decimalPlaces));
+
+                // asks는 현재가 바로 위부터, bids는 현재가 바로 아래부터 시작
+                let startPrice;
+                if (side === 'asks') {
+                    startPrice = Math.ceil(currentPrice / precision) * precision;
+                } else {
+                    startPrice = Math.floor(currentPrice / precision) * precision;
+                }
+                startPrice = parseFloat(startPrice.toFixed(decimalPlaces));
+
                 const avgQty = grouped.size > 0
                     ? Array.from(grouped.values()).reduce((sum, v) => sum + v.qty, 0) / grouped.size
                     : 1;
 
-                for (let i = 1; i <= maxRows; i++) {
+                for (let i = 0; i < maxRows; i++) {
                     let targetPrice;
                     if (side === 'asks') {
-                        targetPrice = parseFloat((basePrice + (i * precision)).toFixed(decimalPlaces));
+                        targetPrice = parseFloat((startPrice + (i * precision)).toFixed(decimalPlaces));
                     } else {
-                        targetPrice = parseFloat((basePrice - (i * precision)).toFixed(decimalPlaces));
+                        targetPrice = parseFloat((startPrice - (i * precision)).toFixed(decimalPlaces));
                     }
 
                     if (targetPrice > 0 && !grouped.has(targetPrice)) {
@@ -1738,10 +1766,21 @@ require_once 'includes/head.php';
             let result = Array.from(grouped.values());
 
             if (side === 'asks') {
-                result.sort((a, b) => a.price - b.price); // 오름차순 후 역순 표시
-                result = result.slice(0, maxRows).reverse();
+                result.sort((a, b) => a.price - b.price); // 오름차순 (낮은 가격부터)
+                // 현재가보다 높거나 같은 가격만 (precision 1단위 여유)
+                if (currentPrice > 0) {
+                    const minAskPrice = Math.floor(currentPrice / precision) * precision;
+                    result = result.filter(item => item.price > minAskPrice);
+                }
+                // 현재가 근처 가격부터 maxRows개 선택 (낮은 가격이 앞에, 렌더링에서 reverse)
+                result = result.slice(0, maxRows);
             } else {
-                result.sort((a, b) => b.price - a.price); // 내림차순
+                result.sort((a, b) => b.price - a.price); // 내림차순 (높은 가격부터)
+                // 현재가보다 낮거나 같은 가격만 (precision 1단위 여유)
+                if (currentPrice > 0) {
+                    const maxBidPrice = Math.ceil(currentPrice / precision) * precision;
+                    result = result.filter(item => item.price < maxBidPrice);
+                }
                 result = result.slice(0, maxRows);
             }
 
@@ -1752,31 +1791,44 @@ require_once 'includes/head.php';
         // 사용자 주문 오더북에 합산
         // ========================================
         function mergeUserOrders() {
+            // precision에 맞게 가격 그룹핑
+            const tolerance = obPrecision / 2;
+
             // 사용자 매도 주문 합산
             userOrders.asks.forEach(userOrder => {
-                const existingIdx = asksData.findIndex(a => Math.abs(a.price - userOrder.price) < 0.01);
+                // 사용자 주문 가격을 현재 precision에 맞게 그룹핑
+                const groupedPrice = Math.ceil(userOrder.price / obPrecision) * obPrecision;
+                const existingIdx = asksData.findIndex(a => Math.abs(a.price - groupedPrice) < tolerance);
+
                 if (existingIdx !== -1) {
                     asksData[existingIdx].qty += userOrder.qty;
                     asksData[existingIdx].isUser = true;
                 } else {
                     // 적절한 위치에 삽입
-                    const insertIdx = asksData.findIndex(a => a.price > userOrder.price);
+                    const insertIdx = asksData.findIndex(a => a.price > groupedPrice);
                     if (insertIdx !== -1) {
-                        asksData.splice(insertIdx, 0, { ...userOrder, isUser: true });
+                        asksData.splice(insertIdx, 0, { price: groupedPrice, qty: userOrder.qty, total: 0, isUser: true });
+                    } else if (asksData.length === 0 || groupedPrice < asksData[asksData.length - 1].price) {
+                        asksData.push({ price: groupedPrice, qty: userOrder.qty, total: 0, isUser: true });
                     }
                 }
             });
 
             // 사용자 매수 주문 합산
             userOrders.bids.forEach(userOrder => {
-                const existingIdx = bidsData.findIndex(b => Math.abs(b.price - userOrder.price) < 0.01);
+                // 사용자 주문 가격을 현재 precision에 맞게 그룹핑
+                const groupedPrice = Math.floor(userOrder.price / obPrecision) * obPrecision;
+                const existingIdx = bidsData.findIndex(b => Math.abs(b.price - groupedPrice) < tolerance);
+
                 if (existingIdx !== -1) {
                     bidsData[existingIdx].qty += userOrder.qty;
                     bidsData[existingIdx].isUser = true;
                 } else {
-                    const insertIdx = bidsData.findIndex(b => b.price < userOrder.price);
+                    const insertIdx = bidsData.findIndex(b => b.price < groupedPrice);
                     if (insertIdx !== -1) {
-                        bidsData.splice(insertIdx, 0, { ...userOrder, isUser: true });
+                        bidsData.splice(insertIdx, 0, { price: groupedPrice, qty: userOrder.qty, total: 0, isUser: true });
+                    } else if (bidsData.length === 0 || groupedPrice > bidsData[bidsData.length - 1].price) {
+                        bidsData.push({ price: groupedPrice, qty: userOrder.qty, total: 0, isUser: true });
                     }
                 }
             });
@@ -2080,7 +2132,9 @@ require_once 'includes/head.php';
             // DocumentFragment 사용하여 리플로우 최소화
             if (obViewMode !== 'bids' && asksData.length > 0) {
                 const fragment = document.createDocumentFragment();
-                asksData.forEach(a => {
+                // asks는 역순으로 표시 (화면에서 낮은 가격이 아래에 오도록)
+                const displayAsks = [...asksData].reverse();
+                displayAsks.forEach(a => {
                     const row = document.createElement('div');
                     row.className = `ob-row ask${a.isUser ? ' user-order' : ''}`;
                     row.dataset.price = a.price.toFixed(priceDecimals);
@@ -2145,7 +2199,7 @@ require_once 'includes/head.php';
             if (asksData.length > 0) {
                 const displayAsks = asksData.slice(0, mobileRows).reverse();
                 mobileAsks.innerHTML = displayAsks.map(a => `
-                    <div class="bybit-ob-row ask" data-price="${a.price}">
+                    <div class="bybit-ob-row ask${a.isUser ? ' user-order' : ''}" data-price="${a.price}">
                         <span class="price">${formatMobilePrice(a.price)}</span>
                         <span class="qty">${formatQty(a.qty)}</span>
                         <div class="depth-bar" style="width: ${(a.total / maxTotal) * 100}%"></div>
@@ -2157,7 +2211,7 @@ require_once 'includes/head.php';
             if (bidsData.length > 0) {
                 const displayBids = bidsData.slice(0, mobileRows);
                 mobileBids.innerHTML = displayBids.map(b => `
-                    <div class="bybit-ob-row bid" data-price="${b.price}">
+                    <div class="bybit-ob-row bid${b.isUser ? ' user-order' : ''}" data-price="${b.price}">
                         <span class="price">${formatMobilePrice(b.price)}</span>
                         <span class="qty">${formatQty(b.qty)}</span>
                         <div class="depth-bar" style="width: ${(b.total / maxTotal) * 100}%"></div>
@@ -2165,13 +2219,15 @@ require_once 'includes/head.php';
                 `).join('');
             }
 
-            // 호가 클릭 시 모바일 가격 입력에 반영
+            // 호가 클릭 시 모바일 가격 입력에 반영 (콤마 없이)
             document.querySelectorAll('.bybit-ob-row[data-price]').forEach(row => {
-                row.addEventListener('click', function() {
+                row.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     const price = parseFloat(this.dataset.price);
                     const mobilePriceInput = document.getElementById('mobilePriceInput');
                     if (mobilePriceInput && price > 0) {
-                        mobilePriceInput.value = formatMobilePrice(price);
+                        // 콤마 없이 숫자만 입력 (주문 시 오류 방지)
+                        mobilePriceInput.value = price.toFixed(priceDecimals);
                         // 주문 정보 재계산
                         mobilePriceInput.dispatchEvent(new Event('input'));
                     }
@@ -3959,15 +4015,23 @@ require_once 'includes/head.php';
             renderAssetsTable(wallets);
         }
 
+        // Order History 페이징 변수
+        let orderHistoryPage = 0;
+        const orderHistoryPageSize = 20;
+        let orderHistoryTotalCount = 0;
+
         // 주문 내역 로드 (API)
-        async function loadOrderHistory() {
+        async function loadOrderHistory(page = 0) {
             if (!authToken) return;
             try {
-                const response = await fetch(`${TRADE_API}?action=get_order_history`, {
+                orderHistoryPage = page;
+                const offset = page * orderHistoryPageSize;
+                const response = await fetch(`${TRADE_API}?action=get_order_history&limit=${orderHistoryPageSize}&offset=${offset}`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 const data = await response.json();
                 if (data.success) {
+                    orderHistoryTotalCount = data.data.total || (data.data.orders ? data.data.orders.length : 0);
                     renderOrderHistory(data.data.orders || []);
                 }
             } catch (error) {
@@ -3981,32 +4045,69 @@ require_once 'includes/head.php';
 
             if (orders.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="empty-cell">주문 내역이 없습니다</td></tr>';
+                renderOrderHistoryPagination();
                 return;
             }
 
             tbody.innerHTML = orders.map(o => {
                 const time = new Date(o.created_at).toLocaleTimeString('ko-KR');
-                const sideClass = o.side === 'buy' ? 'long' : 'short';
-                // status 색상 결정
+                const sideClass = o.side === 'buy' ? 'buy' : 'sell';
+                const sideLabel = o.side === 'buy' ? 'BUY' : 'SELL';
+                // status 배지 클래스 결정
                 let statusClass = '';
-                if (o.status === 'filled') statusClass = 'status-filled';
-                else if (o.status === 'cancelled' || o.status === 'canceled') statusClass = 'status-cancelled';
-                else if (o.status === 'open' || o.status === 'new') statusClass = 'status-open';
-                // order_type 색상 결정
-                const typeClass = o.order_type === 'market' ? 'type-market' : 'type-limit';
-                const typeLabel = o.order_type === 'market' ? 'Market' : 'Limit';
+                let statusLabel = o.status.toUpperCase();
+                if (o.status === 'filled') statusClass = 'filled';
+                else if (o.status === 'cancelled' || o.status === 'canceled') {
+                    statusClass = 'canceled';
+                    statusLabel = 'CANCELED';
+                }
+                else if (o.status === 'expired') statusClass = 'expired';
+                else if (o.status === 'rejected') statusClass = 'rejected';
+                else if (o.status === 'open') statusClass = 'open';
+                else if (o.status === 'new') statusClass = 'new';
+                else if (o.status === 'partially_filled') {
+                    statusClass = 'partial';
+                    statusLabel = 'PARTIAL';
+                }
+                // order_type 라벨
+                const typeLabel = o.order_type === 'market' ? 'MARKET' : 'LIMIT';
                 return `
                     <tr>
                         <td>${time}</td>
                         <td>${o.symbol}</td>
-                        <td class="${typeClass}">${typeLabel}</td>
-                        <td class="${sideClass}">${o.side === 'buy' ? 'Buy' : 'Sell'}</td>
+                        <td>${typeLabel}</td>
+                        <td class="${sideClass}">${sideLabel}</td>
                         <td>${formatPrice(parseFloat(o.price), o.symbol)}</td>
                         <td>${parseFloat(o.quantity).toFixed(6)}</td>
-                        <td class="${statusClass}">${o.status}</td>
+                        <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
                     </tr>
                 `;
             }).join('');
+
+            renderOrderHistoryPagination();
+        }
+
+        function renderOrderHistoryPagination() {
+            const statsEl = document.getElementById('orderHistoryStats');
+            const paginationEl = document.getElementById('orderHistoryPagination');
+            if (!statsEl || !paginationEl) return;
+
+            statsEl.textContent = `Total: ${orderHistoryTotalCount} records`;
+
+            const totalPages = Math.ceil(orderHistoryTotalCount / orderHistoryPageSize);
+            if (totalPages <= 1) {
+                paginationEl.innerHTML = '';
+                return;
+            }
+
+            const currentPage = orderHistoryPage + 1;
+            paginationEl.innerHTML = `
+                <button onclick="loadOrderHistory(0)" ${orderHistoryPage === 0 ? 'disabled' : ''}>First</button>
+                <button onclick="loadOrderHistory(${orderHistoryPage - 1})" ${orderHistoryPage === 0 ? 'disabled' : ''}>Prev</button>
+                <span class="page-info">${currentPage} / ${totalPages}</span>
+                <button onclick="loadOrderHistory(${orderHistoryPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Next</button>
+                <button onclick="loadOrderHistory(${totalPages - 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Last</button>
+            `;
         }
 
         // Trade History 페이징 변수
@@ -4045,17 +4146,20 @@ require_once 'includes/head.php';
 
             tbody.innerHTML = trades.map(t => {
                 const time = new Date(t.created_at).toLocaleTimeString('ko-KR');
-                const sideClass = t.side === 'buy' ? 'long' : 'short';
-                const pnlClass = parseFloat(t.realized_pnl) >= 0 ? 'up' : 'down';
+                const sideClass = t.side === 'buy' ? 'buy' : 'sell';
+                const sideLabel = t.side === 'buy' ? 'BUY' : 'SELL';
+                const pnl = parseFloat(t.realized_pnl);
+                const pnlClass = pnl >= 0 ? 'positive' : 'negative';
+                const pnlPrefix = pnl >= 0 ? '+' : '';
                 return `
                     <tr>
                         <td>${time}</td>
                         <td>${t.symbol}</td>
-                        <td class="${sideClass}">${t.side === 'buy' ? 'Buy' : 'Sell'}</td>
+                        <td class="${sideClass}">${sideLabel}</td>
                         <td>${formatPrice(parseFloat(t.price), t.symbol)}</td>
                         <td>${parseFloat(t.quantity).toFixed(6)}</td>
                         <td>${parseFloat(t.fee).toFixed(4)} USDT</td>
-                        <td class="${pnlClass}">${parseFloat(t.realized_pnl).toFixed(2)} USDT</td>
+                        <td class="${pnlClass}">${pnlPrefix}${pnl.toFixed(2)} USDT</td>
                     </tr>
                 `;
             }).join('');
@@ -4064,18 +4168,11 @@ require_once 'includes/head.php';
         }
 
         function renderTradeHistoryPagination() {
-            let paginationEl = document.getElementById('tradeHistoryPagination');
-            if (!paginationEl) {
-                // 페이징 컨테이너 생성
-                const table = document.querySelector('#tradesPanel .positions-table');
-                if (table) {
-                    paginationEl = document.createElement('div');
-                    paginationEl.id = 'tradeHistoryPagination';
-                    paginationEl.className = 'pagination-container';
-                    table.parentNode.insertBefore(paginationEl, table.nextSibling);
-                }
-            }
-            if (!paginationEl) return;
+            const statsEl = document.getElementById('tradeHistoryStats');
+            const paginationEl = document.getElementById('tradeHistoryPagination');
+            if (!statsEl || !paginationEl) return;
+
+            statsEl.textContent = `Total: ${tradeHistoryTotalCount} records`;
 
             const totalPages = Math.ceil(tradeHistoryTotalCount / tradeHistoryPageSize);
             if (totalPages <= 1) {
@@ -5848,8 +5945,16 @@ require_once 'includes/head.php';
             if (orders.length === 0) {
                 panel.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">📋</div>
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                                <rect x="9" y="3" width="6" height="4" rx="1"/>
+                                <line x1="9" y1="12" x2="15" y2="12"/>
+                                <line x1="9" y1="16" x2="15" y2="16"/>
+                            </svg>
+                        </div>
                         <div class="empty-text">No Open Orders</div>
+                        <div class="empty-subtext">Your active orders will appear here</div>
                     </div>
                 `;
                 return;
@@ -6051,7 +6156,84 @@ require_once 'includes/head.php';
                 loadUserPositions();
             }
         }, 30000);
+
+        // ========================================
+        // Close All Orders 기능
+        // ========================================
+        document.getElementById('closeAllBtn')?.addEventListener('click', () => {
+            // 현재 오픈 오더 개수 확인
+            const orderCount = document.getElementById('orderCount')?.textContent || '0';
+            if (parseInt(orderCount) === 0) {
+                showToast('취소할 주문이 없습니다.', 'warning');
+                return;
+            }
+
+            document.getElementById('closeAllOrderCount').textContent = orderCount;
+            document.getElementById('confirmCloseAllModal').classList.add('active');
+        });
+
+        // 모달 닫기
+        function closeConfirmModal() {
+            document.getElementById('confirmCloseAllModal').classList.remove('active');
+        }
+
+        // 전체 주문 취소 실행
+        async function executeCloseAllOrders() {
+            closeConfirmModal();
+
+            if (!authToken) {
+                showToast('로그인이 필요합니다.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${TRADE_API}?action=cancel_all_orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        symbol: document.getElementById('currentMarketFilter')?.checked ? currentSymbol : null
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showToast(`${data.data.canceled_count}개 주문이 취소되었습니다.`, 'success');
+                    loadUserOrders();
+                    loadUserBalance();
+                } else {
+                    showToast(data.error || '주문 취소 실패', 'error');
+                }
+            } catch (error) {
+                showToast('주문 취소 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        // 모달 외부 클릭시 닫기
+        document.getElementById('confirmCloseAllModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'confirmCloseAllModal') closeConfirmModal();
+        });
     </script>
+
+    <!-- Close All 확인 모달 -->
+    <div class="confirm-modal-overlay" id="confirmCloseAllModal">
+        <div class="confirm-modal">
+            <div class="confirm-modal-header">
+                <span class="confirm-modal-icon">⚠️</span>
+                <h3>주문 전체 취소</h3>
+            </div>
+            <div class="confirm-modal-body">
+                <p><span id="closeAllOrderCount">0</span>개의 미체결 주문을 모두 취소하시겠습니까?</p>
+                <p class="confirm-modal-warning">이 작업은 되돌릴 수 없습니다.</p>
+            </div>
+            <div class="confirm-modal-actions">
+                <button class="confirm-modal-btn cancel" onclick="closeConfirmModal()">아니오</button>
+                <button class="confirm-modal-btn confirm" onclick="executeCloseAllOrders()">예, 취소합니다</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
