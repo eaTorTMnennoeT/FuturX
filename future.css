@@ -4120,11 +4120,14 @@ td.type-limit,
 
     /* 모바일에서 bottom-panel-section 스크롤 제거 */
     .bottom-panel-section {
+        display: none !important;
         overflow: visible;
         height: auto;
     }
 
     .bottom-panel-section.active {
+        display: flex !important;
+        flex-direction: column;
         overflow: visible;
     }
 }
@@ -4531,7 +4534,8 @@ td.type-limit,
     backdrop-filter: blur(4px);
 }
 
-.confirm-modal-overlay.show {
+.confirm-modal-overlay.show,
+.confirm-modal-overlay.active {
     opacity: 1;
     visibility: visible;
 }
@@ -4547,7 +4551,8 @@ td.type-limit,
     transition: transform 0.2s ease-out;
 }
 
-.confirm-modal-overlay.show .confirm-modal {
+.confirm-modal-overlay.show .confirm-modal,
+.confirm-modal-overlay.active .confirm-modal {
     transform: scale(1) translateY(0);
 }
 
