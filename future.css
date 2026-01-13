@@ -4092,12 +4092,14 @@ td.type-limit,
         justify-content: center;
     }
 
-    /* 모바일에서 P&L 테이블 영역 - 내부 스크롤 제거, 부모 스크롤 사용 */
+    /* 모바일에서 P&L 테이블 영역 - 가로 스크롤 활성화 */
     .pnl-table-wrapper {
         flex: 1 1 auto;
         min-height: auto;
         max-height: none;
+        overflow-x: auto;
         overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
     }
 
     #pnlPanel {
@@ -4130,6 +4132,150 @@ td.type-limit,
         flex-direction: column;
         overflow: visible;
     }
+
+    /* 모바일 History Table - 가로 스크롤 */
+    .history-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .history-table {
+        min-width: 600px;
+        font-size: 11px;
+    }
+
+    .history-table th,
+    .history-table td {
+        padding: 8px 6px;
+        white-space: nowrap;
+    }
+
+    /* P&L 테이블 - 모바일에서 최소 너비로 가로 스크롤 가능하게 */
+    .pnl-table {
+        min-width: 900px;
+    }
+
+    .pnl-table th,
+    .pnl-table td {
+        padding: 8px 6px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+}
+
+/* ========================================
+   History Table 기본 스타일
+   ======================================== */
+.history-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.history-table th {
+    text-align: left;
+    padding: 10px 8px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 11px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.history-table td {
+    padding: 10px 8px;
+    color: var(--text);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    white-space: nowrap;
+}
+
+.history-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Side 컬럼 색상 */
+.history-table td:nth-child(4) {
+    font-weight: 500;
+}
+
+.history-table .side-buy,
+.history-table td[class*="Buy"] {
+    color: var(--green);
+}
+
+.history-table .side-sell,
+.history-table td[class*="Sell"] {
+    color: var(--red);
+}
+
+/* Status 컬럼 스타일 */
+.history-table .status-filled {
+    color: var(--green);
+}
+
+.history-table .status-cancelled {
+    color: var(--text-muted);
+}
+
+/* P&L 컬럼 색상 */
+.history-table .pnl-positive {
+    color: var(--green);
+}
+
+.history-table .pnl-negative {
+    color: var(--red);
+}
+
+/* History Footer */
+.history-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 8px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.history-stats {
+    color: var(--text-secondary);
+}
+
+.history-pagination {
+    display: flex;
+    gap: 4px;
+}
+
+.history-pagination button {
+    padding: 6px 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.history-pagination button:hover:not(:disabled) {
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+}
+
+.history-pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.history-pagination .page-info {
+    padding: 6px 12px;
+    color: var(--text-secondary);
+    font-size: 11px;
 }
 
 /* ========================================
