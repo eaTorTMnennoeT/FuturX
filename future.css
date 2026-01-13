@@ -4492,3 +4492,150 @@ td.type-limit,
         font-size: 11px;
     }
 }
+
+/* ========================================
+   확인 모달 (Close All Orders 등)
+   ======================================== */
+.confirm-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    backdrop-filter: blur(4px);
+}
+
+.confirm-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.confirm-modal {
+    background: var(--bg-card);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.2s ease-out;
+}
+
+.confirm-modal-overlay.show .confirm-modal {
+    transform: scale(1) translateY(0);
+}
+
+.confirm-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.confirm-modal-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.confirm-modal-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+}
+
+.confirm-modal-body {
+    padding: 20px 24px;
+}
+
+.confirm-modal-body p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 8px;
+}
+
+.confirm-modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+.confirm-modal-warning {
+    color: var(--red) !important;
+    font-size: 13px !important;
+}
+
+.confirm-modal-actions {
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--border);
+}
+
+.confirm-modal-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+}
+
+.confirm-modal-btn.cancel {
+    background: var(--bg-input);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.confirm-modal-btn.cancel:hover {
+    background: var(--bg-hover);
+}
+
+.confirm-modal-btn.confirm {
+    background: var(--red);
+    color: #fff;
+}
+
+.confirm-modal-btn.confirm:hover {
+    background: #e5374e;
+    box-shadow: 0 4px 12px rgba(246, 70, 93, 0.3);
+}
+
+/* 모바일 모달 반응형 */
+@media (max-width: 480px) {
+    .confirm-modal {
+        width: 95%;
+        margin: 16px;
+    }
+
+    .confirm-modal-header {
+        padding: 16px 20px 12px;
+    }
+
+    .confirm-modal-header h3 {
+        font-size: 16px;
+    }
+
+    .confirm-modal-body {
+        padding: 16px 20px;
+    }
+
+    .confirm-modal-actions {
+        padding: 12px 20px 16px;
+        flex-direction: column;
+    }
+
+    .confirm-modal-btn {
+        padding: 14px 20px;
+    }
+}
