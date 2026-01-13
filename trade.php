@@ -34,8 +34,8 @@ $pageTitle = $urlSymbol . ' 무기한';
 $pageCSS = ['trade.css'];
 require_once 'includes/head.php';
 ?>
-    <!-- Socket.IO Client (로컬 ws-server 제공 버전 사용: CDN 차단/오프라인 이슈 방지) -->
-    <script src="<?= WS_SERVER_URL ?>/socket.io/socket.io.js"></script>
+    <!-- Socket.IO Client -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <!-- Lightweight Charts for custom markers -->
     <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
 
@@ -293,78 +293,70 @@ require_once 'includes/head.php';
                     </div>
                     <!-- Positions -->
                     <div class="panel-section" id="positionsPanel">
-                        <div class="panel-table-scroll">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Symbol</th>
-                                        <th>Size</th>
-                                        <th>Entry Price</th>
-                                        <th>Mark Price</th>
-                                        <th>Liq. Price</th>
-                                        <th>Margin</th>
-                                        <th>PNL (ROE%)</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="positionsBody"></tbody>
-                            </table>
-                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Size</th>
+                                    <th>Entry Price</th>
+                                    <th>Mark Price</th>
+                                    <th>Liq. Price</th>
+                                    <th>Margin</th>
+                                    <th>PNL (ROE%)</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="positionsBody"></tbody>
+                        </table>
                     </div>
                     <!-- Order History -->
                     <div class="panel-section" id="orderHistoryPanel">
-                        <div class="panel-table-scroll">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Time</th>
-                                        <th>Symbol</th>
-                                        <th>Type</th>
-                                        <th>Side</th>
-                                        <th>Price</th>
-                                        <th>Qty</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="orderHistoryBody"></tbody>
-                            </table>
-                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Symbol</th>
+                                    <th>Type</th>
+                                    <th>Side</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderHistoryBody"></tbody>
+                        </table>
                     </div>
                     <!-- Trade History -->
                     <div class="panel-section" id="tradeHistoryPanel">
-                        <div class="panel-table-scroll">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Time</th>
-                                        <th>Symbol</th>
-                                        <th>Side</th>
-                                        <th>Price</th>
-                                        <th>Qty</th>
-                                        <th>Fee</th>
-                                        <th>Realized PNL</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tradeHistoryBody"></tbody>
-                            </table>
-                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Symbol</th>
+                                    <th>Side</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Fee</th>
+                                    <th>Realized PNL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tradeHistoryBody"></tbody>
+                        </table>
                     </div>
                     <!-- Assets -->
                     <div class="panel-section" id="assetsPanel">
-                        <div class="panel-table-scroll">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Coin</th>
-                                        <th>Wallet Balance</th>
-                                        <th>Available</th>
-                                        <th>In Order</th>
-                                        <th>USD Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="assetsBody"></tbody>
-                            </table>
-                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Coin</th>
+                                    <th>Wallet Balance</th>
+                                    <th>Available</th>
+                                    <th>In Order</th>
+                                    <th>USD Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assetsBody"></tbody>
+                        </table>
                     </div>
                     <!-- P&L -->
                     <div class="panel-section" id="pnlPanel">
@@ -744,7 +736,7 @@ require_once 'includes/head.php';
             });
 
             // 캔들스틱 시리즈 (심볼별 소수점 설정)
-            const chartDecimals = getPriceDecimals(currentSymbol);
+            const chartDecimals = PRICE_DECIMALS[currentSymbol] || 2;
             candleSeries = chart.addCandlestickSeries({
                 upColor: '#0ecb81',
                 downColor: '#f6465d',
@@ -869,7 +861,7 @@ require_once 'includes/head.php';
                     const entryPrice = parseFloat(pos.entry_price);
                     const liqPrice = parseFloat(pos.liquidation_price);
                     const isLong = pos.side === 'long';
-                    const size = formatQty(parseFloat(pos.size), pos.symbol);
+                    const size = parseFloat(pos.size).toFixed(4);
 
                     if (entryPrice && !isNaN(entryPrice)) {
                         // 진입가 라인 (굵은 실선)
@@ -912,7 +904,7 @@ require_once 'includes/head.php';
                             lineWidth: 1,
                             lineStyle: LightweightCharts.LineStyle.Dotted,
                             axisLabelVisible: true,
-                            title: `Buy ${formatQty(qty, currentSymbol)}`,
+                            title: `Buy ${qty.toFixed(4)}`,
                         });
                         orderLines.push(orderLine);
                     }
@@ -929,7 +921,7 @@ require_once 'includes/head.php';
                             lineWidth: 1,
                             lineStyle: LightweightCharts.LineStyle.Dotted,
                             axisLabelVisible: true,
-                            title: `Sell ${formatQty(qty, currentSymbol)}`,
+                            title: `Sell ${qty.toFixed(4)}`,
                         });
                         orderLines.push(orderLine);
                     }
@@ -992,75 +984,56 @@ require_once 'includes/head.php';
         const SOCKET_SERVER = window.FuturXConfig?.wsServerUrl || 'http://localhost:3002';
         let socket = null;
 
-        // 심볼별 소수점 자리수 (단일 소스: DB symbols -> window.FuturXConfig.*DecimalsBySymbol)
-        const PRICE_DECIMALS = window.FuturXConfig?.priceDecimalsBySymbol || {};
-        const QTY_DECIMALS = window.FuturXConfig?.qtyDecimalsBySymbol || {};
-        function getPriceDecimals(symbol) {
-            return Number(PRICE_DECIMALS[symbol]) || 2;
-        }
-        function getQtyDecimals(symbol) {
-            return Number(QTY_DECIMALS[symbol]) || 3;
-        }
+        // 심볼별 소수점 자리수 설정 (공통)
+        const PRICE_DECIMALS = {
+            'BTCUSDT': 2,
+            'ETHUSDT': 2,
+            'BNBUSDT': 2,
+            'SOLUSDT': 2,
+            'XRPUSDT': 4,
+            'DOGEUSDT': 5,
+            'ADAUSDT': 4,
+            'AVAXUSDT': 2,
+            'DOTUSDT': 3,
+            'LINKUSDT': 3,
+            'LTCUSDT': 2,
+            'BCHUSDT': 2,
+            'ATOMUSDT': 3,
+            'ETCUSDT': 2,
+            'XLMUSDT': 5,
+            'TRXUSDT': 5,
+            'NEARUSDT': 3,
+            'APTUSDT': 3,
+            'ARBUSDT': 4,
+            'OPUSDT': 4,
+            'MATICUSDT': 4,
+            'FILUSDT': 3,
+            'ICPUSDT': 3,
+            'SHIBUSDT': 6,
+            'UNIUSDT': 3,
+            'XMRUSDT': 2,
+            'DASHUSDT': 2,
+            'ZECUSDT': 2,
+            'XTZUSDT': 4,
+            'ONTUSDT': 4,
+            'IOTAUSDT': 4
+        };
 
-        // ========================================
-        // 공통 숫자 포맷 함수 (USD_KRW는 677줄에서 PHP로 설정됨)
-        // ========================================
-
-        // 가격 포맷팅 (심볼별 소수점)
+        // 가격 포맷팅 (심볼에 따른 소수점 자리수) - 공통 함수
         function formatPrice(price, symbol = null) {
             const sym = symbol || currentSymbol;
-            if (window.FuturX?.formatPrice) return window.FuturX.formatPrice(price, sym);
+            const decimals = PRICE_DECIMALS[sym] || 2;
             const p = parseFloat(price);
             if (isNaN(p)) return '-';
-            const decimals = getPriceDecimals(sym);
-            return p.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-        }
-
-        // 일반 숫자 포맷팅 (천단위 콤마)
-        function formatNum(num, decimals = 2) {
-            const n = parseFloat(num);
-            if (isNaN(n)) return '-';
-            return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-        }
-
-        // 수량 포맷팅 (심볼별 소수점, 표시용: 천단위 포함)
-        function formatQty(qty, symbol = null) {
-            const sym = symbol || currentSymbol;
-            if (window.FuturX?.formatQty) return window.FuturX.formatQty(qty, sym);
-            const q = parseFloat(qty);
-            if (isNaN(q)) return '-';
-            const decimals = getQtyDecimals(sym);
-            return q.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-        }
-
-        // 수량 포맷팅 (입력/페이로드용: 콤마 없이 고정 소수)
-        function formatQtyPlain(qty, symbol = null) {
-            const sym = symbol || currentSymbol;
-            const q = parseFloat(qty);
-            if (isNaN(q)) return '';
-            return q.toFixed(getQtyDecimals(sym));
-        }
-
-        // KRW 포맷팅 (정수, 원)
-        function formatKrw(usd) {
-            const krw = parseFloat(usd) * USD_KRW;
-            if (isNaN(krw)) return '-';
-            return Math.round(krw).toLocaleString('ko-KR');
-        }
-
-        // P&L 포맷팅 (+/- 부호 포함)
-        function formatPnl(pnl, decimals = 2) {
-            const p = parseFloat(pnl);
-            if (isNaN(p)) return '-';
-            const sign = p >= 0 ? '+' : '';
-            return sign + p.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-        }
-
-        // 수수료 포맷팅 (4자리)
-        function formatFee(fee) {
-            const f = parseFloat(fee);
-            if (isNaN(f)) return '0.0000';
-            return f.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+            // 1달러 이상은 천단위 구분자 사용, 미만은 toFixed
+            if (p >= 1) {
+                return p.toLocaleString(undefined, {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals
+                });
+            } else {
+                return p.toFixed(decimals);
+            }
         }
 
         let currentPrice = 0;
@@ -1307,6 +1280,13 @@ require_once 'includes/head.php';
                 loadUserBalance();
             });
 
+            // 다른 세션에서 주문 변경 시 동기화 (PC-모바일 동기화)
+            socket.on('orders:refresh', (data) => {
+                console.log('[WS] orders:refresh received:', data);
+                // 오픈 오더 새로고침 (syncUserOrdersFromAPI 호출로 호가창 내 주문도 업데이트됨)
+                loadUserOrders();
+            });
+
             // 호가창 업데이트
             socket.on('orderbook:update', (data) => {
                 if (data.bids && data.asks) {
@@ -1407,7 +1387,7 @@ require_once 'includes/head.php';
 
                 // 2. 차트 priceFormat 업데이트 (심볼별 소수점)
                 if (candleSeries) {
-                    const newDecimals = getPriceDecimals(data.symbol);
+                    const newDecimals = PRICE_DECIMALS[data.symbol] || 2;
                     candleSeries.applyOptions({
                         priceFormat: {
                             type: 'price',
@@ -1988,7 +1968,7 @@ require_once 'includes/head.php';
             const maxTotal = Math.max(maxAskTotal, maxBidTotal, 0.1);
 
             // 정밀도에 따른 소수점 자릿수 계산 (심볼별 기본값 참조)
-            const defaultDecimals = getPriceDecimals(currentSymbol);
+            const defaultDecimals = PRICE_DECIMALS[currentSymbol] || 2;
             const precisionDecimals = obPrecision < 1 ? Math.round(Math.abs(Math.log10(obPrecision))) : 0;
             const priceDecimals = Math.max(precisionDecimals, defaultDecimals);
 
@@ -2947,7 +2927,7 @@ require_once 'includes/head.php';
             const baseCoin = symbol.replace('USDT', '');
 
             // 심볼별 기본 정밀도 및 옵션 (PRICE_DECIMALS 기반 자동 생성)
-            const decimals = getPriceDecimals(symbol);
+            const decimals = PRICE_DECIMALS[symbol] || 2;
             const minPrecision = Math.pow(10, -decimals);
             const defaultOptions = [minPrecision, minPrecision * 10, minPrecision * 100, minPrecision * 1000];
 
@@ -3614,7 +3594,6 @@ require_once 'includes/head.php';
                     const fee = pos.total_fee / 2;
                     const qtyUsdt = qty * pos.exit_price;
                     const baseCoin = pos.symbol.replace('USDT', '');
-                    const pnlKrw = pos.realized_pnl * USD_KRW;
 
                     return `
                         <tr>
@@ -3630,19 +3609,14 @@ require_once 'includes/head.php';
                             <td>${formatPrice(pos.exit_price, pos.symbol)}</td>
                             <td>
                                 <div class="qty-cell">
-                                    <span>${formatQty(qty)} ${baseCoin}</span>
-                                    <span class="qty-usdt">${formatNum(qtyUsdt)} USDT</span>
+                                    <span>${qty.toFixed(4)} ${baseCoin}</span>
+                                    <span class="qty-usdt">${qtyUsdt.toFixed(2)} USDT</span>
                                 </div>
                             </td>
-                            <td class="${pnlClass}">
-                                <div class="pnl-cell">
-                                    <span>${formatPnl(pos.realized_pnl)}</span>
-                                    <span class="pnl-krw">${formatKrw(pos.realized_pnl)} KRW</span>
-                                </div>
-                            </td>
-                            <td>${formatFee(fee)}</td>
-                            <td>${formatFee(fee)}</td>
-                            <td>${formatFee(0)}</td>
+                            <td class="${pnlClass}">${pos.realized_pnl >= 0 ? '+' : ''}${pos.realized_pnl.toFixed(2)}</td>
+                            <td>${fee.toFixed(4)}</td>
+                            <td>${fee.toFixed(4)}</td>
+                            <td>0.0000</td>
                         </tr>
                     `;
                 }).join('');
@@ -3662,15 +3636,10 @@ require_once 'includes/head.php';
                                     <span class="symbol-type">Perp</span>
                                 </div>
                             </td>
-                            <td class="${pnlClass}">
-                                <div class="pnl-cell">
-                                    <span>${formatPnl(pos.realized_pnl)}</span>
-                                    <span class="pnl-krw">${formatKrw(pos.realized_pnl)} KRW</span>
-                                </div>
-                            </td>
-                            <td>${formatFee(fee)}</td>
-                            <td>${formatFee(fee)}</td>
-                            <td>${formatFee(0)}</td>
+                            <td class="${pnlClass}">${pos.realized_pnl >= 0 ? '+' : ''}${pos.realized_pnl.toFixed(2)}</td>
+                            <td>${fee.toFixed(4)}</td>
+                            <td>${fee.toFixed(4)}</td>
+                            <td>0.0000</td>
                             <td class="date-cell">${openedAt}</td>
                             <td class="duration-cell">${pos.duration}</td>
                             <td class="date-cell">${closedAt}</td>
@@ -4372,7 +4341,7 @@ require_once 'includes/head.php';
                     }
                 }
 
-                const iconUrl = getCoinIconUrl(wallet.currency);
+                const iconUrl = COIN_ICONS[wallet.currency] || `https://assets.coingecko.com/coins/images/1/small/bitcoin.png`;
 
                 return `
                     <tr>

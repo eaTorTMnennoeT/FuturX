@@ -585,8 +585,7 @@ renderPageHeader('포지션 관리', '실시간으로 오픈 포지션을 모니
 <script>
 const WS_SERVER = window.FuturXConfig?.wsServerUrl || 'http://localhost:3002';
 let socket = null;
-let currentPrice = 0; // (상단 티커용 - 기본 심볼)
-let allPrices = {};   // 심볼별 최신가 (prices:all)
+let currentPrice = 0;
 let positions = new Map();
 let selectedPositionId = null;
 
@@ -681,15 +680,6 @@ function connectSocket() {
         updatePositionsPnL();
     });
 
-// 모든 심볼 가격 (포지션/관리자용)
-socket.on('prices:all', (prices) => {
-    if (prices && typeof prices === 'object') {
-        allPrices = prices;
-        // 심볼별 가격이 바뀌었으니 전체 업데이트
-        updatePositionsPnL();
-    }
-});
-
     // 티커 업데이트
     socket.on('ticker:update', (data) => {
         updateTicker(data);
@@ -781,8 +771,7 @@ function formatUptime(ms) {
 function updatePrice(price, prevPrice) {
     currentPrice = price;
     const priceEl = document.getElementById('current-price');
-    // 상단 티커는 기본적으로 BTC 가격 표시 (정확 포맷은 DB decimals 기반)
-    priceEl.textContent = '$' + (window.FuturX?.formatPrice ? window.FuturX.formatPrice(price, 'BTCUSDT') : price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    priceEl.textContent = '$' + price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
     if (prevPrice) {
         priceEl.className = 'price-ticker__price ' + (price >= prevPrice ? 'up' : 'down');
@@ -809,11 +798,9 @@ function updateStats() {
 
         const entryPrice = parseFloat(p.entry_price) || 0;
         const size = parseFloat(p.size) || 0;
-        const symbol = p.symbol || 'BTCUSDT';
-        const markPrice = (allPrices && allPrices[symbol] !== undefined) ? (parseFloat(allPrices[symbol]) || 0) : currentPrice;
         const pnl = side === 'long'
-            ? (markPrice - entryPrice) * size
-            : (entryPrice - markPrice) * size;
+            ? (currentPrice - entryPrice) * size
+            : (entryPrice - currentPrice) * size;
         totalPnl += pnl;
     });
 
@@ -836,13 +823,11 @@ function updatePositionsPnL() {
         const size = parseFloat(p.size) || 0;
         const leverage = parseInt(p.leverage) || 1;
         const side = (p.side || 'long').toLowerCase();
-        const symbol = p.symbol || 'BTCUSDT';
-        const markPrice = (allPrices && allPrices[symbol] !== undefined) ? (parseFloat(allPrices[symbol]) || 0) : currentPrice;
 
         // PnL 계산
         const pnl = side === 'long'
-            ? (markPrice - entryPrice) * size
-            : (entryPrice - markPrice) * size;
+            ? (currentPrice - entryPrice) * size
+            : (entryPrice - currentPrice) * size;
 
         // ROE 계산 (PnL / 마진 * 100)
         const margin = (entryPrice * size) / leverage;
@@ -851,7 +836,7 @@ function updatePositionsPnL() {
         // 현재가 업데이트
         const markPriceCell = row.querySelector('.mark-price');
         if (markPriceCell) {
-            markPriceCell.textContent = '$' + (window.FuturX?.formatPrice ? window.FuturX.formatPrice(markPrice, symbol) : markPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+            markPriceCell.textContent = '$' + currentPrice.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
         }
 
         // PnL 업데이트
@@ -903,14 +888,11 @@ function renderPositions() {
         const liqPrice = parseFloat(p.liquidation_price) || 0;
         const leverage = parseInt(p.leverage) || 1;
         const side = (p.side || 'long').toLowerCase();
-        const symbol = p.symbol || 'BTCUSDT';
-        const markPrice = (allPrices && allPrices[symbol] !== undefined) ? (parseFloat(allPrices[symbol]) || 0) : currentPrice;
-        const baseAsset = symbol.replace(/USDT$/i, '');
 
         // PnL 계산
         const pnl = side === 'long'
-            ? (markPrice - entryPrice) * size
-            : (entryPrice - markPrice) * size;
+            ? (currentPrice - entryPrice) * size
+            : (entryPrice - currentPrice) * size;
 
         // ROE 계산
         const margin = (entryPrice * size) / leverage;
@@ -924,13 +906,13 @@ function renderPositions() {
                         <span class="user-id">#${p.user_id}</span>
                     </div>
                 </td>
-                <td><strong>${symbol}</strong></td>
+                <td><strong>${p.symbol || 'BTCUSDT'}</strong></td>
                 <td><span class="side-badge ${side}">${side.toUpperCase()}</span></td>
-                <td class="num-mono">${window.FuturX?.formatQty ? window.FuturX.formatQty(size, symbol) : size.toFixed(4)}</td>
-                <td class="num-mono">$${window.FuturX?.formatPrice ? window.FuturX.formatPrice(entryPrice, symbol) : entryPrice.toLocaleString()}</td>
-                <td class="num-mono mark-price">$${window.FuturX?.formatPrice ? window.FuturX.formatPrice(markPrice, symbol) : markPrice.toLocaleString()}</td>
+                <td class="num-mono">${size.toFixed(4)}</td>
+                <td class="num-mono">$${entryPrice.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})}</td>
+                <td class="num-mono mark-price">$${currentPrice.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})}</td>
                 <td><span class="leverage-badge">${leverage}x</span></td>
-                <td class="liq-price">$${window.FuturX?.formatPrice ? window.FuturX.formatPrice(liqPrice, symbol) : liqPrice.toLocaleString()}</td>
+                <td class="liq-price">$${liqPrice.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})}</td>
                 <td class="pnl-value ${pnl >= 0 ? 'profit' : 'loss'}">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}</td>
                 <td class="roe-value ${roe >= 0 ? 'profit' : 'loss'}">${roe >= 0 ? '+' : ''}${roe.toFixed(2)}%</td>
                 <td>
@@ -964,13 +946,10 @@ function viewPosition(id) {
     const liqPrice = parseFloat(p.liquidation_price) || 0;
     const leverage = parseInt(p.leverage) || 1;
     const side = (p.side || 'long').toLowerCase();
-    const symbol = p.symbol || 'BTCUSDT';
-    const markPrice = (allPrices && allPrices[symbol] !== undefined) ? (parseFloat(allPrices[symbol]) || 0) : currentPrice;
-    const baseAsset = symbol.replace(/USDT$/i, '');
 
     const pnl = side === 'long'
-        ? (markPrice - entryPrice) * size
-        : (entryPrice - markPrice) * size;
+        ? (currentPrice - entryPrice) * size
+        : (entryPrice - currentPrice) * size;
 
     const margin = (entryPrice * size) / leverage;
     const roe = margin > 0 ? (pnl / margin) * 100 : 0;
@@ -988,7 +967,7 @@ function viewPosition(id) {
             </div>
             <div class="position-detail__item">
                 <div class="position-detail__label">심볼</div>
-                <div class="position-detail__value">${symbol}</div>
+                <div class="position-detail__value">${p.symbol || 'BTCUSDT'}</div>
             </div>
             <div class="position-detail__item">
                 <div class="position-detail__label">방향</div>
@@ -998,7 +977,7 @@ function viewPosition(id) {
             </div>
             <div class="position-detail__item">
                 <div class="position-detail__label">수량</div>
-                <div class="position-detail__value">${window.FuturX?.formatQty ? window.FuturX.formatQty(size, symbol) : size.toFixed(4)} ${baseAsset}</div>
+                <div class="position-detail__value">${size.toFixed(4)} BTC</div>
             </div>
             <div class="position-detail__item">
                 <div class="position-detail__label">레버리지</div>
@@ -1006,15 +985,15 @@ function viewPosition(id) {
             </div>
             <div class="position-detail__item">
                 <div class="position-detail__label">진입가</div>
-                <div class="position-detail__value">$${window.FuturX?.formatPrice ? window.FuturX.formatPrice(entryPrice, symbol) : entryPrice.toLocaleString()}</div>
+                <div class="position-detail__value">$${entryPrice.toLocaleString()}</div>
             </div>
             <div class="position-detail__item">
                 <div class="position-detail__label">현재가</div>
-                <div class="position-detail__value">$${window.FuturX?.formatPrice ? window.FuturX.formatPrice(markPrice, symbol) : markPrice.toLocaleString()}</div>
+                <div class="position-detail__value">$${currentPrice.toLocaleString()}</div>
             </div>
             <div class="position-detail__item">
                 <div class="position-detail__label">청산가</div>
-                <div class="position-detail__value" style="color: var(--color-danger);">$${window.FuturX?.formatPrice ? window.FuturX.formatPrice(liqPrice, symbol) : liqPrice.toLocaleString()}</div>
+                <div class="position-detail__value" style="color: var(--color-danger);">$${liqPrice.toLocaleString()}</div>
             </div>
             <div class="position-detail__item">
                 <div class="position-detail__label">마진</div>
@@ -1069,7 +1048,7 @@ async function forceLiquidate() {
     const confirmMsg = `정말 이 포지션을 강제 청산하시겠습니까?\n\n` +
         `회원: ${p.email || 'Unknown'}\n` +
         `방향: ${p.side?.toUpperCase()}\n` +
-        `수량: ${p.size} ${String(p.symbol || 'BTCUSDT').replace(/USDT$/i, '')}`;
+        `수량: ${p.size} BTC`;
 
     if (!confirm(confirmMsg)) return;
 

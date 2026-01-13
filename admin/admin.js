@@ -4,7 +4,6 @@
 
 // 사이드바 토글
 let sidebar, sidebarOverlay;
-let sidebarInitialized = false;
 
 function toggleSidebar() {
     sidebar?.classList.toggle('open');
@@ -18,47 +17,15 @@ function closeSidebar() {
 
 // DOM 로드 후 초기화
 function initSidebar() {
-    // 여러 번 호출되어도 이벤트 중복 바인딩되지 않도록 가드
-    if (sidebarInitialized) return;
-    sidebarInitialized = true;
-
     sidebar = document.querySelector('.sidebar');
     sidebarOverlay = document.getElementById('sidebarOverlay');
 
-    const toggleBtn = document.getElementById('sidebarToggle');
-    if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
-
-    // X(닫기) 버튼
-    const closeBtn = document.getElementById('sidebarClose');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            closeSidebar();
-        });
-    }
-
-    // 오버레이 클릭 시 닫기
-    if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
-
-    // 모바일에서 메뉴 클릭 시 자동 닫기
-    const isMobile = () => window.matchMedia && window.matchMedia('(max-width: 992px)').matches;
-    if (sidebar) {
-        sidebar.addEventListener('click', (e) => {
-            const link = e.target.closest('a');
-            if (link && isMobile()) closeSidebar();
-        });
-    }
-
-    // ESC로 닫기 (모달 로직과 충돌 없게: 사이드바만 닫고 끝)
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            if (sidebar?.classList.contains('open')) closeSidebar();
-        }
-    });
+    document.getElementById('sidebarToggle')?.addEventListener('click', toggleSidebar);
+    document.getElementById('sidebarClose')?.addEventListener('click', closeSidebar);
+    sidebarOverlay?.addEventListener('click', closeSidebar);
 }
 
-// DOMContentLoaded에서 초기화 (중복 호출 방지 가드 포함)
+// DOMContentLoaded에서 초기화
 document.addEventListener('DOMContentLoaded', initSidebar);
 
 // CSRF 토큰

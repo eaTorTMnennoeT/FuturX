@@ -1010,6 +1010,21 @@ function handleBroadcast(data) {
             }
             break;
 
+        case 'orders:refresh':
+            // 같은 사용자의 모든 세션에 주문 리프레시 알림
+            const orderUserSockets = findAllUserSockets(payload.user_id);
+            if (orderUserSockets.length > 0) {
+                const refreshData = {
+                    action: payload.action || 'refresh',
+                    orderId: payload.order_id,
+                    symbol: payload.symbol,
+                    timestamp: Date.now()
+                };
+                orderUserSockets.forEach(socketId => io.to(socketId).emit('orders:refresh', refreshData));
+                console.log(`[Orders] User ${payload.user_id} 주문 동기화 (${payload.action}) → ${orderUserSockets.length} 세션`);
+            }
+            break;
+
         default:
             console.log(`[Broadcast] 알 수 없는 타입: ${type}`);
     }

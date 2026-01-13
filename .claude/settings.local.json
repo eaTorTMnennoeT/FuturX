@@ -28,7 +28,11 @@
       "mcp__browser__browser_evaluate",
       "mcp__browser__browser_run_code",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(C:laragonbinphpphp-8.3.14-Win32-vs16-x64php.exe -i)",
+      "Bash(\"C:\\\\laragon\\\\bin\\\\php\\\\php-8.3.14-Win32-vs16-x64\\\\php.exe\":*)",
+      "Bash(echo:*)",
+      "Bash(git checkout:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

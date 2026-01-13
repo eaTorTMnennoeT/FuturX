@@ -67,8 +67,9 @@ require_once 'includes/header.php';
         <section class="market-overview">
             <div class="container">
                 <div class="market-ticker" id="marketTicker">
+                    <!-- 첫 번째 세트 -->
                     <div class="ticker-item" data-symbol="BTCUSDT">
-                        <div class="ticker-item__icon">₿</div>
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #f7931a 0%, #ff9500 100%);">₿</div>
                         <div class="ticker-item__info">
                             <div class="ticker-item__symbol">BTC</div>
                             <div class="ticker-item__pair">USDT 무기한</div>
@@ -79,7 +80,7 @@ require_once 'includes/header.php';
                         </div>
                     </div>
                     <div class="ticker-item" data-symbol="ETHUSDT">
-                        <div class="ticker-item__icon" style="background: #627eea;">Ξ</div>
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #627eea 0%, #8c9eff 100%);">Ξ</div>
                         <div class="ticker-item__info">
                             <div class="ticker-item__symbol">ETH</div>
                             <div class="ticker-item__pair">USDT 무기한</div>
@@ -90,7 +91,7 @@ require_once 'includes/header.php';
                         </div>
                     </div>
                     <div class="ticker-item" data-symbol="SOLUSDT">
-                        <div class="ticker-item__icon" style="background: #14f195; color: #111;">◎</div>
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #14f195 0%, #9945ff 100%);">◎</div>
                         <div class="ticker-item__info">
                             <div class="ticker-item__symbol">SOL</div>
                             <div class="ticker-item__pair">USDT 무기한</div>
@@ -101,7 +102,7 @@ require_once 'includes/header.php';
                         </div>
                     </div>
                     <div class="ticker-item" data-symbol="BNBUSDT">
-                        <div class="ticker-item__icon" style="background: #f3ba2f;">B</div>
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #f3ba2f 0%, #f0b90b 100%);">B</div>
                         <div class="ticker-item__info">
                             <div class="ticker-item__symbol">BNB</div>
                             <div class="ticker-item__pair">USDT 무기한</div>
@@ -112,9 +113,109 @@ require_once 'includes/header.php';
                         </div>
                     </div>
                     <div class="ticker-item" data-symbol="XRPUSDT">
-                        <div class="ticker-item__icon" style="background: #2775ca;">X</div>
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #23292f 0%, #2a3540 100%); color: #fff;">X</div>
                         <div class="ticker-item__info">
                             <div class="ticker-item__symbol">XRP</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value" data-price>--</div>
+                            <div class="ticker-item__change" data-change>--%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item" data-symbol="DOGEUSDT">
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #c3a634 0%, #ba9f33 100%);">D</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">DOGE</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value" data-price>--</div>
+                            <div class="ticker-item__change" data-change>--%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item" data-symbol="ADAUSDT">
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #0033ad 0%, #2a52be 100%); color: #fff;">A</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">ADA</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value" data-price>--</div>
+                            <div class="ticker-item__change" data-change>--%</div>
+                        </div>
+                    </div>
+                    <!-- 복제 세트 (무한 스크롤용) -->
+                    <div class="ticker-item" data-symbol="BTCUSDT" aria-hidden="true">
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #f7931a 0%, #ff9500 100%);">₿</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">BTC</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value" data-price>--</div>
+                            <div class="ticker-item__change" data-change>--%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item" data-symbol="ETHUSDT" aria-hidden="true">
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #627eea 0%, #8c9eff 100%);">Ξ</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">ETH</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value" data-price>--</div>
+                            <div class="ticker-item__change" data-change>--%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item" data-symbol="SOLUSDT" aria-hidden="true">
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #14f195 0%, #9945ff 100%);">◎</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">SOL</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value" data-price>--</div>
+                            <div class="ticker-item__change" data-change>--%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item" data-symbol="BNBUSDT" aria-hidden="true">
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #f3ba2f 0%, #f0b90b 100%);">B</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">BNB</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value" data-price>--</div>
+                            <div class="ticker-item__change" data-change>--%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item" data-symbol="XRPUSDT" aria-hidden="true">
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #23292f 0%, #2a3540 100%); color: #fff;">X</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">XRP</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value" data-price>--</div>
+                            <div class="ticker-item__change" data-change>--%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item" data-symbol="DOGEUSDT" aria-hidden="true">
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #c3a634 0%, #ba9f33 100%);">D</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">DOGE</div>
+                            <div class="ticker-item__pair">USDT 무기한</div>
+                        </div>
+                        <div class="ticker-item__price">
+                            <div class="ticker-item__value" data-price>--</div>
+                            <div class="ticker-item__change" data-change>--%</div>
+                        </div>
+                    </div>
+                    <div class="ticker-item" data-symbol="ADAUSDT" aria-hidden="true">
+                        <div class="ticker-item__icon" style="background: linear-gradient(135deg, #0033ad 0%, #2a52be 100%); color: #fff;">A</div>
+                        <div class="ticker-item__info">
+                            <div class="ticker-item__symbol">ADA</div>
                             <div class="ticker-item__pair">USDT 무기한</div>
                         </div>
                         <div class="ticker-item__price">
@@ -130,12 +231,9 @@ require_once 'includes/header.php';
         <section class="price-table" id="markets">
             <div class="container">
                 <div class="price-table__header">
-                    <div class="price-table__tabs">
-                        <button class="price-table__tab active">USDT 무기한</button>
-                        <button class="price-table__tab">USDC 무기한</button>
-                        <button class="price-table__tab">코인-M 선물</button>
-                        <button class="price-table__tab">인기</button>
-                        <button class="price-table__tab">신규</button>
+                    <div class="price-table__title-section">
+                        <h2 class="price-table__title">USDT 무기한 선물</h2>
+                        <span class="price-table__badge">PERPETUAL</span>
                     </div>
                     <div class="price-table__search">
                         <svg class="price-table__search-icon icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -856,6 +954,29 @@ require_once 'includes/header.php';
         animateCountUp();
         createParticles();
         initGyroscopeInteraction();
+
+        // 티커 클릭 시 거래 페이지로 이동
+        document.querySelectorAll('.ticker-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const symbol = item.dataset.symbol;
+                if (symbol) {
+                    window.location.href = `trade.php?symbol=${symbol}`;
+                }
+            });
+        });
+
+        // 테이블 행 클릭 시 거래 페이지로 이동 (이벤트 위임)
+        const marketTable = document.getElementById('marketTableBody');
+        if (marketTable) {
+            marketTable.addEventListener('click', (e) => {
+                // 거래 버튼 클릭은 제외 (이미 링크가 있음)
+                if (e.target.closest('.market-table__action')) return;
+                const row = e.target.closest('tr');
+                if (row && row.dataset.symbol) {
+                    window.location.href = `trade.php?symbol=${row.dataset.symbol}`;
+                }
+            });
+        }
     });
 
     // 페이지 벗어날 때 WebSocket 정리

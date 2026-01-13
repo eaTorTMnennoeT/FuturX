@@ -57,7 +57,7 @@ if ($currentUser) {
     <title><?= htmlspecialchars($pageTitle) ?> - FuturX</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="common.css">
     <?php foreach ($pageCSS as $css): ?>
@@ -65,25 +65,11 @@ if ($currentUser) {
     <?php endforeach; ?>
     <!-- Toast Notification System -->
     <script src="js/toast.js"></script>
-    <!-- Common formatters (symbol decimals from DB) -->
-    <script src="js/formatters.js"></script>
     <!-- PHP Config to JS -->
     <script>
-        <?php
-        // DB symbols -> decimals maps (single source of truth)
-        $symbols = function_exists('getSymbols') ? getSymbols(true) : [];
-        $priceDecimalsBySymbol = [];
-        $qtyDecimalsBySymbol = [];
-        foreach ($symbols as $sym => $row) {
-            $priceDecimalsBySymbol[$sym] = isset($row['price_decimals']) ? (int)$row['price_decimals'] : 2;
-            $qtyDecimalsBySymbol[$sym] = isset($row['qty_decimals']) ? (int)$row['qty_decimals'] : 3;
-        }
-        ?>
-
-        window.FuturXConfig = window.FuturXConfig || {};
-        window.FuturXConfig.wsServerUrl = '<?= WS_SERVER_URL ?>';
-        window.FuturXConfig.priceDecimalsBySymbol = <?= json_encode($priceDecimalsBySymbol, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
-        window.FuturXConfig.qtyDecimalsBySymbol = <?= json_encode($qtyDecimalsBySymbol, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        window.FuturXConfig = {
+            wsServerUrl: '<?= WS_SERVER_URL ?>'
+        };
     </script>
 </head>
-<body>
+<body<?php if (isset($bodyClass) && $bodyClass): ?> class="<?= htmlspecialchars($bodyClass) ?>"<?php endif; ?>>

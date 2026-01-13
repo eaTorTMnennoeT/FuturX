@@ -437,117 +437,218 @@
     50% { opacity: 0.5; transform: translateY(-50%) scale(1.2); }
 }
 
-/* 마켓 개요 */
+/* 마켓 개요 - 자동 슬라이드 티커 */
 .market-overview {
-    padding: var(--spacing-xl) 0;
-    border-bottom: 1px solid var(--border-color);
-    background: var(--bg-secondary);
+    padding: 20px 0;
+    background: linear-gradient(180deg, rgba(240, 185, 11, 0.03) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(240, 185, 11, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+/* 페이드 효과 (좌우) */
+.market-overview::before,
+.market-overview::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 60px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.market-overview::before {
+    left: 0;
+    background: linear-gradient(90deg, var(--bg-primary) 0%, transparent 100%);
+}
+
+.market-overview::after {
+    right: 0;
+    background: linear-gradient(-90deg, var(--bg-primary) 0%, transparent 100%);
 }
 
 .market-ticker {
     display: flex;
-    gap: var(--spacing-xxl);
-    overflow-x: auto;
-    padding: var(--spacing-sm) 0;
-    scrollbar-width: none;
+    gap: 16px;
+    animation: tickerScroll 30s linear infinite;
+    width: max-content;
 }
 
-.market-ticker::-webkit-scrollbar {
-    display: none;
+.market-ticker:hover {
+    animation-play-state: paused;
+}
+
+@keyframes tickerScroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
 }
 
 .ticker-item {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md) var(--spacing-lg);
-    background: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    min-width: 220px;
+    gap: 12px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, rgba(22, 26, 30, 0.9) 0%, rgba(22, 26, 30, 0.7) 100%);
+    border: 1px solid rgba(240, 185, 11, 0.15);
+    border-radius: 12px;
+    min-width: 200px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.ticker-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(240, 185, 11, 0.1) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .ticker-item:hover {
-    background: var(--bg-tertiary);
-    transform: translateY(-2px);
+    border-color: rgba(240, 185, 11, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(240, 185, 11, 0.15);
+}
+
+.ticker-item:hover::before {
+    opacity: 1;
 }
 
 .ticker-item__icon {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: var(--color-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: var(--font-weight-bold);
-    color: var(--bg-primary);
+    font-weight: 700;
+    font-size: 14px;
+    color: #0b0e11;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .ticker-item__info {
     flex: 1;
+    position: relative;
+    z-index: 1;
 }
 
 .ticker-item__symbol {
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-md);
+    font-weight: 600;
+    font-size: 15px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 실시간 표시 점 */
+.ticker-item__symbol::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #0ecb81;
+    border-radius: 50%;
+    animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
 }
 
 .ticker-item__pair {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
+    font-size: 11px;
+    color: #848e9c;
+    margin-top: 2px;
 }
 
 .ticker-item__price {
     text-align: right;
+    position: relative;
+    z-index: 1;
 }
 
 .ticker-item__value {
-    font-family: var(--font-mono);
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-md);
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 15px;
+    color: #fff;
 }
 
 .ticker-item__change {
-    font-family: var(--font-mono);
-    font-size: var(--font-size-sm);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 2px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
 }
 
-/* 실시간 시세 테이블 */
+.ticker-item__change.num-positive {
+    color: #0ecb81;
+    background: rgba(14, 203, 129, 0.1);
+}
+
+.ticker-item__change.num-negative {
+    color: #f6465d;
+    background: rgba(246, 70, 93, 0.1);
+}
+
+/* 실시간 시세 테이블 - 프리미엄 디자인 */
 .price-table {
-    margin-top: var(--spacing-xl);
+    padding: 40px 0 30px;
+    background: var(--bg-primary);
 }
 
 .price-table__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
-.price-table__tabs {
+/* 타이틀 섹션 */
+.price-table__title-section {
     display: flex;
-    gap: var(--spacing-sm);
+    align-items: center;
+    gap: 12px;
 }
 
-.price-table__tab {
-    padding: var(--spacing-sm) var(--spacing-lg);
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    background: transparent;
-    border-radius: var(--radius-md);
-    transition: all var(--transition-fast);
+.price-table__title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #eaecef;
+    margin: 0;
+    letter-spacing: -0.02em;
 }
 
-.price-table__tab:hover {
-    color: var(--text-primary);
-}
-
-.price-table__tab.active {
-    background: var(--color-primary);
-    color: var(--bg-primary);
+.price-table__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, rgba(240, 185, 11, 0.2) 0%, rgba(240, 185, 11, 0.1) 100%);
+    border: 1px solid rgba(240, 185, 11, 0.3);
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #f0b90b;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
 .price-table__search {
@@ -555,99 +656,191 @@
 }
 
 .price-table__search input {
-    width: 280px;
-    padding-left: 36px;
+    width: 240px;
+    padding: 10px 12px 10px 40px;
+    background: rgba(43, 49, 57, 0.5);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: #eaecef;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.price-table__search input:focus {
+    border-color: rgba(240, 185, 11, 0.5);
+    background: rgba(43, 49, 57, 0.8);
+    outline: none;
+}
+
+.price-table__search input::placeholder {
+    color: #5e6673;
 }
 
 .price-table__search-icon {
     position: absolute;
-    left: var(--spacing-md);
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-tertiary);
+    color: #5e6673;
+    width: 18px;
+    height: 18px;
 }
 
-/* 시세 테이블 */
+/* 시세 테이블 - 프리미엄 */
 .market-table {
     width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.market-table thead {
+    position: sticky;
+    top: 64px;
+    z-index: 10;
 }
 
 .market-table th {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: 14px 16px;
     text-align: left;
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    font-weight: var(--font-weight-medium);
-    background: var(--bg-tertiary);
+    font-size: 12px;
+    color: #848e9c;
+    font-weight: 500;
+    background: #161a1e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #2b3139;
 }
 
 .market-table th:first-child {
-    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    border-radius: 8px 0 0 0;
+    padding-left: 20px;
 }
 
 .market-table th:last-child {
-    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    border-radius: 0 8px 0 0;
     text-align: right;
+    padding-right: 20px;
 }
 
 .market-table td {
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
+    padding: 16px;
+    border-bottom: 1px solid rgba(43, 49, 57, 0.5);
+    transition: background 0.15s ease;
+}
+
+.market-table td:first-child {
+    padding-left: 20px;
+}
+
+.market-table td:last-child {
+    padding-right: 20px;
 }
 
 .market-table tr {
     cursor: pointer;
-    transition: background var(--transition-fast);
+}
+
+.market-table tbody tr {
+    transition: background 0.15s ease;
 }
 
 .market-table tbody tr:hover {
-    background: var(--bg-tertiary);
+    background: rgba(240, 185, 11, 0.03);
+}
+
+.market-table tbody tr:hover td {
+    border-bottom-color: rgba(240, 185, 11, 0.1);
 }
 
 .market-table__pair {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: 12px;
 }
 
 .market-table__coin-icon {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--bg-hover);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-bold);
+    font-size: 12px;
+    font-weight: 700;
+    color: #0b0e11;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.market-table__coin-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .market-table__coin-name {
-    font-weight: var(--font-weight-semibold);
+    font-weight: 600;
+    font-size: 14px;
+    color: #eaecef;
 }
 
 .market-table__coin-base {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    font-size: 11px;
+    color: #5e6673;
 }
 
 .market-table__price {
-    font-family: var(--font-mono);
-    font-weight: var(--font-weight-medium);
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
+    font-size: 14px;
+    color: #eaecef;
 }
 
 .market-table__change {
-    font-family: var(--font-mono);
-    font-weight: var(--font-weight-medium);
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.market-table__change.num-positive {
+    color: #0ecb81;
+    background: rgba(14, 203, 129, 0.1);
+}
+
+.market-table__change.num-negative {
+    color: #f6465d;
+    background: rgba(246, 70, 93, 0.1);
 }
 
 .market-table__volume {
-    font-family: var(--font-mono);
-    color: var(--text-secondary);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: #848e9c;
 }
 
 .market-table__action {
     text-align: right;
+}
+
+.market-table__action .btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #f0b90b 0%, #d4a50a 100%);
+    color: #0b0e11;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.market-table__action .btn:hover {
+    background: linear-gradient(135deg, #fcd535 0%, #f0b90b 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(240, 185, 11, 0.3);
 }
 
 /* 미니 차트 */
@@ -675,7 +868,7 @@
 
 /* 기능 섹션 */
 .features {
-    padding: 80px 0;
+    padding: 50px 0;
 }
 
 .features__title {
@@ -1359,6 +1552,98 @@
 
     .price-table__search input {
         width: 200px;
+    }
+
+    /* 마켓 테이블 모바일 - 컴팩트 디자인 */
+    .price-table {
+        overflow-x: visible;
+    }
+
+    .market-table {
+        width: 100%;
+    }
+
+    /* 불필요한 컬럼 숨김: 24h 최고(4), 24h 최저(5), 24h 거래량(6) */
+    .market-table th:nth-child(4),
+    .market-table td:nth-child(4),
+    .market-table th:nth-child(5),
+    .market-table td:nth-child(5),
+    .market-table th:nth-child(6),
+    .market-table td:nth-child(6) {
+        display: none;
+    }
+
+    .market-table th,
+    .market-table td {
+        padding: 10px 6px;
+        font-size: 12px;
+    }
+
+    /* 첫번째 컬럼(거래쌍) 너비 제한 */
+    .market-table th:nth-child(1),
+    .market-table td:nth-child(1) {
+        max-width: 120px;
+    }
+
+    .market-table__coin-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+        flex-shrink: 0;
+    }
+
+    .market-table__pair {
+        gap: 6px;
+    }
+
+    .market-table__coin-name {
+        font-size: 12px;
+    }
+
+    .market-table__coin-base {
+        font-size: 10px;
+    }
+
+    /* 숫자 컬럼 정렬 */
+    .market-table__price,
+    .market-table__change {
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    /* 거래 버튼 컴팩트 */
+    .market-table__action {
+        text-align: right;
+        padding-right: 8px !important;
+    }
+
+    .market-table__action .btn {
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+
+    /* 타이틀 섹션 모바일 */
+    .price-table__header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: flex-start;
+    }
+
+    .price-table__title-section {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .price-table__title {
+        font-size: 18px;
+    }
+
+    .price-table__search {
+        width: 100%;
+    }
+
+    .price-table__search input {
+        width: 100%;
     }
 
     /* 3D 글로벌 섹션 모바일 */

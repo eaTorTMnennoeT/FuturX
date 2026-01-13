@@ -343,8 +343,45 @@ function handlePlaceOrder($db) {
     $stmt->execute([$user['id']]);
     $wallet = $stmt->fetch();
 
-    if (!$wallet || $wallet['available_balance'] < $totalRequired) {
-        errorResponse('잔고가 부족합니다. 필요: ' . number_format($totalRequired, 2) . ' USDT');
+    // 미실현 PnL 및 Initial Margin 계산 (바이낸스/바이빗 방식)
+    $unrealizedPnl = 0;
+    $initialMargin = 0;
+    $stmt2 = $db->prepare("SELECT symbol, side, size, entry_price, margin FROM positions WHERE user_id = ? AND status = 'open'");
+    $stmt2->execute([$user['id']]);
+    $positions = $stmt2->fetchAll();
+
+    foreach ($positions as $pos) {
+        // Initial Margin 합산
+        $initialMargin += floatval($pos['margin']);
+
+        // 각 포지션 심볼의 현재가 조회
+        $posSymbol = $pos['symbol'];
+        $posCurrentPrice = $marketPrice ?: $price; // 기본값
+
+        // 같은 심볼이면 전달받은 가격 사용, 다르면 API 조회
+        if ($posSymbol === $symbol) {
+            $posCurrentPrice = $marketPrice ?: $price;
+        } else {
+            $fetchedPrice = fetchBinancePrice($posSymbol);
+            if ($fetchedPrice > 0) {
+                $posCurrentPrice = $fetchedPrice;
+            }
+        }
+
+        if ($pos['side'] === 'long') {
+            $unrealizedPnl += ($posCurrentPrice - floatval($pos['entry_price'])) * floatval($pos['size']);
+        } else {
+            $unrealizedPnl += (floatval($pos['entry_price']) - $posCurrentPrice) * floatval($pos['size']);
+        }
+    }
+
+    // 바이낸스/바이빗 방식: Available = Margin Balance - Initial Margin
+    // Margin Balance = wallet balance + unrealized PnL
+    $marginBalance = floatval($wallet['balance']) + $unrealizedPnl;
+    $effectiveBalance = $marginBalance - $initialMargin;
+
+    if (!$wallet || $effectiveBalance < $totalRequired) {
+        errorResponse('잔고가 부족합니다. 필요: ' . number_format($totalRequired, 2) . ' USDT, 가용: ' . number_format($effectiveBalance, 2) . ' USDT');
     }
 
     try {
@@ -454,6 +491,14 @@ function handlePlaceOrder($db) {
                 'quantity' => $quantity
             ]);
         }
+
+        // 같은 사용자의 모든 세션에 주문 리프레시 알림 (PC-모바일 동기화)
+        broadcastToWS('orders:refresh', [
+            'user_id' => $user['id'],
+            'action' => $orderType === 'market' ? 'fill' : 'place',
+            'order_id' => $orderId,
+            'symbol' => $symbol
+        ]);
 
         // WebSocket으로 계정 정보 푸시
         broadcastAccountUpdateSafe($db, $user['id']);
@@ -625,6 +670,14 @@ function handleCancelOrder($db) {
             'side' => $order['side'],
             'price' => $order['price'],
             'quantity' => $order['quantity']
+        ]);
+
+        // 같은 사용자의 모든 세션에 주문 리프레시 알림 (PC-모바일 동기화)
+        broadcastToWS('orders:refresh', [
+            'user_id' => $user['id'],
+            'action' => 'cancel',
+            'order_id' => $orderId,
+            'symbol' => $order['symbol']
         ]);
 
         // WebSocket으로 계정 정보 푸시

@@ -198,10 +198,10 @@ renderPageHeader('거래관리', '체결된 거래 내역을 관리합니다', [
                             <?= $trade['side'] === 'buy' ? '매수' : '매도' ?>
                         </span>
                     </td>
-                    <td class="num-mono">$<?= formatPrice($trade['price'], $trade['symbol']) ?></td>
-                    <td class="num-mono"><?= formatQty($trade['quantity'], $trade['symbol']) ?></td>
+                    <td class="num-mono">$<?= number_format($trade['price'], 4) ?></td>
+                    <td class="num-mono"><?= number_format($trade['quantity'], 4) ?></td>
                     <td class="num-mono">$<?= number_format($trade['quote_quantity'], 2) ?></td>
-                    <td class="num-mono">$<?= number_format($trade['fee'], 2) ?></td>
+                    <td class="num-mono">$<?= number_format($trade['fee'], 4) ?></td>
                     <td class="num-mono <?= $trade['realized_pnl'] >= 0 ? 'num-positive' : 'num-negative' ?>">
                         <?= $trade['realized_pnl'] >= 0 ? '+' : '' ?>$<?= number_format($trade['realized_pnl'], 2) ?>
                     </td>
