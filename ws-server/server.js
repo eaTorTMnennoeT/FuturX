@@ -2076,16 +2076,28 @@ async function fillLimitOrder(order, fillPrice) {
             timestamp: Date.now()
         });
 
-        // 해당 유저에게 잔고 업데이트 알림
-        const userSocket = findUserSocket(order.user_id);
-        if (userSocket) {
-            io.to(userSocket).emit('balance:updated', { user_id: order.user_id });
-            io.to(userSocket).emit('order:my_filled', {
+        // 해당 유저의 모든 세션에 알림 전송 (PC, 모바일, 여러 탭 등)
+        const userSockets = findAllUserSockets(order.user_id);
+        console.log(`[Matching] 📢 알림 전송: userId=${order.user_id}, 소켓 수=${userSockets.length}`);
+
+        userSockets.forEach(socketId => {
+            io.to(socketId).emit('balance:updated', { user_id: order.user_id });
+            io.to(socketId).emit('order:my_filled', {
                 order_id: order.order_id,
+                symbol: order.symbol,
+                side: order.side,
+                position_side: order.position_side,
                 fill_price: orderPrice,
+                quantity: quantity,
                 realized_pnl: realizedPnl
             });
-        }
+            // 오더 새로고침 신호 (오더북에서 제거하기 위해)
+            io.to(socketId).emit('orders:refresh', {
+                user_id: order.user_id,
+                reason: 'limit_order_filled',
+                order_id: order.order_id
+            });
+        });
 
     } catch (error) {
         await connection.rollback();

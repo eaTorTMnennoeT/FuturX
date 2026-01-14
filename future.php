@@ -515,33 +515,39 @@ require_once 'includes/head.php';
 
                     <!-- 하단 컨트롤 - 바이빗 스타일 (2줄) -->
                     <div class="bybit-ob-footer">
-                        <!-- 1줄: B/S 비율 바 (바이빗 정확히) -->
+                        <!-- 1줄: B/S 비율 바 -->
                         <div class="ob-footer-row1">
                             <div class="ob-ratio-bar">
-                                <div class="ob-ratio-buy-side">
-                                    <span class="ob-b-box">B</span>
-                                    <span class="ob-pct">48%</span>
+                                <div class="ob-ratio-buy" id="mobileRatioBuy" style="flex: 48">
+                                    <span class="ratio-label-box buy">B</span>
+                                    <span class="ratio-pct">48%</span>
                                 </div>
-                                <div class="ob-ratio-sell-side">
-                                    <span class="ob-pct">52%</span>
-                                    <span class="ob-s-box">S</span>
+                                <div class="ob-ratio-sell" id="mobileRatioSell" style="flex: 52">
+                                    <span class="ratio-pct">52%</span>
+                                    <span class="ratio-label-box sell">S</span>
                                 </div>
                             </div>
                         </div>
                         <!-- 2줄: 드롭다운 + 아이콘 -->
                         <div class="ob-footer-row2">
-                            <div class="ob-decimal-box" id="mobilePrecisionBox">
-                                <select id="precisionSelect" class="precision-select">
-                                    <option value="0.1">0.1</option>
-                                    <option value="1" selected>1</option>
-                                    <option value="10">10</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
-                                <span class="ob-decimal-arrow">▼</span>
+                            <div class="ob-precision-dropdown" id="mobilePrecisionDropdown">
+                                <div class="precision-current" id="mobilePrecisionCurrent">
+                                    <span class="precision-value" id="mobilePrecisionValue">1</span>
+                                    <span class="precision-arrow">▼</span>
+                                </div>
+                                <div class="precision-options" id="mobilePrecisionOptions">
+                                    <div class="precision-option" data-value="0.01">0.01</div>
+                                    <div class="precision-option" data-value="0.1">0.1</div>
+                                    <div class="precision-option active" data-value="1">1</div>
+                                    <div class="precision-option" data-value="10">10</div>
+                                    <div class="precision-option" data-value="50">50</div>
+                                </div>
                             </div>
-                            <div class="ob-mode-box">
-                                <span class="ob-icon-list">≡</span>
+                            <div class="ob-mode-icons">
+                                <div class="mode-bars-icon">
+                                    <span class="bar-line red"></span>
+                                    <span class="bar-line green"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1140,6 +1146,25 @@ require_once 'includes/head.php';
             }
         }
 
+        // 오더 입력용 가격 포맷 (콤마 없음) - 주문 오류 방지
+        function formatPriceForInput(price, symbol = null) {
+            const sym = symbol || currentSymbol;
+            const decimals = PRICE_DECIMALS[sym] || 2;
+            const p = parseFloat(price);
+            if (isNaN(p)) return '';
+            return p.toFixed(decimals);
+        }
+
+        // 숫자 포맷팅 (천단위 구분자) - 전역 함수
+        function formatNum(num, decimals = 2) {
+            const n = parseFloat(num);
+            if (isNaN(n)) return '0.00';
+            return n.toLocaleString('en-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+
         let currentPrice = 0;
         let previousPrice = 0;
         let indexPrice = 0;
@@ -1368,20 +1393,35 @@ require_once 'includes/head.php';
 
             // 지정가 주문 체결 알림 (본인 주문)
             socket.on('order:my_filled', (data) => {
+                console.log('[WS] order:my_filled received:', data);
+
                 // 체결음 재생
                 playOrderFilledSound();
 
-                // 토스트 알림
+                // 토스트 알림 - 더 자세한 정보
+                const sideText = data.side === 'buy' ? 'Long' : 'Short';
+                const symbol = data.symbol || '';
+                const price = parseFloat(data.fill_price).toLocaleString();
+                const qty = data.quantity ? parseFloat(data.quantity).toFixed(4) : '';
                 const pnlText = data.realized_pnl ?
                     (data.realized_pnl >= 0 ? `+$${data.realized_pnl.toFixed(2)}` : `-$${Math.abs(data.realized_pnl).toFixed(2)}`) : '';
 
-                const message = `$${parseFloat(data.fill_price).toLocaleString()}에 체결되었습니다.${pnlText ? ` (${pnlText})` : ''}`;
-                showToast(message, data.realized_pnl >= 0 ? 'success' : 'warning');
+                const title = `${symbol} ${sideText} 체결`;
+                const message = `$${price}${qty ? ` × ${qty}` : ''}${pnlText ? ` (${pnlText})` : ''}`;
 
-                // 데이터 새로고침
-                loadUserOrders();
-                loadUserPositions();
-                loadUserBalance();
+                // Toast 시스템 사용
+                if (typeof Toast !== 'undefined') {
+                    Toast.success(title, message);
+                } else {
+                    showToast(`${title} - ${message}`, 'success');
+                }
+
+                // 데이터 새로고침 (약간 딜레이로 DB 반영 대기)
+                setTimeout(() => {
+                    loadUserOrders();
+                    loadUserPositions();
+                    loadUserBalance();
+                }, 100);
             });
 
             // 다른 세션에서 주문 변경 시 동기화 (PC-모바일 동기화)
@@ -1559,10 +1599,21 @@ require_once 'includes/head.php';
                 window._skipUrlUpdate = false; // 플래그 리셋
                 updateSymbolUI(data.symbol, !skipUrl);
 
-                // 6. 주문 입력 필드를 새 심볼 현재가로 초기화
+                // 6. 주문 입력 필드를 새 심볼 현재가로 초기화 (PC + 모바일)
+                const decimals = PRICE_DECIMALS[data.symbol] || 2;
+
+                // PC 가격 입력 업데이트
+                const priceInput = document.getElementById('priceInput');
+                if (priceInput && currentPrice > 0) {
+                    priceInput.value = formatPriceForInput(currentPrice, data.symbol);
+                    // Last 버튼 활성화 (새 심볼은 현재가 추적)
+                    const lastBtn = document.querySelector('.last-btn');
+                    if (lastBtn) lastBtn.classList.add('active');
+                }
+
+                // 모바일 가격 입력 업데이트
                 const mobilePriceInput = document.getElementById('mobilePriceInput');
                 if (mobilePriceInput && currentPrice > 0) {
-                    const decimals = PRICE_DECIMALS[data.symbol] || 2;
                     mobilePriceInput.value = currentPrice.toFixed(decimals);
                     mobilePriceInput.dispatchEvent(new Event('input'));
                 }
@@ -1585,6 +1636,18 @@ require_once 'includes/head.php';
                     data.symbols.forEach(sym => {
                         updateSymbolListPrice(sym.symbol, sym.price, sym.priceChangePercent);
                     });
+                }
+            });
+
+            // 모든 심볼 가격 업데이트 (Assets USD 가치 계산용)
+            socket.on('prices:all', (data) => {
+                if (data && typeof data === 'object') {
+                    allSymbolPrices = data;
+                    // Assets 탭이 활성화되어 있으면 테이블 업데이트
+                    const assetsPanel = document.getElementById('assetsPanel');
+                    if (assetsPanel && assetsPanel.classList.contains('active') && currentWallets.length > 0) {
+                        renderAssetsTable(currentWallets);
+                    }
                 }
             });
         }
@@ -1655,7 +1718,7 @@ require_once 'includes/head.php';
             const priceInput = document.getElementById('priceInput');
             const lastBtn = document.querySelector('.last-btn');
             if (priceInput && lastBtn && lastBtn.classList.contains('active')) {
-                priceInput.value = formatPrice(currentPrice, currentSymbol);
+                priceInput.value = formatPriceForInput(currentPrice, currentSymbol);
             }
 
             // 포지션 실시간 업데이트는 position:price 이벤트로 통합 (관리자 설정 간격 적용)
@@ -1687,6 +1750,35 @@ require_once 'includes/head.php';
 
             renderOrderbook();
             updateDepthBar();
+            updateBuySellRatio();
+        }
+
+        // 매수/매도 비율 바 업데이트
+        function updateBuySellRatio() {
+            // 총 수량 계산
+            const totalBidQty = bidsData.reduce((sum, b) => sum + parseFloat(b.qty || 0), 0);
+            const totalAskQty = asksData.reduce((sum, a) => sum + parseFloat(a.qty || 0), 0);
+            const total = totalBidQty + totalAskQty;
+
+            if (total === 0) return;
+
+            const buyPct = Math.round((totalBidQty / total) * 100);
+            const sellPct = 100 - buyPct;
+
+            // 모바일 비율 바 업데이트
+            const mobileRatioBuy = document.getElementById('mobileRatioBuy');
+            const mobileRatioSell = document.getElementById('mobileRatioSell');
+
+            if (mobileRatioBuy && mobileRatioSell) {
+                mobileRatioBuy.style.flex = buyPct;
+                mobileRatioSell.style.flex = sellPct;
+
+                const buyPctEl = mobileRatioBuy.querySelector('.ratio-pct');
+                const sellPctEl = mobileRatioSell.querySelector('.ratio-pct');
+
+                if (buyPctEl) buyPctEl.textContent = buyPct + '%';
+                if (sellPctEl) sellPctEl.textContent = sellPct + '%';
+            }
         }
 
         // 가격 정밀도에 따라 그룹화
@@ -2170,6 +2262,41 @@ require_once 'includes/head.php';
             }
 
             // ========================================
+            // PC 호가창 클릭 이벤트 (가격 입력에 반영)
+            // ========================================
+            document.querySelectorAll('.asks-section .ob-row, .bids-section .ob-row').forEach(row => {
+                row.style.cursor = 'pointer';
+                row.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const price = parseFloat(this.dataset.price);
+                    const priceInput = document.getElementById('priceInput');
+                    if (priceInput && price > 0) {
+                        // 호가 클릭 시 PC 주문 타입을 강제로 Limit으로 전환 (Market 상태면 가격 입력이 비활성화되어 적용이 안됨)
+                        const orderTabs = Array.from(document.querySelectorAll('.order-type-tab'));
+                        const limitTab = orderTabs.find(t => t.textContent.trim().toLowerCase() === 'limit');
+                        if (limitTab && !limitTab.classList.contains('active')) {
+                            orderTabs.forEach(t => t.classList.remove('active'));
+                            limitTab.classList.add('active');
+                        }
+                        // :has 지원 여부와 무관하게 가격 입력 그룹을 확실히 활성화
+                        const priceGroup = priceInput.closest('.input-group');
+                        if (priceGroup) {
+                            priceGroup.style.opacity = '1';
+                            priceGroup.style.pointerEvents = 'auto';
+                        }
+
+                        // 콤마 없이 숫자만 입력 (주문 시 오류 방지)
+                        priceInput.value = formatPriceForInput(price, currentSymbol);
+                        // Last 버튼 비활성화 (수동 입력이므로)
+                        const lastBtn = document.querySelector('.last-btn');
+                        if (lastBtn) lastBtn.classList.remove('active');
+                        // 주문 정보 재계산
+                        priceInput.dispatchEvent(new Event('input'));
+                    }
+                });
+            });
+
+            // ========================================
             // 모바일 호가창 업데이트
             // ========================================
             renderMobileOrderbook(priceDecimals, maxTotal);
@@ -2475,7 +2602,7 @@ require_once 'includes/head.php';
                 });
             });
 
-            // 정밀도 변경
+            // 정밀도 변경 (기존 select 방식)
             const precisionSelect = document.getElementById('precisionSelect');
             if (precisionSelect) {
                 precisionSelect.addEventListener('change', function() {
@@ -2483,6 +2610,54 @@ require_once 'includes/head.php';
                     console.log('Precision changed to:', obPrecision);
                     if (rawAsksData.length > 0 || rawBidsData.length > 0) {
                         applyPrecisionAndRender();
+                    }
+                });
+            }
+
+            // 모바일 정밀도 드롭다운 (새 방식)
+            const mobilePrecisionDropdown = document.getElementById('mobilePrecisionDropdown');
+            const mobilePrecisionCurrent = document.getElementById('mobilePrecisionCurrent');
+            const mobilePrecisionOptions = document.getElementById('mobilePrecisionOptions');
+            const mobilePrecisionValue = document.getElementById('mobilePrecisionValue');
+
+            if (mobilePrecisionDropdown && mobilePrecisionCurrent) {
+                // 드롭다운 토글
+                mobilePrecisionCurrent.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobilePrecisionDropdown.classList.toggle('open');
+                });
+
+                // 옵션 선택
+                if (mobilePrecisionOptions) {
+                    mobilePrecisionOptions.querySelectorAll('.precision-option').forEach(option => {
+                        option.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const value = parseFloat(this.dataset.value);
+
+                            // UI 업데이트
+                            mobilePrecisionOptions.querySelectorAll('.precision-option').forEach(o => o.classList.remove('active'));
+                            this.classList.add('active');
+                            if (mobilePrecisionValue) {
+                                mobilePrecisionValue.textContent = this.dataset.value;
+                            }
+
+                            // 드롭다운 닫기
+                            mobilePrecisionDropdown.classList.remove('open');
+
+                            // 정밀도 적용
+                            obPrecision = value;
+                            console.log('Mobile precision changed to:', obPrecision);
+                            if (rawAsksData.length > 0 || rawBidsData.length > 0) {
+                                applyPrecisionAndRender();
+                            }
+                        });
+                    });
+                }
+
+                // 외부 클릭 시 닫기
+                document.addEventListener('click', function(e) {
+                    if (!mobilePrecisionDropdown.contains(e.target)) {
+                        mobilePrecisionDropdown.classList.remove('open');
                     }
                 });
             }
@@ -2633,7 +2808,7 @@ require_once 'includes/head.php';
                             priceInputGroup.style.pointerEvents = 'auto';
                             const priceInput = document.getElementById('priceInput');
                             if (priceInput && currentPrice > 0) {
-                                priceInput.value = formatPrice(currentPrice, currentSymbol);
+                                priceInput.value = formatPriceForInput(currentPrice, currentSymbol);
                             }
                         }
                     }
@@ -2653,7 +2828,7 @@ require_once 'includes/head.php';
                     if (this.classList.contains('active') && currentPrice > 0) {
                         const priceInput = document.getElementById('priceInput');
                         if (priceInput) {
-                            priceInput.value = formatPrice(currentPrice, currentSymbol);
+                            priceInput.value = formatPriceForInput(currentPrice, currentSymbol);
                         }
                     }
                 });
@@ -3216,12 +3391,52 @@ require_once 'includes/head.php';
             const config = precisionConfig[symbol] || { default: minPrecision, options: defaultOptions };
             obPrecision = config.default;
 
-            // 정밀도 드롭다운 옵션 동적 생성
+            // 정밀도 드롭다운 옵션 동적 생성 (PC select)
             const precisionSelect = document.getElementById('precisionSelect');
             if (precisionSelect) {
                 precisionSelect.innerHTML = config.options.map(opt =>
                     `<option value="${opt}" ${opt === obPrecision ? 'selected' : ''}>${opt}</option>`
                 ).join('');
+            }
+
+            // 모바일 정밀도 드롭다운 옵션 업데이트
+            const mobilePrecisionOptions = document.getElementById('mobilePrecisionOptions');
+            const mobilePrecisionValue = document.getElementById('mobilePrecisionValue');
+            if (mobilePrecisionOptions) {
+                mobilePrecisionOptions.innerHTML = config.options.map(opt =>
+                    `<div class="precision-option${opt === obPrecision ? ' active' : ''}" data-value="${opt}">${opt}</div>`
+                ).join('');
+
+                // 현재 값 표시
+                if (mobilePrecisionValue) {
+                    mobilePrecisionValue.textContent = obPrecision;
+                }
+
+                // 옵션 클릭 이벤트 재바인딩
+                mobilePrecisionOptions.querySelectorAll('.precision-option').forEach(option => {
+                    option.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const value = parseFloat(this.dataset.value);
+
+                        // UI 업데이트
+                        mobilePrecisionOptions.querySelectorAll('.precision-option').forEach(o => o.classList.remove('active'));
+                        this.classList.add('active');
+                        if (mobilePrecisionValue) {
+                            mobilePrecisionValue.textContent = this.dataset.value;
+                        }
+
+                        // 드롭다운 닫기
+                        const dropdown = document.getElementById('mobilePrecisionDropdown');
+                        if (dropdown) dropdown.classList.remove('open');
+
+                        // 정밀도 적용
+                        obPrecision = value;
+                        console.log('Mobile precision changed to:', obPrecision);
+                        if (rawAsksData.length > 0 || rawBidsData.length > 0) {
+                            applyPrecisionAndRender();
+                        }
+                    });
+                });
             }
 
             // 수량 입력 단위
@@ -3658,6 +3873,12 @@ require_once 'includes/head.php';
                         const data = await response.json();
                         if (data.success) {
                             showToast('Long 주문이 체결되었습니다', 'success');
+
+                            // 지정가 주문이고 filled가 아니면 오더북에 표시
+                            if (orderType !== 'market' && data.data?.order?.status !== 'filled') {
+                                addUserOrder('buy', orderPrice, qty);
+                            }
+
                             if (mobileValueInput) mobileValueInput.value = '0.0000';
                             setMobileSliderPosition(0);
                             updateMobileOrderInfo();
@@ -3665,7 +3886,7 @@ require_once 'includes/head.php';
                             loadUserPositions();
                             loadUserOrders();
                         } else {
-                            showToast(data.message || '주문 실패', 'error');
+                            showToast(data.error || data.message || '주문 실패', 'error');
                         }
                     } catch (error) {
                         console.error('Order error:', error);
@@ -3719,6 +3940,12 @@ require_once 'includes/head.php';
                         const data = await response.json();
                         if (data.success) {
                             showToast('Short 주문이 체결되었습니다', 'success');
+
+                            // 지정가 주문이고 filled가 아니면 오더북에 표시
+                            if (orderType !== 'market' && data.data?.order?.status !== 'filled') {
+                                addUserOrder('sell', orderPrice, qty);
+                            }
+
                             if (mobileValueInput) mobileValueInput.value = '0.0000';
                             setMobileSliderPosition(0);
                             updateMobileOrderInfo();
@@ -3726,7 +3953,7 @@ require_once 'includes/head.php';
                             loadUserPositions();
                             loadUserOrders();
                         } else {
-                            showToast(data.message || '주문 실패', 'error');
+                            showToast(data.error || data.message || '주문 실패', 'error');
                         }
                     } catch (error) {
                         console.error('Order error:', error);
@@ -4104,7 +4331,7 @@ require_once 'includes/head.php';
             paginationEl.innerHTML = `
                 <button onclick="loadOrderHistory(0)" ${orderHistoryPage === 0 ? 'disabled' : ''}>First</button>
                 <button onclick="loadOrderHistory(${orderHistoryPage - 1})" ${orderHistoryPage === 0 ? 'disabled' : ''}>Prev</button>
-                <span class="page-info">${currentPage} / ${totalPages}</span>
+                <span class="page-info">${currentPage} / ${totalPages} (Total: ${orderHistoryTotalCount})</span>
                 <button onclick="loadOrderHistory(${orderHistoryPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Next</button>
                 <button onclick="loadOrderHistory(${totalPages - 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Last</button>
             `;
@@ -4184,7 +4411,7 @@ require_once 'includes/head.php';
             paginationEl.innerHTML = `
                 <button onclick="loadTradeHistory(0)" ${tradeHistoryPage === 0 ? 'disabled' : ''}>First</button>
                 <button onclick="loadTradeHistory(${tradeHistoryPage - 1})" ${tradeHistoryPage === 0 ? 'disabled' : ''}>Prev</button>
-                <span class="page-info">${currentPage} / ${totalPages}</span>
+                <span class="page-info">${currentPage} / ${totalPages} (Total: ${tradeHistoryTotalCount})</span>
                 <button onclick="loadTradeHistory(${tradeHistoryPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Next</button>
                 <button onclick="loadTradeHistory(${totalPages - 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Last</button>
             `;
@@ -4940,7 +5167,7 @@ require_once 'includes/head.php';
             // Assets 탭이 활성화되어 있으면 테이블도 업데이트
             const assetsPanel = document.getElementById('assetsPanel');
             if (assetsPanel && assetsPanel.classList.contains('active')) {
-                renderAssetsTable(wallets);
+                renderAssetsTable(wallets, balanceData);
             }
         }
 
@@ -5001,6 +5228,27 @@ require_once 'includes/head.php';
                 // 주문창 Available도 동일하게 업데이트 (미실현 PNL 포함)
                 if (orderAvailable) {
                     orderAvailable.textContent = formatBalance(availableBalance) + ' USDT';
+                }
+
+                // 전역 변수도 실시간 값으로 업데이트 (Assets 탭 등에서 사용)
+                userAvailableBalance = availableBalance;
+
+                // Assets 탭이 활성화되어 있으면 USDT Available도 업데이트
+                const assetsPanel = document.getElementById('assetsPanel');
+                if (assetsPanel && assetsPanel.classList.contains('active')) {
+                    // USDT Available 셀만 업데이트 (전체 테이블 리렌더링 방지)
+                    const usdtAvailableEl = document.querySelector('.assets-row:first-child .col-available .amount');
+                    const usdtInOrderEl = document.querySelector('.assets-row:first-child .col-inorder .amount');
+                    if (usdtAvailableEl) {
+                        const displayAvailable = Math.max(0, availableBalance);
+                        usdtAvailableEl.textContent = formatBalance(displayAvailable);
+                        // In Order도 업데이트
+                        if (usdtInOrderEl) {
+                            const totalBalance = window.currentWalletBalance || 0;
+                            const inOrder = Math.max(0, totalBalance - displayAvailable);
+                            usdtInOrderEl.textContent = formatBalance(inOrder);
+                        }
+                    }
                 }
 
                 // 모바일 Available 업데이트
@@ -5208,11 +5456,6 @@ require_once 'includes/head.php';
         async function loadAssetsData() {
             if (!authToken) return;
 
-            // 이미 캐시된 데이터가 있으면 바로 표시
-            if (currentWallets.length > 0) {
-                renderAssetsTable(currentWallets);
-            }
-
             // 최신 데이터 가져오기
             try {
                 const response = await fetch(`${TRADE_API}?action=get_balance`, {
@@ -5222,37 +5465,35 @@ require_once 'includes/head.php';
                 const data = await response.json();
                 if (data.success) {
                     currentWallets = data.data.wallets;
-                    renderAssetsTable(data.data.wallets);
-                    // 헤더 잔고도 업데이트 (balanceData 포함)
+                    // 잔고 데이터 먼저 업데이트 (userAvailableBalance 갱신)
                     updateWalletDisplay(data.data.wallets, data.data);
+                    // 그 다음 Assets 테이블 렌더링 (API 계산된 balanceData 전달)
+                    renderAssetsTable(data.data.wallets, data.data);
                 }
             } catch (error) {
                 console.error('Load assets error:', error);
+                // 에러 시 캐시된 데이터라도 표시
+                if (currentWallets.length > 0) {
+                    renderAssetsTable(currentWallets);
+                }
             }
         }
 
         // 코인 아이콘 URL 가져오기 (DB symbolConfigs 활용)
         function getCoinIconUrl(currency) {
+            // USDT 특별 처리
+            if (currency === 'USDT') {
+                return 'https://cryptologos.cc/logos/tether-usdt-logo.png';
+            }
             const symbol = currency + 'USDT';
-            return symbolConfigs[symbol]?.logo || 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png';
+            return symbolConfigs[symbol]?.logo || `https://cryptologos.cc/logos/${currency.toLowerCase()}-logo.png`;
         }
 
         // Assets 테이블 렌더링 - 바이빗 스타일
-        function renderAssetsTable(wallets) {
+        // balanceData: API에서 계산된 available_balance 포함 (USDT용)
+        function renderAssetsTable(wallets, balanceData = null) {
             const assetsBody = document.getElementById('assetsBody');
             if (!assetsBody) return;
-
-            // 잔고가 0보다 큰 코인만 필터링
-            const activeWallets = wallets.filter(wallet => {
-                const balance = parseFloat(wallet.balance) || 0;
-                const availableBalance = parseFloat(wallet.available_balance) || 0;
-                return balance > 0 || availableBalance > 0;
-            });
-
-            if (!activeWallets || activeWallets.length === 0) {
-                assetsBody.innerHTML = '<div class="empty-assets">No assets found</div>';
-                return;
-            }
 
             // 코인 이름 매핑
             const coinNames = {
@@ -5265,35 +5506,82 @@ require_once 'includes/head.php';
                 'DOGE': 'Dogecoin',
                 'ADA': 'Cardano',
                 'AVAX': 'Avalanche',
-                'LINK': 'Chainlink'
+                'LINK': 'Chainlink',
+                'DOT': 'Polkadot'
             };
+
+            // USDT Available Balance - 실시간 PNL 반영 (Trade 패널과 동일한 계산)
+            // Available = Wallet Balance + Unrealized PNL - Initial Margin
+            const walletBal = window.currentWalletBalance || (balanceData ? parseFloat(balanceData.wallet_balance) : 0) || 0;
+            const unrealizedPnl = userUnrealizedPnl || (balanceData ? parseFloat(balanceData.unrealized_pnl) : 0) || 0;
+            const initialMargin = window.currentInitialMargin || (balanceData ? parseFloat(balanceData.total_im) : 0) || 0;
+            const calculatedUsdtAvailable = walletBal + unrealizedPnl - initialMargin;
+
+            // 코인별 현재 시세 (USDT 기준) - WebSocket에서 받은 실시간 가격 사용
+            const getCoinPrice = (currency) => {
+                if (currency === 'USDT') return 1;
+                const symbol = currency + 'USDT';
+                // allSymbolPrices에서 실시간 가격 사용
+                if (allSymbolPrices[symbol]) {
+                    return parseFloat(allSymbolPrices[symbol]) || 0;
+                }
+                // 현재 보고 있는 심볼이면 currentPrice 사용
+                if (symbol === currentSymbol && currentPrice > 0) {
+                    return currentPrice;
+                }
+                return 0; // 가격 정보 없음
+            };
+
+            // 잔고가 0보다 큰 코인만 필터링 + USD 가치 계산
+            const activeWallets = wallets
+                .filter(wallet => {
+                    const balance = parseFloat(wallet.balance) || 0;
+                    const availableBalance = parseFloat(wallet.available_balance) || 0;
+                    return balance > 0 || availableBalance > 0;
+                })
+                .map(wallet => {
+                    const balance = parseFloat(wallet.balance) || 0;
+                    const price = getCoinPrice(wallet.currency);
+                    return { ...wallet, usdValue: balance * price };
+                })
+                // USD 가치 내림차순 정렬
+                .sort((a, b) => b.usdValue - a.usdValue);
+
+            if (!activeWallets || activeWallets.length === 0) {
+                assetsBody.innerHTML = '<div class="empty-assets">No assets found</div>';
+                return;
+            }
 
             assetsBody.innerHTML = activeWallets.map(wallet => {
                 const balance = parseFloat(wallet.balance) || 0;
-                const availableBalance = parseFloat(wallet.available_balance) || balance;
-                const marginUsed = parseFloat(wallet.margin_used) || (balance - availableBalance);
-
-                // USD Value 계산 (USDT는 1:1, 다른 코인은 현재가 기준)
-                let usdValue = balance;
-                if (wallet.currency !== 'USDT' && currentPrice > 0) {
-                    if (wallet.currency === 'BTC') {
-                        usdValue = balance * currentPrice;
-                    }
-                }
-
+                const usdValue = wallet.usdValue;
                 const iconUrl = getCoinIconUrl(wallet.currency);
                 const coinName = coinNames[wallet.currency] || wallet.currency;
+                const isUSDT = wallet.currency === 'USDT';
+
+                // USDT는 Trade 패널과 동일한 Available 사용 (API 계산값)
+                // 다른 코인은 DB의 available_balance 사용
+                let availableBalance, inOrderAmount;
+                if (isUSDT) {
+                    // USDT: API에서 계산된 available_balance 사용 (Trade 패널과 동일)
+                    availableBalance = Math.max(0, calculatedUsdtAvailable);
+                    // In Order = Total - Available (마진으로 사용 중인 금액)
+                    inOrderAmount = Math.max(0, balance - availableBalance);
+                } else {
+                    availableBalance = parseFloat(wallet.available_balance) || 0;
+                    inOrderAmount = parseFloat(wallet.frozen_balance) || 0;
+                }
 
                 // 포맷팅
-                const formattedAvailable = wallet.currency === 'USDT'
-                    ? availableBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
-                    : availableBalance.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 8});
-                const formattedInOrder = wallet.currency === 'USDT'
-                    ? marginUsed.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
-                    : marginUsed.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 8});
-                const formattedTotal = wallet.currency === 'USDT'
-                    ? balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})
-                    : balance.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 8});
+                const formatNumber = (num, forUSDT) => {
+                    if (forUSDT) {
+                        return num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    }
+                    return num.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 8});
+                };
+                const formattedAvailable = formatNumber(availableBalance, isUSDT);
+                const formattedInOrder = formatNumber(inOrderAmount, isUSDT);
+                const formattedTotal = formatNumber(balance, isUSDT);
 
                 return `
                     <div class="assets-row">
@@ -5308,7 +5596,7 @@ require_once 'includes/head.php';
                             <span class="amount">${formattedAvailable}</span>
                         </div>
                         <div class="col-inorder">
-                            <span class="amount ${marginUsed > 0 ? 'has-order' : ''}">${formattedInOrder}</span>
+                            <span class="amount">${formattedInOrder}</span>
                         </div>
                         <div class="col-total">
                             <span class="amount">${formattedTotal}</span>
@@ -5494,7 +5782,7 @@ require_once 'includes/head.php';
                             <div style="font-size: 11px; color: #888;">₩${pnlKrw >= 0 ? '+' : ''}${formatKrw(pnlKrw)} KRW</div>
                         </td>
                         <td class="position-action-cell">
-                            <button class="close-position-btn" onclick="closePosition('${p.id}', '${p.symbol}', '${p.side}', ${p.size})">닫기</button>
+                            <button class="close-position-btn" onclick="closePosition('${p.id}', '${p.symbol}', '${p.side}', ${p.size}, ${p.entry_price}, ${markPrice})">닫기</button>
                         </td>
                     </tr>
                 `;
@@ -5590,7 +5878,7 @@ require_once 'includes/head.php';
                             <!-- 액션 버튼 -->
                             <div class="mpc-actions">
                                 <button class="mpc-btn mpc-btn-tpsl">TP/SL</button>
-                                <button class="mpc-btn mpc-btn-close" onclick="closePosition('${p.id}', '${p.symbol}', '${p.side}', ${p.size})">Close</button>
+                                <button class="mpc-btn mpc-btn-close" onclick="closePosition('${p.id}', '${p.symbol}', '${p.side}', ${p.size}, ${entryPrice}, ${markPrice})">Close</button>
                             </div>
                         </div>
                     `;
@@ -5598,11 +5886,198 @@ require_once 'includes/head.php';
             }
         }
 
-        // 포지션 닫기 함수
-        async function closePosition(positionId, symbol, side, size) {
-            if (!confirm(`${symbol} ${side.toUpperCase()} 포지션 ${size} BTC를 시장가로 청산하시겠습니까?`)) {
+        // ========================================
+        // Position Close Modal Functions (FuturX Style)
+        // ========================================
+        let closeModalData = {
+            positionId: null,
+            symbol: null,
+            side: null,
+            totalSize: 0,
+            entryPrice: 0,
+            markPrice: 0,
+            closeType: 'market',
+            closeQty: 0,
+            closePercent: 100,
+            limitPrice: 0
+        };
+
+        // 포지션 닫기 버튼 클릭 시 모달 열기
+        function closePosition(positionId, symbol, side, size, entryPrice, markPrice) {
+            closeModalData.positionId = positionId;
+            closeModalData.symbol = symbol;
+            closeModalData.side = side;
+            closeModalData.totalSize = parseFloat(size);
+            closeModalData.entryPrice = parseFloat(entryPrice) || 0;
+            closeModalData.markPrice = parseFloat(markPrice) || currentPrice || 0;
+            closeModalData.closeType = 'market';
+            closeModalData.closePercent = 100;
+            closeModalData.closeQty = closeModalData.totalSize;
+            closeModalData.limitPrice = closeModalData.markPrice;
+
+            // 코인 이름
+            const coinName = symbol.replace('USDT', '');
+
+            // 헤더 업데이트
+            document.getElementById('closeModalSymbol').textContent = symbol;
+            const logoUrl = symbolConfigs[symbol]?.logo || `https://cryptologos.cc/logos/${coinName.toLowerCase()}-logo.png`;
+            document.getElementById('closeModalIcon').src = logoUrl;
+
+            const sideEl = document.getElementById('closeModalSide');
+            sideEl.textContent = side === 'long' ? 'Long' : 'Short';
+            sideEl.className = `close-modal-side ${side}`;
+
+            // 포지션 정보 업데이트
+            document.getElementById('closeQtyCoin').textContent = coinName;
+            document.getElementById('closeEntryPrice').textContent = formatPrice(closeModalData.entryPrice, symbol);
+            document.getElementById('closeMarketPrice').textContent = formatPrice(closeModalData.markPrice, symbol);
+            document.getElementById('closeTotalQty').textContent = formatNum(closeModalData.totalSize, 4);
+            document.getElementById('closeMaxQtyBtn').textContent = formatNum(closeModalData.totalSize, 4);
+
+            // 지정가 초기화
+            document.getElementById('closeLimitPrice').value = formatPrice(closeModalData.limitPrice, symbol);
+
+            // 슬라이더 초기화
+            document.getElementById('closeQtySlider').value = 100;
+            document.getElementById('closeQtyInput').value = formatNum(closeModalData.closeQty, 4);
+            updateSliderBackground(100);
+
+            // 주문 타입 초기화 (시장가)
+            setCloseModalType('market');
+
+            // 퍼센트 버튼 초기화
+            document.querySelectorAll('.close-percent-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.percent === '100');
+            });
+
+            // 손익 업데이트
+            updateCloseModalInfo();
+
+            // 모달 표시
+            document.getElementById('closePositionModal').classList.add('show');
+        }
+
+        // 모달 닫기
+        function closeCloseModal() {
+            document.getElementById('closePositionModal').classList.remove('show');
+        }
+
+        // 시장가/지정가 전환
+        function setCloseModalType(type) {
+            closeModalData.closeType = type;
+
+            // 버튼 활성화 상태
+            document.querySelectorAll('.close-type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === type);
+            });
+
+            // 지정가 필드 표시/숨기기
+            document.getElementById('closeLimitPriceField').style.display = type === 'limit' ? 'block' : 'none';
+
+            updateCloseModalInfo();
+        }
+
+        // 슬라이더 변경
+        function updateCloseQtyFromSlider(percent) {
+            closeModalData.closePercent = percent;
+            closeModalData.closeQty = closeModalData.totalSize * (percent / 100);
+            document.getElementById('closeQtyInput').value = formatNum(closeModalData.closeQty, 4);
+            document.getElementById('closeSliderPercent').textContent = Math.round(percent) + '%';
+
+            // 퍼센트 버튼 활성화 상태
+            document.querySelectorAll('.close-percent-btn').forEach(btn => {
+                const btnPercent = parseInt(btn.dataset.percent);
+                btn.classList.toggle('active', btnPercent === Math.round(percent));
+            });
+
+            updateCloseModalInfo();
+        }
+
+        // 퍼센트 버튼 클릭
+        function setClosePercent(percent) {
+            closeModalData.closePercent = percent;
+            closeModalData.closeQty = closeModalData.totalSize * (percent / 100);
+            document.getElementById('closeQtyInput').value = formatNum(closeModalData.closeQty, 4);
+            document.getElementById('closeQtySlider').value = percent;
+            document.getElementById('closeSliderPercent').textContent = percent + '%';
+            updateSliderBackground(percent);
+
+            // 퍼센트 버튼 활성화
+            document.querySelectorAll('.close-percent-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.percent) === percent);
+            });
+
+            updateCloseModalInfo();
+        }
+
+        // 슬라이더 fill 업데이트
+        function updateSliderBackground(percent) {
+            // 0~100 범위 보정
+            const pct = Math.max(0, Math.min(100, Number(percent) || 0));
+
+            // range 자체 배경(--pct)로 채움 처리 (브라우저별 미세 오차 방지)
+            const slider = document.getElementById('closeQtySlider');
+            if (slider) {
+                slider.style.setProperty('--pct', `${pct}%`);
+            }
+
+            // (구형 fallback) div fill이 남아있는 경우도 함께 업데이트
+            const fill = document.getElementById('closeSliderFill');
+            if (fill) fill.style.width = `${pct}%`;
+
+            const percentEl = document.getElementById('closeSliderPercent');
+            if (percentEl) {
+                const pctText = Math.max(0, Math.min(100, Math.round(pct)));
+                percentEl.textContent = `${pctText}%`;
+            }
+        }
+
+        // 지정가 +/- 조정
+        function adjustClosePrice(delta) {
+            const symbol = closeModalData.symbol;
+            let tickSize = 0.01;
+            if (symbol === 'BTCUSDT') tickSize = 0.1;
+            if (symbol === 'ETHUSDT') tickSize = 0.01;
+
+            closeModalData.limitPrice = Math.max(0, closeModalData.limitPrice + (delta * tickSize));
+            document.getElementById('closeLimitPrice').value = formatPrice(closeModalData.limitPrice, symbol);
+            updateCloseModalInfo();
+        }
+
+        // 예상 손익 업데이트
+        function updateCloseModalInfo() {
+            const qty = closeModalData.closeQty;
+            const entryPrice = closeModalData.entryPrice;
+            const closePrice = closeModalData.closeType === 'market' ? closeModalData.markPrice : closeModalData.limitPrice;
+            const side = closeModalData.side;
+
+            // PNL 계산 (수수료 0.06% 포함)
+            let pnl = 0;
+            if (side === 'long') {
+                pnl = (closePrice - entryPrice) * qty;
+            } else {
+                pnl = (entryPrice - closePrice) * qty;
+            }
+            const fee = closePrice * qty * 0.0006;
+            pnl = pnl - fee;
+
+            // 손익 표시
+            const pnlEl = document.getElementById('closePnlValue');
+            const prefix = pnl >= 0 ? '+' : '';
+            pnlEl.textContent = `${prefix}${formatNum(pnl, 2)} USDT`;
+            pnlEl.className = `close-pnl-value ${pnl >= 0 ? 'profit' : 'loss'}`;
+        }
+
+        // 청산 실행
+        async function executeClosePosition() {
+            const qty = closeModalData.closeQty;
+            if (qty <= 0) {
+                showToast('청산 수량을 입력해주세요.', 'error');
                 return;
             }
+
+            const isPartial = qty < closeModalData.totalSize;
+            const closePrice = closeModalData.closeType === 'market' ? closeModalData.markPrice : closeModalData.limitPrice;
 
             try {
                 const response = await fetch(TRADE_API, {
@@ -5613,16 +6088,19 @@ require_once 'includes/head.php';
                     },
                     body: JSON.stringify({
                         action: 'close_position',
-                        position_id: positionId,
-                        symbol: symbol,
-                        market_price: currentPrice // WebSocket 실시간 가격
+                        position_id: closeModalData.positionId,
+                        symbol: closeModalData.symbol,
+                        market_price: closePrice,
+                        close_qty: isPartial ? qty : null,
+                        order_type: closeModalData.closeType
                     })
                 });
 
                 const data = await response.json();
                 if (data.success) {
-                    playOrderFilledSound(); // 청산 완료 소리
+                    playOrderFilledSound();
                     showToast('포지션이 청산되었습니다.', 'success');
+                    closeCloseModal();
                     loadUserBalance();
                     loadUserPositions();
                     loadUserOrders();
@@ -5631,9 +6109,46 @@ require_once 'includes/head.php';
                 }
             } catch (error) {
                 console.error('Close position error:', error);
-                alert('포지션 청산 중 오류가 발생했습니다.');
+                showToast('포지션 청산 중 오류가 발생했습니다.', 'error');
             }
         }
+
+        // 모달 이벤트 리스너
+        document.addEventListener('DOMContentLoaded', function() {
+            // 주문 타입 버튼 클릭
+            document.querySelectorAll('.close-type-btn').forEach(btn => {
+                btn.addEventListener('click', () => setCloseModalType(btn.dataset.type));
+            });
+
+            // 슬라이더 변경
+            document.getElementById('closeQtySlider')?.addEventListener('input', function() {
+                updateCloseQtyFromSlider(parseInt(this.value));
+                updateSliderBackground(parseInt(this.value));
+            });
+
+            // 퍼센트 버튼 클릭
+            document.querySelectorAll('.close-percent-btn').forEach(btn => {
+                btn.addEventListener('click', () => setClosePercent(parseInt(btn.dataset.percent)));
+            });
+
+            // 지정가 입력 변경
+            document.getElementById('closeLimitPrice')?.addEventListener('change', function() {
+                closeModalData.limitPrice = parseFloat(this.value.replace(/,/g, '')) || 0;
+                updateCloseModalInfo();
+            });
+
+            // 모달 외부 클릭 시 닫기
+            document.getElementById('closePositionModal')?.addEventListener('click', function(e) {
+                if (e.target === this) closeCloseModal();
+            });
+
+            // ESC 키로 닫기
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.getElementById('closePositionModal')?.classList.contains('show')) {
+                    closeCloseModal();
+                }
+            });
+        });
 
         // 포지션 실시간 가격/PnL 업데이트
         function updatePositionsPrices(newPrice) {
@@ -6216,6 +6731,106 @@ require_once 'includes/head.php';
             if (e.target.id === 'confirmCloseAllModal') closeConfirmModal();
         });
     </script>
+
+    <!-- Position Close 모달 (FuturX Style) -->
+    <div class="close-modal-overlay" id="closePositionModal">
+        <div class="close-modal">
+            <!-- 모달 헤더 -->
+            <div class="close-modal-header">
+                <div class="close-modal-title">
+                    <div class="close-modal-symbol">
+                        <img id="closeModalIcon" src="https://cdn.jsdelivr.net/gh/nicholasyoungdevs/crypto-icons@main/color/btc.png" alt="">
+                        <span class="close-modal-symbol-name" id="closeModalSymbol">BTCUSDT</span>
+                    </div>
+                    <span class="close-modal-side long" id="closeModalSide">Long</span>
+                </div>
+                <button class="close-modal-close" onclick="closeCloseModal()">&times;</button>
+            </div>
+
+            <!-- 모달 바디 -->
+            <div class="close-modal-body">
+                <!-- 주문 타입 선택 -->
+                <div class="close-order-type">
+                    <button class="close-type-btn active" data-type="market">시장가</button>
+                    <button class="close-type-btn" data-type="limit">지정가</button>
+                </div>
+
+                <!-- 포지션 정보 -->
+                <div class="close-position-info">
+                    <div class="close-info-row">
+                        <span class="close-info-label">진입가</span>
+                        <span class="close-info-value" id="closeEntryPrice">0.00</span>
+                    </div>
+                    <div class="close-info-row">
+                        <span class="close-info-label">현재가</span>
+                        <span class="close-info-value" id="closeMarketPrice">0.00</span>
+                    </div>
+                    <div class="close-info-row">
+                        <span class="close-info-label">보유수량</span>
+                        <span class="close-info-value"><span id="closeTotalQty">0.00</span> <span id="closeQtyCoin">BTC</span></span>
+                    </div>
+                </div>
+
+                <!-- 지정가 입력 (Limit only) -->
+                <div class="close-modal-field" id="closeLimitPriceField" style="display: none;">
+                    <label class="close-field-label">청산가격</label>
+                    <div class="close-input-wrap">
+                        <input type="text" id="closeLimitPrice" class="close-input" value="0">
+                        <span class="close-input-unit">USDT</span>
+                        <div class="close-input-btns">
+                            <button class="close-input-btn" onclick="adjustClosePrice(-1)">−</button>
+                            <button class="close-input-btn" onclick="adjustClosePrice(1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 청산 수량 섹션 -->
+                <div class="close-qty-section">
+                    <div class="close-qty-header">
+                        <span class="close-qty-label">청산 수량</span>
+                        <span class="close-qty-max">최대 <span onclick="setClosePercent(100)" id="closeMaxQtyBtn">0.00</span></span>
+                    </div>
+
+                    <!-- 퍼센트 버튼 -->
+                    <div class="close-percent-btns">
+                        <button class="close-percent-btn" data-percent="25">25%</button>
+                        <button class="close-percent-btn" data-percent="50">50%</button>
+                        <button class="close-percent-btn" data-percent="75">75%</button>
+                        <button class="close-percent-btn active" data-percent="100">100%</button>
+                    </div>
+
+                    <!-- 슬라이더 -->
+                    <div class="close-slider-wrap">
+                        <div class="close-slider-container">
+                            <div class="close-slider-track">
+                                <div class="close-slider-fill" id="closeSliderFill"></div>
+                            </div>
+                            <input type="range" id="closeQtySlider" class="close-slider" min="0" max="100" value="100">
+                        </div>
+                        <div class="close-slider-percent" id="closeSliderPercent">100%</div>
+                    </div>
+                </div>
+
+                <!-- 예상 손익 -->
+                <div class="close-pnl-box">
+                    <div class="close-pnl-row">
+                        <span class="close-pnl-label">예상 손익</span>
+                        <span class="close-pnl-value profit" id="closePnlValue">+0.00 USDT</span>
+                    </div>
+                    <div class="close-pnl-fee">수수료 포함 (0.06%)</div>
+                </div>
+
+                <!-- Hidden inputs for compatibility -->
+                <input type="hidden" id="closeQtyInput" value="0">
+            </div>
+
+            <!-- 모달 푸터 -->
+            <div class="close-modal-footer">
+                <button class="close-modal-btn confirm" onclick="executeClosePosition()">청산하기</button>
+                <button class="close-modal-btn cancel" onclick="closeCloseModal()">취소</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Close All 확인 모달 -->
     <div class="confirm-modal-overlay" id="confirmCloseAllModal">

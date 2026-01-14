@@ -118,6 +118,10 @@ switch ($action) {
         handleCancelOrder($db);
         break;
 
+    case 'cancel_all_orders':
+        handleCancelAllOrders($db);
+        break;
+
     case 'get_orders':
         handleGetOrders($db);
         break;
@@ -607,10 +611,13 @@ function processPosition($db, $userId, $symbol, $side, $positionSide, $quantity,
         }
     }
 
+    // 교차 마진 포지션 청산가 재계산 (포지션 추가/변경/종료 후)
+    recalculateCrossLiquidationPrices($db, $userId);
+
     return $result;
 }
 
-// 청산가 계산
+// 청산가 계산 (격리 마진용 - 단일 포지션 기준)
 function calculateLiquidationPrice($entryPrice, $leverage, $side) {
     $maintenanceMarginRate = 0.005; // 0.5%
 
@@ -619,6 +626,141 @@ function calculateLiquidationPrice($entryPrice, $leverage, $side) {
     } else {
         return $entryPrice * (1 + (1 / $leverage) - $maintenanceMarginRate);
     }
+}
+
+/**
+ * 교차 마진 청산가 계산 (계좌 전체 잔고 기반)
+ * 바이낸스 공식 기반:
+ * Long: Liq Price = Entry Price - (Available Balance + Position Margin - Maintenance Margin) / Position Size
+ * Short: Liq Price = Entry Price + (Available Balance + Position Margin - Maintenance Margin) / Position Size
+ *
+ * @param float $entryPrice 진입가
+ * @param float $positionSize 포지션 크기
+ * @param string $side long/short
+ * @param float $walletBalance 지갑 잔고
+ * @param float $totalUnrealizedPnl 전체 미실현 PNL
+ * @param float $totalPositionMargin 전체 포지션 마진
+ * @param float $totalMaintenanceMargin 전체 유지 마진
+ * @param float $positionMargin 해당 포지션 마진
+ * @return float 청산가
+ */
+function calculateCrossLiquidationPrice($entryPrice, $positionSize, $side, $walletBalance, $totalUnrealizedPnl, $totalPositionMargin, $totalMaintenanceMargin, $positionMargin) {
+    if ($positionSize <= 0) return 0;
+
+    // Margin Balance = Wallet Balance + Total Unrealized PNL
+    $marginBalance = $walletBalance + $totalUnrealizedPnl;
+
+    // Available Balance for this position = Margin Balance - Total Margin (excluding current position)
+    // 다른 포지션들의 마진을 제외한 사용 가능 금액
+    $otherPositionsMargin = $totalPositionMargin - $positionMargin;
+    $availableForPosition = $marginBalance - $otherPositionsMargin;
+
+    // MMR (Maintenance Margin Rate) - 티어 기반이지만 간단히 0.5% 사용
+    $mmr = 0.005;
+    $maintenanceMargin = $entryPrice * $positionSize * $mmr;
+
+    // 청산까지 버틸 수 있는 손실 금액
+    $maxLoss = $availableForPosition - $maintenanceMargin;
+
+    if ($side === 'long') {
+        // Long: 가격이 하락하면 손실
+        // 청산가 = 진입가 - (버틸 수 있는 손실 / 포지션 크기)
+        $liqPrice = $entryPrice - ($maxLoss / $positionSize);
+    } else {
+        // Short: 가격이 상승하면 손실
+        // 청산가 = 진입가 + (버틸 수 있는 손실 / 포지션 크기)
+        $liqPrice = $entryPrice + ($maxLoss / $positionSize);
+    }
+
+    // 청산가는 0 이상이어야 함
+    return max(0, $liqPrice);
+}
+
+/**
+ * 특정 사용자의 모든 교차 마진 포지션 청산가 재계산
+ * 포지션이 추가/종료될 때 호출
+ */
+function recalculateCrossLiquidationPrices($db, $userId) {
+    // 1. 지갑 잔고 조회
+    $stmt = $db->prepare("SELECT balance FROM wallets WHERE user_id = ? AND currency = 'USDT'");
+    $stmt->execute([$userId]);
+    $wallet = $stmt->fetch();
+    $walletBalance = $wallet ? floatval($wallet['balance']) : 0;
+
+    // 2. 모든 오픈 포지션 조회
+    $stmt = $db->prepare("
+        SELECT id, symbol, side, size, entry_price, margin, leverage, margin_mode
+        FROM positions
+        WHERE user_id = ? AND status = 'open'
+    ");
+    $stmt->execute([$userId]);
+    $positions = $stmt->fetchAll();
+
+    if (empty($positions)) return;
+
+    // 3. 전체 미실현 PNL 및 마진 계산
+    $totalUnrealizedPnl = 0;
+    $totalPositionMargin = 0;
+    $totalMaintenanceMargin = 0;
+
+    // 현재가 캐시 (심볼별)
+    $currentPrices = [];
+
+    foreach ($positions as $pos) {
+        $symbol = $pos['symbol'];
+        $size = floatval($pos['size']);
+        $entryPrice = floatval($pos['entry_price']);
+        $margin = floatval($pos['margin']);
+
+        // 현재가 조회 (캐시 사용)
+        if (!isset($currentPrices[$symbol])) {
+            // 바이낸스 API에서 현재가 조회
+            $fetchedPrice = fetchBinancePrice($symbol);
+            $currentPrices[$symbol] = $fetchedPrice > 0 ? $fetchedPrice : $entryPrice;
+        }
+        $currentPrice = $currentPrices[$symbol];
+
+        // 미실현 PNL 계산
+        if ($pos['side'] === 'long') {
+            $pnl = ($currentPrice - $entryPrice) * $size;
+        } else {
+            $pnl = ($entryPrice - $currentPrice) * $size;
+        }
+
+        $totalUnrealizedPnl += $pnl;
+        $totalPositionMargin += $margin;
+
+        // 유지 마진 (MMR 0.5%)
+        $notional = $currentPrice * $size;
+        $totalMaintenanceMargin += $notional * 0.005;
+    }
+
+    // 4. 각 교차 마진 포지션의 청산가 재계산
+    foreach ($positions as $pos) {
+        if ($pos['margin_mode'] !== 'cross') continue;
+
+        $symbol = $pos['symbol'];
+        $size = floatval($pos['size']);
+        $entryPrice = floatval($pos['entry_price']);
+        $margin = floatval($pos['margin']);
+
+        $newLiqPrice = calculateCrossLiquidationPrice(
+            $entryPrice,
+            $size,
+            $pos['side'],
+            $walletBalance,
+            $totalUnrealizedPnl,
+            $totalPositionMargin,
+            $totalMaintenanceMargin,
+            $margin
+        );
+
+        // 청산가 업데이트
+        $updateStmt = $db->prepare("UPDATE positions SET liquidation_price = ? WHERE id = ?");
+        $updateStmt->execute([$newLiqPrice, $pos['id']]);
+    }
+
+    error_log("[Cross Margin] Recalculated liquidation prices for user $userId - " . count($positions) . " positions");
 }
 
 // ========================================
@@ -692,6 +834,80 @@ function handleCancelOrder($db) {
 }
 
 // ========================================
+// 전체 주문 취소
+// ========================================
+function handleCancelAllOrders($db) {
+    $user = requireAuth($db);
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    $symbol = isset($input['symbol']) ? strtoupper($input['symbol']) : null;
+
+    // 취소할 주문 조회
+    $sql = "SELECT * FROM orders WHERE user_id = ? AND status IN ('pending', 'open', 'partially_filled')";
+    $params = [$user['id']];
+
+    if (!empty($symbol)) {
+        $sql .= " AND symbol = ?";
+        $params[] = $symbol;
+    }
+
+    $stmt = $db->prepare($sql);
+    $stmt->execute($params);
+    $orders = $stmt->fetchAll();
+
+    if (count($orders) === 0) {
+        successResponse(['canceled_count' => 0], '취소할 주문이 없습니다.');
+        return;
+    }
+
+    try {
+        $db->beginTransaction();
+
+        $canceledCount = 0;
+        $totalRefund = 0;
+
+        foreach ($orders as $order) {
+            // 주문 취소
+            $stmt = $db->prepare("UPDATE orders SET status = 'cancelled' WHERE id = ?");
+            $stmt->execute([$order['id']]);
+
+            // 동결 마진 반환
+            $remainingQty = $order['quantity'] - $order['filled_quantity'];
+            $refundMargin = ($remainingQty * $order['price']) / $order['leverage'];
+            $refundFee = ($remainingQty * $order['price']) * getTakerFee();
+            $refund = $refundMargin + $refundFee;
+            $totalRefund += $refund;
+
+            $stmt = $db->prepare("UPDATE wallets SET available_balance = available_balance + ?, frozen_balance = frozen_balance - ? WHERE user_id = ? AND currency = 'USDT'");
+            $stmt->execute([$refund, $refund, $user['id']]);
+
+            $canceledCount++;
+        }
+
+        $db->commit();
+
+        // 같은 사용자의 모든 세션에 주문 리프레시 알림
+        broadcastToWS('orders:refresh', [
+            'user_id' => $user['id'],
+            'action' => 'cancel_all',
+            'symbol' => $symbol
+        ]);
+
+        // WebSocket으로 계정 정보 푸시
+        broadcastAccountUpdateSafe($db, $user['id']);
+
+        successResponse([
+            'canceled_count' => $canceledCount,
+            'refunded' => $totalRefund
+        ], "{$canceledCount}개 주문이 취소되었습니다.");
+
+    } catch (Exception $e) {
+        $db->rollBack();
+        errorResponse('주문 취소 중 오류가 발생했습니다.');
+    }
+}
+
+// ========================================
 // 주문 조회
 // ========================================
 function handleGetOrders($db) {
@@ -753,6 +969,9 @@ function handleGetPositions($db) {
     $user = requireAuth($db);
 
     $symbol = strtoupper($_GET['symbol'] ?? '');
+
+    // 교차 마진 청산가 재계산 (최신 잔고/PNL 기준)
+    recalculateCrossLiquidationPrices($db, $user['id']);
 
     $sql = "SELECT * FROM positions WHERE user_id = ? AND status = 'open'";
     $params = [$user['id']];
@@ -890,6 +1109,9 @@ function handleClosePosition($db) {
         ]);
 
         $db->commit();
+
+        // 교차 마진 포지션 청산가 재계산 (포지션 종료 후 다른 포지션들의 청산가도 변경됨)
+        recalculateCrossLiquidationPrices($db, $user['id']);
 
         // WebSocket 브로드캐스트 - 포지션 청산
         broadcastToWS('position:closed', [
@@ -1035,24 +1257,34 @@ function handleGetOrderHistory($db) {
     $user = requireAuth($db);
 
     $symbol = strtoupper($_GET['symbol'] ?? '');
-    $limit = intval($_GET['limit'] ?? 50);
+    $limit = min(100, max(10, intval($_GET['limit'] ?? 20)));
+    $offset = max(0, intval($_GET['offset'] ?? 0));
 
-    $sql = "SELECT * FROM orders WHERE user_id = ?";
+    $where = "user_id = ?";
     $params = [$user['id']];
 
     if (!empty($symbol)) {
-        $sql .= " AND symbol = ?";
+        $where .= " AND symbol = ?";
         $params[] = $symbol;
     }
 
-    $sql .= " ORDER BY created_at DESC LIMIT ?";
-    $params[] = $limit;
+    // 전체 개수 조회
+    $stmt = $db->prepare("SELECT COUNT(*) FROM orders WHERE $where");
+    $stmt->execute($params);
+    $totalCount = $stmt->fetchColumn();
 
+    // 페이징된 데이터 조회
+    $sql = "SELECT * FROM orders WHERE $where ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
     $orders = $stmt->fetchAll();
 
-    successResponse(['orders' => $orders, 'count' => count($orders)]);
+    successResponse([
+        'orders' => $orders,
+        'total' => intval($totalCount),
+        'limit' => $limit,
+        'offset' => $offset
+    ]);
 }
 
 // ========================================
@@ -1062,24 +1294,34 @@ function handleGetTradeHistory($db) {
     $user = requireAuth($db);
 
     $symbol = strtoupper($_GET['symbol'] ?? '');
-    $limit = intval($_GET['limit'] ?? 50);
+    $limit = min(100, max(10, intval($_GET['limit'] ?? 20)));
+    $offset = max(0, intval($_GET['offset'] ?? 0));
 
-    $sql = "SELECT * FROM trades WHERE user_id = ?";
+    $where = "user_id = ?";
     $params = [$user['id']];
 
     if (!empty($symbol)) {
-        $sql .= " AND symbol = ?";
+        $where .= " AND symbol = ?";
         $params[] = $symbol;
     }
 
-    $sql .= " ORDER BY executed_at DESC LIMIT ?";
-    $params[] = $limit;
+    // 전체 개수 조회
+    $stmt = $db->prepare("SELECT COUNT(*) FROM trades WHERE $where");
+    $stmt->execute($params);
+    $totalCount = $stmt->fetchColumn();
 
+    // 페이징된 데이터 조회
+    $sql = "SELECT * FROM trades WHERE $where ORDER BY executed_at DESC LIMIT $limit OFFSET $offset";
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
     $trades = $stmt->fetchAll();
 
-    successResponse(['trades' => $trades, 'count' => count($trades)]);
+    successResponse([
+        'trades' => $trades,
+        'total' => intval($totalCount),
+        'limit' => $limit,
+        'offset' => $offset
+    ]);
 }
 
 // ========================================

@@ -719,6 +719,31 @@ body.future-page {
 .ob-row.ask .depth-bar, .ob-row.ask .ob-depth { background: var(--red); }
 .ob-row.bid .depth-bar, .ob-row.bid .ob-depth { background: var(--green); }
 
+/* 사용자 주문 표시 - 오더북에 내 주문이 있을 때 */
+.ob-row.user-order,
+.bybit-ob-row.user-order {
+    background: rgba(240, 185, 11, 0.15) !important;
+    border-left: 2px solid var(--yellow);
+    position: relative;
+}
+
+.ob-row.user-order::after,
+.bybit-ob-row.user-order::after {
+    content: '●';
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--yellow);
+    font-size: 6px;
+    z-index: 2;
+}
+
+.ob-row.user-order:hover,
+.bybit-ob-row.user-order:hover {
+    background: rgba(240, 185, 11, 0.25) !important;
+}
+
 .spread-row {
     padding: 6px 12px;
     text-align: center;
@@ -2441,6 +2466,10 @@ td.type-limit,
         gap: 8px;
         margin-top: auto;
         padding-top: 8px;
+        position: sticky;
+        bottom: 0;
+        background: linear-gradient(180deg, rgba(11,14,17,0) 0%, rgba(11,14,17,0.95) 35%, rgba(11,14,17,1) 100%);
+        padding-bottom: 8px;
     }
 
     .bybit-btn-long,
@@ -2639,95 +2668,189 @@ td.type-limit,
     }
 
     /* ========================================
-       오더북 하단 - 바이빗 정확히 복사
+       오더북 하단 - 바이빗 스타일 (2줄)
        ======================================== */
     .bybit-ob-footer {
         display: flex;
         flex-direction: column;
-        gap: 8px;
-        padding: 8px 0 0;
-        margin: 0 -8px;
-        padding-left: 8px;
-        padding-right: 8px;
+        gap: 6px;
+        padding: 4px 0 0;
         flex-shrink: 0;
     }
 
-    /* 1줄: B/S 비율 바 - 바이빗 정확히 */
+    /* 1줄: B/S 비율 바 */
     .ob-footer-row1 {
         width: 100%;
     }
 
     .ob-ratio-bar {
         display: flex;
-        align-items: stretch;
+        height: 18px;
         border-radius: 2px;
         overflow: hidden;
-        font-size: 12px;
-        font-weight: 500;
-        font-family: var(--mono);
-        height: 26px;
-        width: 100%;
     }
 
-    .ob-ratio-buy-side {
-        flex: 48;
+    .ob-ratio-buy {
         display: flex;
         align-items: center;
-        justify-content: flex-start;
-        gap: 4px;
-        padding-left: 2px;
-        background: rgba(14, 203, 129, 0.2);
-        color: #0ecb81;
+        gap: 3px;
+        padding: 0 4px;
+        background: rgba(14, 203, 129, 0.15);
     }
 
-    .ob-ratio-sell-side {
-        flex: 52;
+    .ob-ratio-sell {
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        gap: 4px;
-        padding-right: 2px;
-        background: rgba(246, 70, 93, 0.2);
+        gap: 3px;
+        padding: 0 4px;
+        background: rgba(246, 70, 93, 0.15);
+    }
+
+    .ratio-label-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 14px;
+        height: 14px;
+        font-size: 9px;
+        font-weight: 700;
+        border-radius: 2px;
+        color: #fff !important;
+    }
+
+    .ratio-label-box.buy {
+        background: #0ecb81;
+        color: #fff !important;
+    }
+
+    .ratio-label-box.sell {
+        background: #f6465d;
+        color: #fff !important;
+    }
+
+    .ratio-pct {
+        font-size: 10px;
+        font-weight: 500;
+        font-family: var(--mono);
+    }
+
+    .ob-ratio-buy .ratio-pct {
+        color: #0ecb81;
+    }
+
+    .ob-ratio-sell .ratio-pct {
         color: #f6465d;
     }
 
-    .ob-b-box {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 18px;
-        height: 18px;
-        background: #0ecb81;
-        color: #fff;
-        font-weight: 700;
-        font-size: 11px;
-        border-radius: 2px;
-    }
-
-    .ob-pct {
-        font-weight: 500;
-        font-size: 12px;
-    }
-
-    .ob-s-box {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 18px;
-        height: 18px;
-        background: #f6465d;
-        color: #fff;
-        font-weight: 700;
-        font-size: 11px;
-        border-radius: 2px;
-    }
-
-    /* 2줄: 드롭다운 + 아이콘 - 바이빗 정확히 */
+    /* 2줄: 드롭다운 + 아이콘 */
     .ob-footer-row2 {
         display: flex;
         align-items: center;
         gap: 8px;
         width: 100%;
+    }
+
+    /* 정밀도 드롭다운 - 바이빗 스타일 */
+    .ob-precision-dropdown {
+        position: relative;
+        flex: 1;
+    }
+
+    .precision-current {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 5px 10px;
+        background: #2b2f36;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #eaecef;
+        cursor: pointer;
+        font-family: var(--mono);
+    }
+
+    .precision-arrow {
+        font-size: 10px;
+        color: #848e9c;
+        transition: transform 0.2s;
+    }
+
+    .ob-precision-dropdown.open .precision-arrow {
+        transform: rotate(180deg);
+    }
+
+    .precision-options {
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        right: 0;
+        background: #1e2329;
+        border: 1px solid #2b2f36;
+        border-radius: 4px;
+        margin-bottom: 4px;
+        display: none;
+        z-index: 100;
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .ob-precision-dropdown.open .precision-options {
+        display: block;
+    }
+
+    .precision-option {
+        padding: 10px 12px;
+        font-size: 13px;
+        font-family: var(--mono);
+        color: #848e9c;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .precision-option:hover {
+        background: #2b2f36;
+        color: #eaecef;
+    }
+
+    .precision-option.active {
+        color: #f0b90b;
+        background: rgba(240, 185, 11, 0.1);
+    }
+
+    /* 모드 아이콘 - 바이빗 스타일 */
+    .ob-mode-icons {
+        display: flex;
+        align-items: center;
+        padding: 5px 8px;
+        background: #2b2f36;
+        border-radius: 4px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .mode-bars-icon {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .bar-line {
+        width: 16px;
+        height: 4px;
+        border-radius: 1px;
+    }
+
+    .bar-line.red {
+        background: #f6465d;
+    }
+
+    .bar-line.green {
+        background: #0ecb81;
+    }
+
+    .ob-mode-icons:hover .bar-line {
+        opacity: 0.7;
     }
 
     /* Decimal 선택 박스 - 바이빗 정확히 */
@@ -4135,7 +4258,11 @@ td.type-limit,
 
     /* 모바일 History Table - 가로 스크롤 */
     .history-table-wrapper {
+        flex: 1 1 auto;
+        min-height: auto;
+        max-height: none;
         overflow-x: auto;
+        overflow-y: visible;
         -webkit-overflow-scrolling: touch;
     }
 
@@ -4148,6 +4275,33 @@ td.type-limit,
     .history-table td {
         padding: 8px 6px;
         white-space: nowrap;
+    }
+
+    /* Order History & Trade History 패널 - 모바일 */
+    #historyPanel,
+    #tradesPanel {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: auto;
+        overflow: visible;
+    }
+
+    #historyPanel.active,
+    #tradesPanel.active {
+        display: flex;
+    }
+
+    /* History Footer - 모바일 */
+    .history-footer {
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .history-pagination {
+        width: 100%;
+        justify-content: center;
     }
 
     /* P&L 테이블 - 모바일에서 최소 너비로 가로 스크롤 가능하게 */
@@ -4166,9 +4320,25 @@ td.type-limit,
 /* ========================================
    History Table 기본 스타일
    ======================================== */
+
+/* Order History & Trade History 패널 - P&L 패널과 동일한 flex 레이아웃 */
+#historyPanel,
+#tradesPanel {
+    flex-direction: column;
+    height: 100%;
+}
+
+#historyPanel.active,
+#tradesPanel.active {
+    display: flex;
+}
+
 .history-table-wrapper {
     width: 100%;
     overflow-x: auto;
+    overflow-y: auto;
+    flex: 1 1 0;
+    min-height: 0;
 }
 
 .history-table {
@@ -4267,13 +4437,16 @@ td.type-limit,
     font-weight: 600;
 }
 
-/* History Footer */
+/* History Footer - P&L Footer와 동일한 스타일 */
 .history-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 8px;
+    padding: 8px 12px;
     border-top: 1px solid var(--border);
+    background: var(--bg-card);
+    flex-shrink: 0;
+    min-height: 36px;
     font-size: 12px;
     color: var(--text-muted);
 }
@@ -4315,9 +4488,24 @@ td.type-limit,
 }
 
 /* ========================================
-   Assets 테이블 - 바이빗 스타일 고퀄리티
+   Assets 테이블 - P&L 스타일 flex 레이아웃
    ======================================== */
+
+/* Assets 패널 - P&L과 동일한 flex 레이아웃 */
+#assetsPanel {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+}
+
+#assetsPanel.active {
+    display: flex;
+}
+
 .assets-table {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     width: 100%;
     font-size: 12px;
 }
@@ -4332,6 +4520,7 @@ td.type-limit,
     font-weight: 500;
     border-bottom: 1px solid var(--border);
     background: var(--bg-card);
+    flex-shrink: 0;
 }
 
 .assets-header .col-coin {
@@ -4345,7 +4534,8 @@ td.type-limit,
 }
 
 .assets-body {
-    max-height: 350px;
+    flex: 1 1 0;
+    min-height: 0;
     overflow-y: auto;
 }
 
@@ -4353,7 +4543,7 @@ td.type-limit,
     display: grid;
     grid-template-columns: 2fr 1.2fr 1fr 1.5fr;
     gap: 12px;
-    padding: 12px 16px;
+    padding: 10px 16px;
     align-items: center;
     border-bottom: 1px solid rgba(43, 49, 57, 0.5);
     transition: background 0.15s ease;
@@ -4416,9 +4606,7 @@ td.type-limit,
     color: var(--text);
 }
 
-.assets-row .amount.has-order {
-    color: var(--yellow);
-}
+/* In Order 금액도 동일한 색상 사용 */
 
 .assets-row .usd-value {
     font-size: 11px;
@@ -4857,5 +5045,559 @@ td.type-limit,
         padding: 8px 12px;
         font-size: 12px;
         min-height: 32px;
+    }
+}
+
+/* ========================================
+   Close Position Modal (FuturX Style)
+   ======================================== */
+.close-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(8px);
+}
+
+.close-modal-overlay.show {
+    display: flex;
+}
+
+.close-modal {
+    background: linear-gradient(180deg, #1a1d24 0%, #14171c 100%);
+    border-radius: 16px;
+    width: 380px;
+    max-width: 92vw;
+    /* 반응형에서 내용이 잘리지 않도록 컬럼 레이아웃 + 높이 제한 */
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 48px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
+    animation: closeModalSlide 0.3s ease-out;
+}
+
+@keyframes closeModalSlide {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Modal Header */
+.close-modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.close-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.close-modal-symbol {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.close-modal-symbol img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+}
+
+.close-modal-symbol-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.close-modal-side {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.close-modal-side.long {
+    background: rgba(14, 203, 129, 0.15);
+    color: #0ecb81;
+}
+
+.close-modal-side.short {
+    background: rgba(246, 70, 93, 0.15);
+    color: #f6465d;
+}
+
+.close-modal-close {
+    background: none;
+    border: none;
+    color: #5e6673;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.2s;
+    border-radius: 6px;
+}
+
+.close-modal-close:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Tab Hidden for simplicity - use single mode selector */
+.close-modal-tabs {
+    display: none;
+}
+
+/* Modal Body */
+.close-modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+}
+
+/* Order Type Selector */
+.close-order-type {
+    display: flex;
+    background: #0d1017;
+    border-radius: 8px;
+    padding: 3px;
+    margin-bottom: 20px;
+}
+
+.close-type-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #5e6673;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 0;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.close-type-btn:hover {
+    color: #848e9c;
+}
+
+.close-type-btn.active {
+    background: #252930;
+    color: #fff;
+}
+
+/* Position Info */
+.close-position-info {
+    background: #0d1017;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+}
+
+.close-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.close-info-row:first-child {
+    padding-top: 0;
+}
+
+.close-info-row:last-child {
+    padding-bottom: 0;
+}
+
+.close-info-label {
+    font-size: 13px;
+    color: #5e6673;
+}
+
+.close-info-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: #eaecef;
+    font-family: var(--mono);
+}
+
+/* Limit Price Field */
+.close-modal-field {
+    margin-bottom: 16px;
+}
+
+.close-field-label {
+    font-size: 12px;
+    color: #5e6673;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.close-input-wrap {
+    display: flex;
+    align-items: center;
+    background: #0d1017;
+    border: 1px solid #252930;
+    border-radius: 8px;
+    padding: 0 12px;
+    height: 44px;
+    transition: border-color 0.2s;
+}
+
+.close-input-wrap:focus-within {
+    border-color: #f0b90b;
+}
+
+.close-input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: var(--mono);
+    outline: none;
+    min-width: 0;
+}
+
+.close-input::placeholder {
+    color: #3c4451;
+}
+
+.close-input-unit {
+    font-size: 12px;
+    color: #5e6673;
+    margin-left: 8px;
+}
+
+.close-input-btns {
+    display: flex;
+    gap: 2px;
+    margin-left: 8px;
+}
+
+.close-input-btn {
+    background: #252930;
+    border: none;
+    color: #848e9c;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.close-input-btn:hover {
+    background: #3c4451;
+    color: #fff;
+}
+
+/* Quantity Section */
+.close-qty-section {
+    margin-bottom: 20px;
+}
+
+.close-qty-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.close-qty-label {
+    font-size: 12px;
+    color: #5e6673;
+}
+
+.close-qty-max {
+    font-size: 12px;
+    color: #848e9c;
+}
+
+.close-qty-max span {
+    color: #f0b90b;
+    cursor: pointer;
+}
+
+/* Percent Buttons */
+.close-percent-btns {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.close-percent-btn {
+    flex: 1;
+    background: linear-gradient(180deg, rgba(20, 23, 28, 0.95) 0%, rgba(13, 16, 23, 0.95) 100%);
+    border: 1px solid #252a33;
+    border-radius: 10px;
+    color: #9aa4b2;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.close-percent-btn:hover {
+    border-color: #39414f;
+    color: #eaecef;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px);
+}
+
+.close-percent-btn.active {
+    background: linear-gradient(180deg, rgba(240, 185, 11, 0.95) 0%, rgba(212, 165, 10, 0.95) 100%);
+    border-color: rgba(240, 185, 11, 0.8);
+    color: #0b0e11;
+    box-shadow: 0 10px 24px rgba(240, 185, 11, 0.18);
+}
+
+/* Slider */
+.close-slider-wrap {
+    position: relative;
+    padding: 8px 0;
+}
+
+.close-slider-container {
+    position: relative;
+    height: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.close-slider-track {
+    /* 기존 div 트랙 방식은 브라우저별 range 트랙/thumb 렌더링 차이로 미세 오차가 생길 수 있어 숨김 처리 */
+    display: none;
+}
+
+.close-slider-fill {
+    display: none;
+}
+
+.close-slider {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    -webkit-appearance: none;
+    appearance: none;
+    /* range 자체를 트랙으로 사용: --pct(0~100%)에 따라 채움이 정확히 끝까지 맞음 */
+    --pct: 100%;
+    padding: 0;
+    margin: 0;
+    display: block;
+    border: 0;
+    border-radius: 999px;
+    background-color: transparent;
+    /* 6px 스트립을 요소 중앙에 그려서 '아래로 내려가 보이는' 현상 제거 */
+    background-image:
+        linear-gradient(90deg, #f0b90b 0%, #ffdd7a 100%),
+        linear-gradient(90deg, #252930 0%, #252930 100%);
+    background-size: var(--pct) 6px, 100% 6px;
+    background-position: left center, left center;
+    background-repeat: no-repeat;
+    box-shadow: inset 0 0 0 1px #2b313c, inset 0 1px 2px rgba(0, 0, 0, 0.55);
+    outline: none;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.close-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(180deg, #ffffff 0%, #f2f4f7 100%);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid #f0b90b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.close-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 12px rgba(240, 185, 11, 0.4);
+}
+
+.close-slider::-webkit-slider-runnable-track {
+    height: 20px;
+    background: transparent;
+    border-radius: 999px;
+}
+
+.close-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid #f0b90b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.close-slider::-moz-range-track {
+    background: transparent;
+}
+
+.close-slider-percent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #b6c0cd;
+    text-align: left;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(13, 16, 23, 0.6);
+    border: 1px solid rgba(43, 49, 60, 0.9);
+}
+
+.close-slider-labels {
+    display: none;
+}
+
+/* Expected PNL */
+.close-pnl-box {
+    background: #0d1017;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.close-pnl-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-pnl-label {
+    font-size: 13px;
+    color: #5e6673;
+}
+
+.close-pnl-value {
+    font-size: 16px;
+    font-weight: 600;
+    font-family: var(--mono);
+}
+
+.close-pnl-value.profit {
+    color: #0ecb81;
+}
+
+.close-pnl-value.loss {
+    color: #f6465d;
+}
+
+.close-pnl-fee {
+    font-size: 11px;
+    color: #3c4451;
+    text-align: right;
+    margin-top: 6px;
+}
+
+/* Hidden elements from old design */
+.close-modal-prices,
+.close-modal-info,
+.close-modal-options,
+.close-slider-labels span:first-child {
+    display: none;
+}
+
+/* Modal Footer */
+.close-modal-footer {
+    padding: 0 24px 24px;
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.close-modal-btn {
+    flex: 1;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 14px 0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.close-modal-btn.confirm {
+    background: linear-gradient(180deg, #f0b90b 0%, #d4a50a 100%);
+    color: #0b0e11;
+}
+
+.close-modal-btn.confirm:hover {
+    filter: brightness(1.1);
+}
+
+.close-modal-btn.confirm:active {
+    filter: brightness(0.95);
+}
+
+.close-modal-btn.cancel {
+    background: #252930;
+    color: #848e9c;
+}
+
+.close-modal-btn.cancel:hover {
+    background: #3c4451;
+    color: #eaecef;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    .close-modal {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 16px 16px 0 0;
+        margin-top: auto;
+        max-height: calc(100vh - 12px);
+    }
+
+    .close-modal-overlay.show {
+        align-items: flex-end;
+    }
+
+    .close-modal-header {
+        padding: 16px 20px 14px;
+    }
+
+    .close-modal-body {
+        padding: 16px 20px;
+    }
+
+    .close-modal-footer {
+        padding: 0 20px calc(20px + env(safe-area-inset-bottom));
+    }
+
+    .close-percent-btn {
+        padding: 9px 0;
+        font-size: 12px;
     }
 }

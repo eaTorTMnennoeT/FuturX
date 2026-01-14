@@ -897,7 +897,43 @@ input:focus, select:focus, textarea:focus {
         display: flex;
     }
 
+    /* 모바일 헤더 - 로그인 상태 */
+    .header__user {
+        gap: var(--spacing-sm);
+    }
+
     .header__user-balance {
+        display: flex;
+        padding: 6px 10px;
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-sm);
+    }
+
+    .header__user-balance-value {
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .header__user-balance-unit {
+        font-size: 10px;
+    }
+
+    .header__user-btn {
+        padding: 4px;
+    }
+
+    .header__user-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .header__user-avatar svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* 드롭다운 화살표 숨기기 (모바일) */
+    .header__user-btn .header__nav-arrow {
         display: none;
     }
 
